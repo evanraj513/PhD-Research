@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Oct 25 16:50:32 2019
+
+@author: evanraj
+"""
+
+import numpy as np
+
+class Field(object):
+    ''' 
+    This class will store the values of a given field, as a long vector
+    The size will be determined by initialization
+    where each component is located will be based on my_ind()
+    It will be F = <F_x, F_y, F_z>
+    '''
+    def __init__(self):
+        pass
+    
+    
+class Vector(object):
+    ''' 
+    This will be the storing on one vector. Could be a component of a field, 
+        or a stand alone thing
+        
+    -- Think F = <F_x, F_y, F_z>
+        This will be either F_x or F_y
+    
+    It will 
+    
+    Attributes:
+    -----------
+    index: function
+        gives (x,y,z) coordinates for a given value of the vector
+    
+    
+    '''
+    
+    def __init__(self,index,init_value):
+        self.index = index
+        self.value = init_value
+        
+        
