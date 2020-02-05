@@ -112,15 +112,15 @@ ax = plt.axes()
 E_old = R_sys.E_old
 
 x1 = np.zeros(shape = (E_old.x.nx*E_old.x.ny,1))
-y1 = np.zeros(shape = (E_old.x.nx*E_old.x.ny,1))
-z1 = np.zeros(shape = (E_old.x.nx*E_old.x.ny,1))
+y1 = np.copy(x1)
+z1 = np.copy(x1)
 
 #for k in np.arange(0,E_old.x.nx*E_old.x.ny):
 #    x1[k] = R_sys.ind_rev_x_out(k)[0]
 #    y1[k] = R_sys.ind_rev_x_out(k)[1]
 #    z1[k] = E_old.x.value[k]
 
-for k in np.arange(0,E_old.x.value.shape[0]):
+for k in np.arange(0,x1.shape[0]):
     x1[k] = R_sys.ind_rev_x_out(k)[0]
     y1[k] = R_sys.ind_rev_x_out(k)[1]
     z1[k] = E_old.x.value[k]

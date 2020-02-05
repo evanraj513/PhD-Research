@@ -125,25 +125,42 @@ Ferro_sys = ferro_system1.Ferro_sys
 #ind = z.myind_std
 
 
+#fig = plt.figure()
+#ax = plt.axes(projection='3d')
+#E_old = R_sys.E_old
+#
+#x1 = np.zeros(shape = (E_old.x.value.shape[0],1))
+#y1 = np.zeros(shape = (E_old.x.value.shape[0],1))
+#z1 = np.zeros(shape = (E_old.x.value.shape[0],1))
+#
+#for k in np.arange(0,E_old.x.value.shape[0]):
+#    x1[k] = R_sys.ind_rev_x_out(k)[0]
+#    y1[k] = R_sys.ind_rev_x_out(k)[1]
+#    z1[k] = E_old.x.value[k]
+#
+#x,y = np.meshgrid(x1,y1)
+#z = z1
+#
+#surf = ax.plot_surface(x, y, z) ## This will plot where size gives value
+
 fig = plt.figure()
-ax = plt.axes()
+ax = plt.axes(projection='3d')
 E_old = R_sys.E_old
 
-x1 = np.zeros(shape = (E_old.x.value.shape[0],1))
-y1 = np.zeros(shape = (E_old.x.value.shape[0],1))
-z1 = np.zeros(shape = (E_old.x.value.shape[0],1))
+x1 = np.zeros(shape = (E_old.x.nx*E_old.x.ny,1))
+y1 = np.copy(x1)
+z1 = np.copy(x1)
 
-for k in np.arange(0,E_old.x.value.shape[0]):
+for k in np.arange(0,x1.shape[0]):
     x1[k] = R_sys.ind_rev_x_out(k)[0]
     y1[k] = R_sys.ind_rev_x_out(k)[1]
     z1[k] = E_old.x.value[k]
 
-x = x1
-y = y1
+x,y = np.meshgrid(x1,y1)
 z = z1
 
-surf = ax.scatter(x, y, s = z/np.linalg.norm(z,axis=0)) ## This will plot where size gives value
+surf = ax.plot_surface(x, y, z) ## This will plot where size gives value
 
-plt.draw()
+plt.show()
 
 
