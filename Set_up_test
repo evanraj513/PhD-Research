@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Jan 28 16:32:58 2020
+
+@author: evanraj
+"""
+
+import os
+import sys
+
+import numpy as np
+from mpl_toolkits import mplot3d
+import matplotlib.pyplot as plt
+from matplotlib import cm
+plt.rcParams['backend'] = "Qt4Agg"
+
+l_path = '..'
+m_path = os.path.abspath(l_path)
+if not os.path.exists(m_path):
+    print('Error importing modules. Need to specify new path')
+    raise Exception
+else:
+    sys.path.append(m_path)
+
+#import numpy as np
+#import scipy as sp
+#from scipy.sparse import csr_matrix
+
+from Research import ferro_system1
+Ferro_sys = ferro_system1.Ferro_sys
+
+#size = 7
+#disc = [1, 1, 1]
+#def sizing(nx):
+#    size_Ex = np.array([(nx-1)/2, (nx+1)/2, (nx+1)/2])
+#    size_Ey = np.array([(nx+1)/2, (nx-1)/2, (nx+1)/2])
+#    size_Ez = np.array([(nx+1)/2, (nx+1)/2, (nx-1)/2])
+#
+##    size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2])
+##    size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2])
+##    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2])
+#    
+#    size_Bx = np.array([(nx+1)/2, (nx-1)/2, (nx-1)/2])
+#    size_By = np.array([(nx-1)/2, (nx+1)/2, (nx-1)/2])
+#    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx+1)/2])
+#    return [size_Ex, size_Ey, size_Ez, size_Bx, size_By, size_Bz]
+#
+### To give number of nodes
+#a = np.array(sizing(size)).prod(axis=1)
+#
+#
+#E0_x = np.zeros(shape = (int(a[0]),1))
+#E0_y = np.zeros(shape = (int(a[1]),1))
+#E0_z = np.zeros(shape = (int(a[2]),1))
+#B0_x = np.zeros(shape = (int(a[3]),1))
+#B0_y = np.zeros(shape = (int(a[4]),1))
+#B0_z = np.zeros(shape = (int(a[5]),1))
+#M0_x = np.zeros(shape = (int(a[3]),1))
+#M0_y = np.zeros(shape = (int(a[4]),1))
+#M0_z = np.zeros(shape = (int(a[5]),1))
+#E0 = np.array([E0_x, E0_y, E0_z])
+#H0 = np.array([B0_x, B0_y, B0_z])
+#M0 = np.array([M0_x, M0_y, M0_z])
+#H_s = H0
+#
+#test1 = Ferro_sys(size,disc,E0,H0,M0,H_s)
+#test1.set_up()
+#dt = test1.dt
+#
+#E_old = test1.E_old
+#H_old = test1.H_old
+#M_old = test1.M_old
+#B_old = test1.B_old
+#
+#b_ind = test1.bound_ind
+#
+#t = 2
+#
+#Fx = test1.Fx
+#Fy = test1.Fy
+#Fz = test1.Fz
+#F = np.array([Fx(t), Fy(t), Fz(t)])
+#
+### Testing E_curl shape, specifically last column
+##x = E_old.x
+##y = E_old.y
+#
+### Looks good, had to change my sizing, and there was an indexing error
+#
+### Debugging single run
+#
+## b_ind looks correct
+#
+## error in setting values, not in computation (at least for compiling)
+## May be the dimensions, as the shape is now (3,48,1), the 1 might be the issue
+##   Ans: Error came from using size instead of shape. Size multiplies each of the   
+##       dimemsions. That's all. 
+## There was an issue with storing F as a numpy array of three lil_matrix, 
+## So I just made them numpy arrays all. 
+#
+## So now there is an issue with computing M_new, going to debug this piece by piece. 
+##   Ans: The issue was within the dot product, because I have a 3D array, it was weird. 
+##       Just did it piecewise
+#
+#mu0 = 10.0 
+#eps = 1.0
+#gamma = 1.0
+#K = 0
+#alpha = 1.0
+#
+#B_on = B_old.values
+#
+#f = 2*M_old.values
+#a = -(abs(gamma)*dt/2)*(B_on/mu0 + test1.H_s.values) - alpha*M_old.values
+#
+#x = H_old.x
+#y = H_old.y
+#z = H_old.z
+#
+#dx = 0.1
+#dy = 0.1
+#dz = 0.1
+#
+#ind = z.myind_std
+
+
+fig = plt.figure()
+ax = plt.axes()
+E_old = R_sys.E_old
+
+x1 = np.zeros(shape = (E_old.x.value.shape[0],1))
+y1 = np.zeros(shape = (E_old.x.value.shape[0],1))
+z1 = np.zeros(shape = (E_old.x.value.shape[0],1))
+
+for k in np.arange(0,E_old.x.value.shape[0]):
+    x1[k] = R_sys.ind_rev_x_out(k)[0]
+    y1[k] = R_sys.ind_rev_x_out(k)[1]
+    z1[k] = E_old.x.value[k]
+
+x = x1
+y = y1
+z = z1
+
+surf = ax.scatter(x, y, s = z/np.linalg.norm(z,axis=0)) ## This will plot where size gives value
+
+plt.draw()
+
+
