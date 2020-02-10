@@ -735,6 +735,21 @@ class Ferro_sys(object):
         #Need to add in how we find M_new for K ~= 0
         
         
+        
+    def plot_xy_slice(self,field,comp,num_of_slice):
+        '''
+        Plots the num_of_slice slice (in the z-direction) of the 
+        component of the field given
+        
+        available fields: E,H,M,B
+        available comps: x,y,z
+        
+        E.g.
+        '''
+        
+        
+        
+        
     def Ex_ind(self,x,y,z):
         nx = self.nx
         dx = self.dx

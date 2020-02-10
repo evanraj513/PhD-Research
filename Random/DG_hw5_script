@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Feb  6 10:14:39 2020
+
+@author: evanraj
+"""
+
+from mpl_toolkits import mplot3d
+import matplotlib.pyplot as plt
+from matplotlib import cm
+plt.rcParams['backend'] = "Qt4Agg"
+import numpy as np
+
+R = 5.0
+
+x = np.array([0])
+y = np.array([0])
+z = np.array([0])
+
+a = 4*np.pi
+da = (np.pi/32)
+for rho in np.arange(0,1,.1):
+    for psi in np.arange(0,a,da):
+        for phi in np.arange(0,a,da):
+            x1 = [(R + rho*np.cos(psi))*np.cos(phi)]
+            y1 = [(R + rho*np.cos(psi))*np.sin(phi)]
+            z1 = [rho*np.sin(psi)]
+#            print('rho; ',rho,'\n',
+#                  'psi: ',psi,'\n',
+#                  'phi: ',phi,'\n',
+#                  'x1: ',x1,'\n',
+#                  'y1: ',y1,'\n',
+#                  'z1: ',z1)            
+            x = np.concatenate((x,x1))
+            y = np.concatenate((y,y1))
+            z = np.concatenate((z,z1))
+            
+x = np.delete(x,[0])
+y = np.delete(y,[0])
+z = np.delete(z,[0])
+            
+fig1 = plt.figure()
+fig2 = plt.figure()
+fig3 = plt.figure()
+ax3 = fig1.add_subplot(111, projection='3d')
+ax2 = fig2.add_subplot(111)
+ax21 = fig3.add_subplot(111)
+
+ax3.scatter(x,y,z)
+ax3.set_xlabel('x')
+ax3.set_ylabel('y')
+ax3.set_zlabel('z')
+
+ax2.scatter(x,y)
+ax2.set_xlabel('x')
+ax2.set_ylabel('y')
+
+ax21.scatter(x,z)
+ax21.set_xlabel('x')
+ax21.set_ylabel('z')
+
+
+
+plt.show()
