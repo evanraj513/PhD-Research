@@ -52,14 +52,18 @@ ax3.set_xlabel('x')
 ax3.set_ylabel('y')
 ax3.set_zlabel('z')
 
+fig1.savefig('DG_hw5_3d.png')
+
 ax2.scatter(x,y)
 ax2.set_xlabel('x')
 ax2.set_ylabel('y')
+
+fig2.savefig('DG_hw5_xy.png')
 
 ax21.scatter(x,z)
 ax21.set_xlabel('x')
 ax21.set_ylabel('z')
 
+fig3.savefig('DG_hw5_xz.png')
 
-
-plt.show()
+#plt.show()
