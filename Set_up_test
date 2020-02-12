@@ -188,9 +188,16 @@ c = alpha/np.norm(M_on) * M_on
 ct = np.cross(c, a)
 
 
+## Debugging saving into pandas DataFrame
 
+t1 = OrderedDict()
 
+t1['E.x'] = R_sys.E_old.values[0].T[0]
 
+t1
+Out[78]: OrderedDict([('E.x', array([1., 1., 1., ..., 0., 0., 0.]))])
+
+t2 = pd.DataFrame(t1)
 
 
 

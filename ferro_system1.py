@@ -13,8 +13,6 @@ the LLG equation. System given as a class
 import os
 import sys
 
-import numpy as np
-
 l_path = '..'
 m_path = os.path.abspath(l_path)
 if not os.path.exists(m_path):
@@ -24,12 +22,16 @@ else:
     sys.path.append(m_path)
 
 import numpy as np
-import scipy as sp
+#import scipy as sp
 from scipy.sparse import lil_matrix
-from mpl_toolkits import mplot3d
+from mpl_toolkits import mplot3d # Needed even though 'unused' variable
 import matplotlib.pyplot as plt
-from matplotlib import cm
+#from matplotlib import cm
 plt.rcParams['backend'] = "Qt4Agg"
+
+## For saving data
+import pandas as pd
+from collections import OrderedDict
 
 from Research import field_class
 Field = field_class.Field_2
@@ -970,11 +972,44 @@ class Ferro_sys(object):
             .format(k, xprev, fprev, rel_step, alpha*dx))
                     
         return x
-        
-        
-        
     
+    def save_data(self,name = 'blank.csv'):
+        ''' 
+        Converts data to pandas data-frame, and saves as two csv
+        under 'name_outer', 'name_inner'. Requires two csv's as different size
+        arrays
+        '''
+        
+        E_old = self.E_old
+        B_old = self.B_old
+        H_old = self.H_old
+        M_old = self.M_old
+        
+        data_outer = OrderedDict()
+        data_inner = OrderedDict()
+        
+        data_outer['E.x'] = E_old.x.value[0:,0]
+        data_outer['E.y'] = E_old.y.value[0:,0]
+        data_outer['E.z'] = E_old.z.value[0:,0]
+        
+        data_inner['B.x'] = B_old.x.value[0:,0]
+        data_inner['B.y'] = B_old.y.value[0:,0]
+        data_inner['B.z'] = B_old.z.value[0:,0]
+        
+        data_inner['H.x'] = H_old.x.value[0:,0]
+        data_inner['H.y'] = H_old.y.value[0:,0]
+        data_inner['H.z'] = H_old.z.value[0:,0]
+    
+        data_inner['M.x'] = M_old.x.value[0:,0]
+        data_inner['M.y'] = M_old.y.value[0:,0]
+        data_inner['M.z'] = M_old.z.value[0:,0]
+        
+        ## Converting to DataFrame and Saving
+        df_outer = pd.DataFrame(data_outer)
+        df_inner = pd.DataFrame(data_inner)
 
+        df_outer.to_csv(name+'_outer.csv')
+        df_inner.to_csv(name+'_inner.csv')
 
 
 

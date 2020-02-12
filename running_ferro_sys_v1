@@ -141,17 +141,24 @@ for t in np.arange(0,T,dt):
     R_sys.M_old = R_sys.M_new.values
     R_sys.B_old = R_sys.B_new.values
     
-    print('Current time: ', round(t,1))
+    print('Current time: ', '{:.2e}'.format(t))
+    
+    
+## Saving data
+
+R_sys.save_data('test1')
 
 ## Plotting stuff
 
-fig_Mx = R_sys.plot_slice('M','x',10)
-fig_My = R_sys.plot_slice('M','y',10)
 fig_Mz = R_sys.plot_slice('M','z',10)
+fig_Bz = R_sys.plot_slice('B','z',10)
+fig_Ez = R_sys.plot_slice('E','z',10)
+fig_Hz = R_sys.plot_slice('H','z',10)
 
-fig_Mx.savefig('Mx_10')
-fig_My.savefig('My_10')
 fig_Mz.savefig('Mz_10')
+fig_Bz.savefig('Bz_10')
+fig_Ez.savefig('Ez_10')
+fig_Hz.savefig('Hz_10')
 
 
 
