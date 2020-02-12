@@ -26,23 +26,27 @@ else:
 import numpy as np
 import scipy as sp
 from scipy.sparse import lil_matrix
+from mpl_toolkits import mplot3d
+import matplotlib.pyplot as plt
+from matplotlib import cm
+plt.rcParams['backend'] = "Qt4Agg"
 
 from Research import field_class
 Field = field_class.Field_2
 Vector = field_class.Vector
-mu0 = 10.0 
-eps = 1.0
-gamma = 1.0
+mu0 = 1.25667e-6
+eps = 0.88422e-11
+gamma = 2.2e5
 K = 0
-alpha = 1.0
+alpha = 0.2
+H_s_guess = 10**5
 
 ''' TO DO 
     1. Find values for mu0, eps that are realistic (check paper again)
     2. (done) Determine how we will find M_new. In paper, just need to read it again
-    3. Determine if np.cross is working
-        - It should be. Based on the 
+    3. (done) Determine if np.cross is working
     4. (done) Determine path stuff
-    5. Add in check that given initial values are np.arrays of arrays (maybe)
+    5. (done) Add in check that given initial values are np.arrays of arrays (maybe)
     '''
 
 class Ferro_sys(object):
@@ -66,9 +70,7 @@ class Ferro_sys(object):
         
     '''
     
-    
-    
-    def __init__(self,size,disc,E0,H0,M0,H_s):
+    def __init__(self,size,disc,E0,H0,M0,H_s = H_s_guess):
         # Parameter Set-up
         self.dt = 0.1 
         self.T = 1.0
@@ -79,44 +81,106 @@ class Ferro_sys(object):
         
         # Sizing #
         ### Sizing for even number of nodes v.1.1
-#        self.size_Ex = np.array([nx/2, nx/2, nx/2]).astype('int')
-#        self.size_Ey = np.array([nx/2, nx/2, nx/2]).astype('int')
-#        self.size_Ez = np.array([nx/2, nx/2, nx/2]).astype('int')
-#        
-#        self.size_Bx = np.array([nx/2, nx/2, nx/2]).astype('int')
-#        self.size_By = np.array([nx/2, nx/2, nx/2]).astype('int')
-#        self.size_Bz = np.array([nx/2, nx/2, nx/2]).astype('int')
+        
+        if nx%2 == 0:
+            print('Warning: Beta-testing still under-way; possible poor grid')
+            wait = input('Press ENTER to continue, or CTRL C to break')
+            self.size_outer_x = np.array([nx/2, nx/2, nx/2]).astype('int')
+            self.size_outer_y = np.array([nx/2, nx/2, nx/2]).astype('int')
+            self.size_outer_z = np.array([nx/2, nx/2, nx/2]).astype('int')
+            
+            self.size_inner_x = np.array([nx/2, nx/2, nx/2]).astype('int')
+            self.size_inner_y = np.array([nx/2, nx/2, nx/2]).astype('int')
+            self.size_inner_z = np.array([nx/2, nx/2, nx/2]).astype('int')
         
         ### Sizing for odd number of nodes below 
-        self.size_Ex = np.array([(nx-1)/2, (nx+1)/2, (nx+1)/2]).astype('int')
-        self.size_Ey = np.array([(nx+1)/2, (nx-1)/2, (nx+1)/2]).astype('int')
-        self.size_Ez = np.array([(nx+1)/2, (nx+1)/2, (nx-1)/2]).astype('int')
-        
-        self.size_Bx = np.array([(nx+1)/2, (nx-1)/2, (nx-1)/2]).astype('int')
-        self.size_By = np.array([(nx-1)/2, (nx+1)/2, (nx-1)/2]).astype('int')
-        self.size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx+1)/2]).astype('int')
-#       ### Old sizing v.1
-#        self.size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2]).astype('int')
-#        self.size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2]).astype('int')
-#        self.size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2]).astype('int')
+        else:
+            self.size_outer_x = np.array([(nx-1)/2, (nx+1)/2, (nx+1)/2]).astype('int')
+            self.size_outer_y = np.array([(nx+1)/2, (nx-1)/2, (nx+1)/2]).astype('int')
+            self.size_outer_z = np.array([(nx+1)/2, (nx+1)/2, (nx-1)/2]).astype('int')
+            
+            self.size_inner_x = np.array([(nx+1)/2, (nx-1)/2, (nx-1)/2]).astype('int')
+            self.size_inner_y = np.array([(nx-1)/2, (nx+1)/2, (nx-1)/2]).astype('int')
+            self.size_inner_z = np.array([(nx-1)/2, (nx-1)/2, (nx+1)/2]).astype('int')
+            
+    #       ### Old sizing v.1
+    #        self.size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2]).astype('int')
+    #        self.size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2]).astype('int')
+    #        self.size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2]).astype('int')
         
         ## See Research Notes 1/27/20 for more explanation on above ##
         
+        self.size_Ex = self.size_outer_x
+        self.size_Ey = self.size_outer_y
+        self.size_Ez = self.size_outer_z
+        
+        self.size_Bx = self.size_inner_x
+        self.size_By = self.size_inner_y
+        self.size_Bz = self.size_inner_z
+        
         # Field set-up #
         self.E_old = E0
-
-        self.H_s = H_s
+        
         self.H_old = H0
         self.M_old = M0
-        B0 = mu0*H0 + M0 #Curious is this will work. Looks like it should. 
-        self.B_old = B0
+        self.B0 = mu0*H0 + M0 
+        self.B_old = self.B0
+        self.H_s = H_s
         
         self.E_new = E0
         self.H_new = H0
         self.M_new = M0
-        self.B_new = B0
+        self.B_new = self.B0
         
         self.bound_ind = self.bound_ind()
+        
+    @property
+    def E_old2(self):
+        return self._E_old2
+    @E_old2.setter
+    def E_old2(self, values):
+        self._E_old2 = Field(self.size_Ex, self.size_Ey,self.size_Ez,self.disc,values)
+#        self._E_old.E = True
+        
+        if type(values) != np.ndarray or values.shape[0] != 3:
+            print('Something is wrong. Assigned incorrect array to E_old')
+            raise Exception
+   
+    @property
+    def H_old2(self):
+        return self._H_old2
+    @H_old2.setter
+    def H_old2(self, values):
+        self._H_old2 = Field(self.size_Bx, self.size_By
+                            ,self.size_Bz,self.disc,values)
+        
+        if type(values) != np.ndarray or values.shape[0] != 3:
+            print('Something is wrong. Assigned incorrect array to H_old')
+            raise Exception        
+        
+    @property
+    def M_old2(self):
+        return self._M_old2
+    @M_old2.setter
+    def M_old2(self, values):
+        self._M_old2 = Field(self.size_Bx, self.size_By
+                            ,self.size_Bz,self.disc,values)
+        
+        if type(values) != np.ndarray or values.shape[0] != 3:
+            print('Something is wrong. Assigned incorrect array to M_old')
+            raise Exception        
+         
+    @property
+    def B_old2(self):
+        return self._B_old2
+    @B_old2.setter
+    def B_old2(self, values):
+        self._B_old2 = Field(self.size_Bx, self.size_By
+                            ,self.size_Bz,self.disc,values)
+        
+        if type(values) != np.ndarray or values.shape[0] != 3:
+            print('Something is wrong. Assigned incorrect array to B_old')
+            raise Exception  
         
     @property
     def E_old(self):
@@ -152,8 +216,8 @@ class Ferro_sys(object):
         
         if type(values) != np.ndarray or values.shape[0] != 3:
             print('Something is wrong. Assigned incorrect array to M_old')
-            raise Exception        
-         
+            raise Exception  
+            
     @property
     def B_old(self):
         return self._B_old
@@ -163,7 +227,7 @@ class Ferro_sys(object):
                             ,self.size_Bz,self.disc,values)
         
         if type(values) != np.ndarray or values.shape[0] != 3:
-            print('Something is wrong. Assigned incorrect array to B_old')
+            print('Something is wrong. Assigned incorrect array to M_old')
             raise Exception  
             
     @property
@@ -221,13 +285,18 @@ class Ferro_sys(object):
     def H_s(self):
         return self._H_s
     @H_s.setter
-    def H_s(self, values):
+    def H_s(self, val):
+#        shape1 = np.int(np.round(np.prod(self.size_inner_x)))
+        values = val*np.ones(shape = self.B_old.values.shape)
         self._H_s = Field(self.size_Bx, self.size_By
                             ,self.size_Bz,self.disc,values)
         
         if type(values) != np.ndarray or values.shape[0] != 3:
             print('Something is wrong. Assigned incorrect array to H_new')
-            raise Exception        
+            raise Exception      
+            
+        else: 
+            pass
         
     def ind_rev_x_out(self,m):
         '''
@@ -315,8 +384,8 @@ class Ferro_sys(object):
         k = k/dy
         l = l/dz
         
-        x = dx + j*2*dx
-        y = k*2*dy
+        x = j*2*dx
+        y = dy + k*2*dy
         z = dz + l*2*dz
         
         return np.array([x,y,z])
@@ -338,8 +407,8 @@ class Ferro_sys(object):
         k = k/dy
         l = l/dz
         
-        x = j*2*dx
-        y = dy + k*2*dy
+        x = dx + j*2*dx
+        y = k*2*dy
         z = dz + l*2*dz
         
         return np.array([x,y,z])
@@ -367,6 +436,94 @@ class Ferro_sys(object):
         
         return np.array([x,y,z])
     
+    def plot_slice(self,F,comp,s):
+        '''
+        Plots the 'comp' component of the 'F' field in the 's' slice down the z-axis
+        
+        Note that this plotted component is denoted pc
+        '''
+        
+        if F == 'E':
+            if comp == 'x':
+                pc = self.E_old.x
+                ind = self.ind_rev_x_out
+            elif comp == 'y':
+                pc = self.E_old.y
+                ind = self.ind_rev_y_out
+            elif comp == 'z':
+                pc = self.E_old.z
+                ind = self.ind_rev_z_out
+            else:
+                print('Error, not "x", "y", "z". No comprendo, start over')
+                raise Exception
+                
+        elif F == 'B':
+            if comp == 'x':
+                pc = self.B_old.x
+                ind = self.ind_rev_x_inn
+            elif comp == 'y':
+                pc = self.B_old.y
+                ind = self.ind_rev_y_inn
+            elif comp == 'z':
+                pc = self.B_old.z
+                ind = self.ind_rev_z_inn
+            else:
+                print('Error, not "x", "y", "z". No comprendo, start over')
+                raise Exception
+                
+        elif F == 'M':
+            if comp == 'x':
+                pc = self.B_old.x
+                ind = self.ind_rev_x_inn
+            elif comp == 'y':
+                pc = self.B_old.y
+                ind = self.ind_rev_y_inn
+            elif comp == 'z':
+                pc = self.B_old.z
+                ind = self.ind_rev_z_inn
+            else:
+                print('Error, not "x", "y", "z". No comprendo, start over')
+                raise Exception
+                
+        elif F == 'H':
+            if comp == 'x':
+                pc = self.B_old.x
+                ind = self.ind_rev_x_inn
+            elif comp == 'y':
+                pc = self.B_old.y
+                ind = self.ind_rev_y_inn
+            elif comp == 'z':
+                pc = self.B_old.z
+                ind = self.ind_rev_z_inn
+            else:
+                print('Error, not "x", "y", "z". No comprendo, start over')
+                raise Exception
+            
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        
+        m_s = s*pc.nx*pc.ny
+        if s >= pc.nz:
+            print('Error, outside of domain. Cannot plot')
+            raise Exception
+        
+        x1 = np.zeros(shape = (pc.nx*pc.ny,1))
+        y1 = np.copy(x1)
+        z1 = np.copy(x1)
+        
+        for k in np.arange(m_s,m_s+x1.shape[0]):
+            x1[k-m_s] = ind(k)[0]
+            y1[k-m_s] = ind(k)[1]
+            z1[k-m_s] = pc.value[k]
+            
+                  #   (num rows, num cols)
+        x1 = x1.reshape(pc.ny, pc.nx)
+        y1 = y1.reshape(pc.ny, pc.nx)
+        z1 = z1.reshape(pc.ny, pc.nx)
+        ax.plot_surface(x1,y1,z1)
+        
+        return fig
+                       
     def set_up(self):
         '''
         This will set-up the system to be run. 
@@ -507,88 +664,92 @@ class Ferro_sys(object):
         Bz = self.B_old.z
         
         ### Indexing for Even node grid
-#        ind_Ex = np.array([0]) #First node is always a boundary
-#        for ll in np.arange(0,Ex.nz):
-#            for kk in np.arange(0,Ex.ny):
-#                for jj in np.arange(0,Ex.nx):
-#                    if ll == 0:
-#                        ind = [ll*Ex.nx*Ex.ny + kk*Ex.nx + jj]
-#                        ind_Ex= np.concatenate((ind_Ex, ind))
-#                    elif kk == 0:
-#                        ind = [ll*Ex.nx*Ex.ny + kk*Ex.nx + jj]
-#                        ind_Ex= np.concatenate((ind_Ex, ind))
-#                    elif jj == Ex.nx-1: 
-#                    # Note: This does NOT double count nodes if ll==0 and jj==0
-#                        ind = [ll*Ex.nx*Ex.ny + kk*Ex.nx + jj]
-#                        ind_Ex= np.concatenate((ind_Ex, ind))
-#                        
-#        ind_By = np.array([0])
-#        for ll in np.arange(0,By.nz):
-#            for kk in np.arange(0,By.ny):
-#                for jj in np.arange(0,By.nx):
-#                    ind = [ll*By.nx*By.ny + kk*By.nx + jj]
-#                    if ll == Bx.nz-1:
-#                        ind_By = np.concatenate((ind_By, ind))
-#                    elif kk == 0:
-#                        ind_By = np.concatenate((ind_By, ind))
-#                    elif jj == Ex.nx-1: 
-#                        ind_By = np.concatenate((ind_By, ind))
-#        
-#        ind_Ey = np.array([0])
-#        for ll in np.arange(0,Ey.nz):
-#            for kk in np.arange(0,Ey.ny):
-#                for jj in np.arange(0,Ey.nx):
-#                    ind = [ll*Ey.nx*Ey.ny + kk*Ey.nx + jj]
-#                    if ll == 0:
-#                        ind_Ey = np.concatenate((ind_Ey, ind))
-#                    elif kk == Ex.ny-1:
-#                        ind_Ey = np.concatenate((ind_Ey, ind))
-#                    elif jj == 0:
-#                        ind_Ey = np.concatenate((ind_Ey, ind))
-#                        
-#        ind_Bx = np.array([0])
-#        for ll in np.arange(0,Bx.nz):
-#            for kk in np.arange(0,Bx.ny):
-#                for jj in np.arange(0,Bx.nx):
-#                    ind = [ll*Bx.nx*Bx.ny + kk*Bx.nx + jj]
-#                    if ll == Bx.nz-1:
-#                        ind_Bx = np.concatenate((ind_Bx, ind))
-#                    elif kk == Ex.ny-1:
-#                        ind_Bx = np.concatenate((ind_Bx, ind))
-#                    elif jj == 0:
-#                        ind_Bx = np.concatenate((ind_Bx, ind))
-#        
-#        ind_Ez = np.array([0])
-#        for ll in np.arange(0,Ez.nz):
-#            for kk in np.arange(0,Ez.ny):
-#                for jj in np.arange(0,Ez.nx):
-#                    ind = [ll*Ez.nx*Ez.ny + kk*Ez.nx + jj]
-#                    if ll == Ez.nz-1:
-#                        ind_Ez = np.concatenate((ind_Ez, ind))
-#                    elif kk == 0:
-#                        ind_Ez = np.concatenate((ind_Ez, ind))
-#                    elif jj == 0:
-#                        ind_Ez = np.concatenate((ind_Ez, ind))
-#                        
-#        ind_Bz = np.array([0])
-#        for ll in np.arange(0,Bz.nz):
-#            for kk in np.arange(0,Bz.ny):
-#                for jj in np.arange(0,Bz.nx):
-#                    ind = [ll*Bz.nx*Bz.ny + kk*Bz.nx + jj]
-#                    if ll == Bz.nz-1:
-#                        ind_Bz = np.concatenate((ind_Bz, ind))
-#                    elif kk == 0:
-#                        ind_Bz = np.concatenate((ind_Bz, ind))
-#                    elif jj == 0:
-#                        ind_Bz = np.concatenate((ind_Bz, ind))
-#                    
-#        ind_Ex = np.unique(ind_Ex)
-#        ind_Ey = np.unique(ind_Ey)
-#        ind_Ez = np.unique(ind_Ez)
-#        
-#        ind_Bx = np.unique(ind_Bx)
-#        ind_By = np.unique(ind_By)
-#        ind_Bz = np.unique(ind_Bz)
+        if self.size%2 == 0:
+            print('Warning, untested grid style. Change to odd number size, or be forewarned')
+            wait = input('Press ENTER to continue, or CTRL C to break')
+            
+            ind_Ex = np.array([0]) #First node is always a boundary
+            for ll in np.arange(0,Ex.nz):
+                for kk in np.arange(0,Ex.ny):
+                    for jj in np.arange(0,Ex.nx):
+                        if ll == 0:
+                            ind = [ll*Ex.nx*Ex.ny + kk*Ex.nx + jj]
+                            ind_Ex= np.concatenate((ind_Ex, ind))
+                        elif kk == 0:
+                            ind = [ll*Ex.nx*Ex.ny + kk*Ex.nx + jj]
+                            ind_Ex= np.concatenate((ind_Ex, ind))
+                        elif jj == Ex.nx-1: 
+                        # Note: This does NOT double count nodes if ll==0 and jj==0
+                            ind = [ll*Ex.nx*Ex.ny + kk*Ex.nx + jj]
+                            ind_Ex= np.concatenate((ind_Ex, ind))
+                            
+            ind_By = np.array([0])
+            for ll in np.arange(0,By.nz):
+                for kk in np.arange(0,By.ny):
+                    for jj in np.arange(0,By.nx):
+                        ind = [ll*By.nx*By.ny + kk*By.nx + jj]
+                        if ll == Bx.nz-1:
+                            ind_By = np.concatenate((ind_By, ind))
+                        elif kk == 0:
+                            ind_By = np.concatenate((ind_By, ind))
+                        elif jj == Ex.nx-1: 
+                            ind_By = np.concatenate((ind_By, ind))
+            
+            ind_Ey = np.array([0])
+            for ll in np.arange(0,Ey.nz):
+                for kk in np.arange(0,Ey.ny):
+                    for jj in np.arange(0,Ey.nx):
+                        ind = [ll*Ey.nx*Ey.ny + kk*Ey.nx + jj]
+                        if ll == 0:
+                            ind_Ey = np.concatenate((ind_Ey, ind))
+                        elif kk == Ex.ny-1:
+                            ind_Ey = np.concatenate((ind_Ey, ind))
+                        elif jj == 0:
+                            ind_Ey = np.concatenate((ind_Ey, ind))
+                            
+            ind_Bx = np.array([0])
+            for ll in np.arange(0,Bx.nz):
+                for kk in np.arange(0,Bx.ny):
+                    for jj in np.arange(0,Bx.nx):
+                        ind = [ll*Bx.nx*Bx.ny + kk*Bx.nx + jj]
+                        if ll == Bx.nz-1:
+                            ind_Bx = np.concatenate((ind_Bx, ind))
+                        elif kk == Ex.ny-1:
+                            ind_Bx = np.concatenate((ind_Bx, ind))
+                        elif jj == 0:
+                            ind_Bx = np.concatenate((ind_Bx, ind))
+            
+            ind_Ez = np.array([0])
+            for ll in np.arange(0,Ez.nz):
+                for kk in np.arange(0,Ez.ny):
+                    for jj in np.arange(0,Ez.nx):
+                        ind = [ll*Ez.nx*Ez.ny + kk*Ez.nx + jj]
+                        if ll == Ez.nz-1:
+                            ind_Ez = np.concatenate((ind_Ez, ind))
+                        elif kk == 0:
+                            ind_Ez = np.concatenate((ind_Ez, ind))
+                        elif jj == 0:
+                            ind_Ez = np.concatenate((ind_Ez, ind))
+                            
+            ind_Bz = np.array([0])
+            for ll in np.arange(0,Bz.nz):
+                for kk in np.arange(0,Bz.ny):
+                    for jj in np.arange(0,Bz.nx):
+                        ind = [ll*Bz.nx*Bz.ny + kk*Bz.nx + jj]
+                        if ll == Bz.nz-1:
+                            ind_Bz = np.concatenate((ind_Bz, ind))
+                        elif kk == 0:
+                            ind_Bz = np.concatenate((ind_Bz, ind))
+                        elif jj == 0:
+                            ind_Bz = np.concatenate((ind_Bz, ind))
+                        
+            ind_Ex = np.unique(ind_Ex)
+            ind_Ey = np.unique(ind_Ey)
+            ind_Ez = np.unique(ind_Ez)
+            
+            ind_Bx = np.unique(ind_Bx)
+            ind_By = np.unique(ind_By)
+            ind_Bz = np.unique(ind_Bz)
         
         
         
@@ -596,59 +757,60 @@ class Ferro_sys(object):
         
         
         ### Indexing for Odd node count
-        ind_Ex = np.array([0])
-        for ll in np.arange(0,Ex.nz):
-            for kk in np.arange(0,Ex.ny):
-                for jj in np.arange(0,Ex.nx):
-                    ind = [jj+kk*Ex.nx + ll*Ex.nx*Ex.ny]
-                    if ll == 0 or ll == Ex.nz-1:
-                        ind_Ex = np.concatenate((ind_Ex, ind))
-                    elif kk == 0 or kk == Ex.ny-1:
-                        ind_Ex = np.concatenate((ind_Ex, ind))
-                        
-        ind_By = np.array([0])
-        for ll in np.arange(0,By.nz):
-            for kk in np.arange(0,By.ny):
-                for jj in np.arange(0,By.nx):
-                    ind = [jj+kk*By.nx + ll*By.nx*By.ny]
-                    if kk == 0 or kk == By.ny-1:
-                        ind_By = np.concatenate((ind_By, ind))
-                        
-                        
-        ind_Ey = np.array([0])
-        for ll in np.arange(0,Ey.nz):
-            for kk in np.arange(0,Ey.ny):
-                for jj in np.arange(0,Ey.nx):
-                    ind = [jj+kk*Ey.nx + ll*Ey.nx*Ey.ny]
-                    if ll == 0 or ll == Ey.nz-1:
-                        ind_Ey = np.concatenate((ind_Ey, ind))
-                    elif jj == 0 or jj == Ey.nx-1:
-                        ind_Ey = np.concatenate((ind_Ey, ind))
-                        
-        ind_Bx = np.array([0])
-        for ll in np.arange(0,Bx.nz):
-            for kk in np.arange(0,Bx.ny):
-                for jj in np.arange(0,Bx.nx):
-                    ind = [jj+kk*Bx.nx + ll*Bx.nx*Bx.ny]
-                    if jj == 0 or jj == Bx.nx-1:
-                        ind_Bx = np.concatenate((ind_Bx, ind))
-                        
-        ind_Ez = np.array([0])
-        for ll in np.arange(0,Ez.nz):
-            for kk in np.arange(0,Ez.ny):
-                for jj in np.arange(0,Ez.nx):
-                    ind = [jj+kk*Ez.nx + ll*Ez.nx*Ez.ny]
-                    if kk == 0 or kk == Ez.ny-1:
-                        ind_Ez = np.concatenate((ind_Ez, ind))
-                    elif jj == 0 or jj == Ez.nx-1:
-                        ind_Ez = np.concatenate((ind_Ez, ind))
-                        
-        ind_Bz = np.array([])
-#        for ll in np.arange(0,Bz.nz):
-#            for kk in np.arange(0,Bz.ny):
-#                for jj in np.arange(0,Bz.nx):
-#                    ind = [jj+kk*Bz.nx + ll*Bz.nx*Bz.ny]
-#                    if 
+        else:
+            ind_Ex = np.array([0])
+            for ll in np.arange(0,Ex.nz):
+                for kk in np.arange(0,Ex.ny):
+                    for jj in np.arange(0,Ex.nx):
+                        ind = [jj+kk*Ex.nx + ll*Ex.nx*Ex.ny]
+                        if ll == 0 or ll == Ex.nz-1:
+                            ind_Ex = np.concatenate((ind_Ex, ind))
+                        elif kk == 0 or kk == Ex.ny-1:
+                            ind_Ex = np.concatenate((ind_Ex, ind))
+                            
+            ind_By = np.array([0])
+            for ll in np.arange(0,By.nz):
+                for kk in np.arange(0,By.ny):
+                    for jj in np.arange(0,By.nx):
+                        ind = [jj+kk*By.nx + ll*By.nx*By.ny]
+                        if kk == 0 or kk == By.ny-1:
+                            ind_By = np.concatenate((ind_By, ind))
+                            
+                            
+            ind_Ey = np.array([0])
+            for ll in np.arange(0,Ey.nz):
+                for kk in np.arange(0,Ey.ny):
+                    for jj in np.arange(0,Ey.nx):
+                        ind = [jj+kk*Ey.nx + ll*Ey.nx*Ey.ny]
+                        if ll == 0 or ll == Ey.nz-1:
+                            ind_Ey = np.concatenate((ind_Ey, ind))
+                        elif jj == 0 or jj == Ey.nx-1:
+                            ind_Ey = np.concatenate((ind_Ey, ind))
+                            
+            ind_Bx = np.array([0])
+            for ll in np.arange(0,Bx.nz):
+                for kk in np.arange(0,Bx.ny):
+                    for jj in np.arange(0,Bx.nx):
+                        ind = [jj+kk*Bx.nx + ll*Bx.nx*Bx.ny]
+                        if jj == 0 or jj == Bx.nx-1:
+                            ind_Bx = np.concatenate((ind_Bx, ind))
+                            
+            ind_Ez = np.array([0])
+            for ll in np.arange(0,Ez.nz):
+                for kk in np.arange(0,Ez.ny):
+                    for jj in np.arange(0,Ez.nx):
+                        ind = [jj+kk*Ez.nx + ll*Ez.nx*Ez.ny]
+                        if kk == 0 or kk == Ez.ny-1:
+                            ind_Ez = np.concatenate((ind_Ez, ind))
+                        elif jj == 0 or jj == Ez.nx-1:
+                            ind_Ez = np.concatenate((ind_Ez, ind))
+                            
+            ind_Bz = np.array([])
+    #        for ll in np.arange(0,Bz.nz):
+    #            for kk in np.arange(0,Bz.ny):
+    #                for jj in np.arange(0,Bz.nx):
+    #                    ind = [jj+kk*Bz.nx + ll*Bz.nx*Bz.ny]
+    #                    if 
                         
                         
         ind_Ex = np.unique(ind_Ex)
@@ -660,8 +822,6 @@ class Ferro_sys(object):
         ind_Bz = np.unique(ind_Bz)
         
         return np.array([ind_Ex, ind_Ey, ind_Ez, ind_Bx, ind_By, ind_Bz])
-                        
-        
         
     def single_run(self,t):
         '''
@@ -692,7 +852,7 @@ class Ferro_sys(object):
         F = np.array([self.Fx(t), self.Fy(t), self.Fz(t)])
         E_new_values = E_old.values + dt*H_old.curl()
         
-        #Setting E boundaries to 0
+        #Setting all E boundaries to 0
         for j in b_ind[0]:
             E_new_values[0][j] = 0
         for k in b_ind[1]:
@@ -711,254 +871,109 @@ class Ferro_sys(object):
         
         f = 2*M_old.values
         a = -(abs(gamma)*self.dt/2)*(B_on/mu0 + self.H_s.values) - alpha*M_old.values
-        lam = -K*abs(gamma)*self.dt/4
+#        lam = -K*abs(gamma)*self.dt/4
         
         a_dot_f = np.array([a[0].T@f[0], a[1].T@f[1], a[2].T@f[2]])
         
-        if K == 0:
+        if K == 0 or t == dt:
             M_new_values = (f + (a_dot_f)*a - np.cross(a.T,f.T).T) 
             Mnv_denom = (1+np.linalg.norm(a,axis=1)**2)
             
             for k in np.arange(0,M_new_values.shape[0]):
                 M_new_values[k] = M_new_values[k]/Mnv_denom[k]
-            
-            
-        elif type(K)!= int or type(K) != float:
-            print('Error in K, not a number?')
-            
+                
         else:
-            print('Currently under construction')
+            pass
             
         self.M_new = M_new_values
         
         self.H_new = B_new_values/mu0 - M_new_values
-        #Need to add in how we find M_new for K ~= 0
         
-        
-        
-    def plot_xy_slice(self,field,comp,num_of_slice):
+    def opt_func(self,val):
         '''
-        Plots the num_of_slice slice (in the z-direction) of the 
-        component of the field given
+        Returns the residual for a given guess of M
         
-        available fields: E,H,M,B
-        available comps: x,y,z
-        
-        E.g.
+        value must be an array of proper size. 
         '''
         
+        M_old, B_old, B_new, H_s = self.M_old, self.B_old, self.B_new, self.H_s
+        dt = self.dt
         
+        M_new_values = val
         
+        #####
+        P = 0
+        #####
         
-    def Ex_ind(self,x,y,z):
-        nx = self.nx
-        dx = self.dx
+        M_on = (M_new_values + M_old.values)/2
+        B_on = (B_old.values + B_new.values)/2
         
-        i = round(x/dx)
-        j = round(y/dx)
-        k = round(z/dx)
-        
-        if i%2 != 1:
-            print('*'*40,'\n','Mistake in Ex-x input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
+        if type(val) != np.array:
+            print('Error, function cannot be evaluated for this input. Abort')
             raise Exception
-        elif j%2 != 0:
-            print('*'*40,'\n','Mistake in Ex-y input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-        elif k%2 != 0:
-            print('*'*40,'\n','Mistake in Ex-z input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-        elif i > nx-1 or j > nx-1 or k > nx-1:
-            print('*'*40,'\n','Mistake. Some component is too large. Break')
-            raise Exception
-        else:
-            ind1 = k*((nx+1)/2*(nx-1)/2)
-            ind2 = j/2*(nx-3)/2
-            ind = ind1+ind2+i
             
-        return ind
+        elif val.shape != M_old.values.shape:
+            print('Error in input size. Abort')
+            raise Exception
+        
+        a =1/dt*(M_new_values - M_old.values)
+        b = abs(gamma)*( (1/mu0)*B_on - M_on + H_s.values + K*P*M_on)
+        
+        bt = np.cross(b.T,M_on.T).T
+        
+        c = alpha/np.norm(M_on) * M_on
+        ct = np.cross(c.T, a.T).T
+        
+        print('Warning: Still undergoing work. P needs to be further developed')
+        
+        return a-(bt+ct)
+        
+        
+        
+        
+        
+        
+    def secant_method(func, x0, x1, alpha=1.0, tol=1E-9, maxit=200):
+        """
+        Uses the secant method to find f(x)=0.  
+        
+        INPUTS
+        
+            * f     : function f(x)
+            * x0    : initial guess for x
+            * alpha : relaxation coefficient: modifies Secant step size
+            * tol   : convergence tolerance
+            * maxit : maximum number of iteration, default=200        
+        """
     
-    def Ey_ind(self,x,y,z):
-        nx = self.nx
-        dx = self.dx
+        x, xprev = x1, x0
+        f, fprev = func(x), func(xprev)
         
-        i = round(x/dx)
-        j = round(y/dx)
-        k = round(z/dx)
+        rel_step = 2.0 *tol
+        k = 0
         
-        if i%2 != 0:
-            print('*'*40,'\n','Mistake in Ex-x input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-        elif j%2 != 1:
-            print('*'*40,'\n','Mistake in Ex-y input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-        elif k%2 != 0:
-            print('*'*40,'\n','Mistake in Ex-z input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-        elif i > nx-1 or j > nx-1 or k > nx-1:
-            print('*'*40,'\n','Mistake. Some component is too large. Break')            
-            raise Exception
-        
-        else:
-            ind1 = k*((nx+1)/2*(nx-1)/2)
-            ind2 = (j-1)/2*(nx-1)/2
-            ind = ind1+ind2+i
+        while (abs(f) > tol) and (rel_step) > tol and (k<maxit):        
+            rel_step = abs(x-xprev)/abs(x)
             
-        return ind
-        
-    def Ez_ind(self,x,y,z):
-        nx = self.nx
-        dx = self.dx
-        
-        i = round(x/dx)
-        j = round(y/dx)
-        k = round(z/dx)
-        
-        if i%2 != 1:
-            print('*'*40,'\n','Mistake in Ex-x input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-        elif j%2 != 1:
-            print('*'*40,'\n','Mistake in Ex-y input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-        elif k%2 != 0:
-            print('*'*40,'\n','Mistake in Ex-z input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-        elif i > nx-1 or j > nx-1 or k > nx-1:
-            print('*'*40,'\n','Mistake. Some component is too large. Break')            
-            raise Exception
-        else:            
+            # Full secant step
+            dx = -f/(f - fprev)*(x - xprev)
             
-            ind1 = k*((nx-3) + (nx+1)/2*(nx-3)/2)
+            # Update `xprev` and `x` simultaneously
+            xprev, x = x, x + alpha*dx
             
-            if j == 1:
-                ind2 = 0
-            else:
-                ind2 = (j-3)/2*(nx+1)/2*(nx-3)/2 + (nx-3)/2
-            ind = ind1+ind2+i
+            # Update `fprev` and `f`:
+            fprev, f = f, func(x)
             
-        return ind
+            k += 1
+            
+            print('{0:10d} {1:12.5f} {2:12.5f} {3:12.5f} {4:12.5f}'\
+            .format(k, xprev, fprev, rel_step, alpha*dx))
+                    
+        return x
+        
+        
         
     
-    def Bx_ind(self,x,y,z):
-        nx = self.nx
-        dx = self.dx
-        
-        i = round(x/dx)
-        j = round(y/dx)
-        k = round(z/dx)
-        
-        if i%2 != 1:
-            print('*'*40,'\n','Mistake in Ex-x input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-        elif j%2 != 0:
-            print('*'*40,'\n','Mistake in Ex-y input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-        elif k%2 != 0:
-            print('*'*40,'\n','Mistake in Ex-z input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-            
-        elif i == 0:
-            print('*'*40,'\n','Mistake in Ex-x input. Nodal value not','\n',...
-                  ,' assigned there, boundary node. Break now')
-            raise Exception
-        elif i == nx-1:
-            print('*'*40,'\n','Mistake in Ex-x input. Nodal value not','\n',...
-                  ,' assigned there, boundary node. Break now')
-            raise Exception
-        elif i > nx-1 or j > nx-1 or k > nx-1:
-            print('*'*40,'\n','Mistake. Some component is too large. Break') 
-            raise Exception
-        
-        else:
-            ind1 = k*((nx-1)/2*(nx-3)/2)
-            ind2 = (j-1)/2*(nx-3)/2
-            ind = ind1+ind2+i
-            
-            return ind
-        
-    def By_ind(self,x,y,z):
-        nx = self.nx
-        dx = self.dx
-        
-        i = round(x/dx)
-        j = round(y/dx)
-        k = round(z/dx)
-        
-        if i%2 != 0:
-            print('*'*40,'\n','Mistake in Ex-x input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-        elif j%2 != 1:
-            print('*'*40,'\n','Mistake in Ex-y input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-        elif k%2 != 0:
-            print('*'*40,'\n','Mistake in Ex-z input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-            
-        elif j == 0:
-            print('*'*40,'\n','Mistake in Ex-x input. Nodal value not','\n',...
-                  ,' assigned there, boundary node. Break now')
-            raise Exception
-        elif j == nx-1:
-            print('*'*40,'\n','Mistake in Ex-x input. Nodal value not','\n',...
-                  ,' assigned there, boundary node. Break now')
-            raise Exception
-        elif i > nx-1 or j > nx-1 or k > nx-1:
-            print('*'*40,'\n','Mistake. Some component is too large. Break')   
-            raise Exception
-        
-        else:
-            ind1 = k*((nx-1)/2*(nx-3)/2)
-            ind2 = j/2*(nx-1)/2
-            ind = ind1+ind2+i
-            
-            return ind
-        
-    def Bz_ind(self,x,y,z):
-        nx = self.nx
-        dx = self.dx
-        
-        i = round(x/dx)
-        j = round(y/dx)
-        k = round(z/dx)
-        
-        if i%2 != 0:
-            print('*'*40,'\n','Mistake in Ex-x input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-        elif j%2 != 1:
-            print('*'*40,'\n','Mistake in Ex-y input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-        elif k%2 != 0:
-            print('*'*40,'\n','Mistake in Ex-z input. Nodal value not','\n',...
-                  ,' assigned there. Break now')
-            raise Exception
-        elif i > nx-1 or j > nx-1 or k > nx-1:
-            print('*'*40,'\n','Mistake. Some component is too large. Break')     
-            raise Exception
-        
-        else:
-            ind1 = k*((nx-1)/2)**2
-            ind2 = (j-1)/2*(nx-1)/2
-            ind = ind1+ind2+i
-            
-            return ind
-        
-        
 
 
 

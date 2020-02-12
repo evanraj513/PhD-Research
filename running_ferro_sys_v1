@@ -30,8 +30,33 @@ else:
 from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
-size = 3+2*5
-disc = [1, 1, 1]
+### Parameters (global)
+mu0 = 1.25667e-6
+eps = 0.88422e-11
+gamma = 2.2e5
+K = 0
+alpha = 0.2
+H_s_guess = 10**5
+
+### Parameters (system)
+max_x = 16.4
+disc = [0.4, 0.4, 0.4]
+T = 6e-8
+dt = 5e-10
+
+if (max_x/disc[0])%2 == 0:
+    print('Warning. Grid could fail, untested')
+    size = round(max_x/disc[0])
+    
+elif (max_x/disc[0])%2 == 1:
+    size = round(max_x/disc[0])
+    
+else:
+    print('That domain and disc not available'
+          '\n','Attempting closest available disc.')
+    max_x = max_x - (max_x/disc[0])%2
+    size = round(max_x/disc[0])
+    
 def sizing(nx):
     size_Ex = np.array([(nx-1)/2, (nx+1)/2, (nx+1)/2])
     size_Ey = np.array([(nx+1)/2, (nx-1)/2, (nx+1)/2])
@@ -46,9 +71,10 @@ def sizing(nx):
     size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx+1)/2])
     return [size_Ex, size_Ey, size_Ez, size_Bx, size_By, size_Bz]
 
-## To give number of nodes
-a = np.array(sizing(size)).prod(axis=1)
+### Initial conditions
 
+# To give number of nodes
+a = np.round(np.array(sizing(size)).prod(axis=1))
 
 E0_x = np.zeros(shape = (int(a[0]),1))
 E0_y = np.zeros(shape = (int(a[1]),1))
@@ -65,9 +91,12 @@ M0 = np.array([M0_x, M0_y, M0_z])
 H_s = H0
 
 R_sys = Ferro_sys(size,disc,E0,H0,M0,H_s)
+R_sys.dt = dt
 
 def f_x(x,y,z,t):
     if t < 0.2:
+        val = 0
+    if x == 0 or x == max_x:
         val = 0
     else:
         val = 1
@@ -77,11 +106,16 @@ def f_x(x,y,z,t):
 def f_y(x,y,z,t):
     
     val = 0
+    if y == 0 or y == max_x:
+        val = 0
     
     return val
 
 def f_z(x,y,z,t):
     val = 0
+    
+    if z == 0 or z == max_x:
+        val = 0
     
     return val
 
@@ -89,7 +123,7 @@ R_sys.fx = f_x
 R_sys.fy = f_y
 R_sys.fz = f_z
 
-for t in np.arange(0,R_sys.T,R_sys.dt):
+for t in np.arange(0,T,dt):
     ### re-initializing the system
     R_sys.set_up()
     
@@ -97,6 +131,11 @@ for t in np.arange(0,R_sys.T,R_sys.dt):
     R_sys.single_run(t)
     
     ## Updating old fields
+    R_sys.E_old2 = R_sys.E_old.values
+    R_sys.B_old2 = R_sys.B_old.values
+    R_sys.M_old2 = R_sys.M_old.values
+    R_sys.H_old2 = R_sys.H_old.values
+    
     R_sys.E_old = R_sys.E_new.values
     R_sys.H_old = R_sys.H_new.values
     R_sys.M_old = R_sys.M_new.values
@@ -105,34 +144,15 @@ for t in np.arange(0,R_sys.T,R_sys.dt):
     print('Current time: ', round(t,1))
 
 ## Plotting stuff
-# For now, plotting Ex or By
 
-fig = plt.figure()
-ax = plt.axes()
-E_old = R_sys.E_old
+fig_Mx = R_sys.plot_slice('M','x',110)
+fig_My = R_sys.plot_slice('M','y',100)
+fig_Mz = R_sys.plot_slice('M','z',100)
 
-x1 = np.zeros(shape = (E_old.x.nx*E_old.x.ny,1))
-y1 = np.copy(x1)
-z1 = np.copy(x1)
+fig_Mx.save_fig('Mx_110')
+fig_Mx.save_fig('My_100')
+fig_Mx.save_fig('My_100')
 
-#for k in np.arange(0,E_old.x.nx*E_old.x.ny):
-#    x1[k] = R_sys.ind_rev_x_out(k)[0]
-#    y1[k] = R_sys.ind_rev_x_out(k)[1]
-#    z1[k] = E_old.x.value[k]
 
-for k in np.arange(0,x1.shape[0]):
-    x1[k] = R_sys.ind_rev_x_out(k)[0]
-    y1[k] = R_sys.ind_rev_x_out(k)[1]
-    z1[k] = E_old.x.value[k]
-
-x = x1
-y = y1
-z = z1
-
-#surf = ax.scatter(x, y, s = z/np.linalg.norm(z,axis=1))
-
-plot = ax.pcolormesh(x,y,z)
-
-plt.show()
 
 

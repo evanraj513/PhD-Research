@@ -8,73 +8,9 @@ Created on Fri Oct 25 16:50:32 2019
 
 import numpy as np
 #import scipy as sp
-from scipy.sparse import lil_matrix
+from scipy.sparse import lil_matrix    
 
-''' TODO
-    1. Reverse index function
-    '''
-
-
-class Field(object):
-    ''' 
-    This class will store the values of a given field, as three vectors
-    The size will be determined by initialization
-    where each component is located will be based on my_ind()
-    It will be F = <F_x, F_y, F_z>
     
-    Attributes:
-    -----------
-    index: function
-        Converts (x,y,z) to k component for the vector fed into it
-    size: np_array of length 3
-        Contains the number of nodes in the x,y,z direction, in that order
-    disc: np_array of length 3
-        Contains the uniform discretization in the x,y,z direction, in that order
-    x: Vector
-        stores the first component of the field
-    y,z similar to x
-    
-    TODO:
-        - Add in setter properties for x,y,z? This will force the user
-            to use the Vector class...
-            
-        - Boundary conditions need to be implemented. Think more about how
-            to implement these
-            
-    '''
-    
-    def __init__(self,size,disc,x,y,z):
-#        self.index = index
-        self.size = size
-        self.disc = disc
-        self.x = Vector(x,self.size,self.disc)
-        self.y = Vector(y,self.size,self.disc)
-        self.z = Vector(z,self.size,self.disc)
-        
-    @property
-    def index(self):
-        return self._index
-    @index.setter
-    def index(self,ind):
-        self._index = ind
-        self.x.index = ind
-        self.y.index = ind
-        self.z.index = ind
-        
-    def curl(self):
-        '''
-        Finds an approximation to the curl, given the index and x,y,z values
-        in Cartesian coordinates
-        
-        Returns as three vectors. Can be used to generate a field
-        '''
-        curl_x = self.z.Dy() - self.y.Dz()
-        curl_y = self.x.Dz() - self.z.Dx()
-        curl_z = self.y.Dx() - self.x.Dy()
-        
-        return np.array([curl_x,curl_y,curl_z])
-        
-        
     
     
 class Vector(object):
@@ -106,18 +42,17 @@ class Vector(object):
         
     TODO:
     -----
-    - Add in check that values being given to Vector are always a vector, not a matrix
-    
-        Somewhat done?
-    
+    - (done) Add in check that values being given to Vector are always a np.arrray of size(x,1), not a matrix    
     - As of now, first slice is included? Shouldn't be, but necessary for reduction to 2D? 
+        Ans: With current code, first slice is always required
     - Think about possibly just saving the dX,dY,dZ matrices? And then just reusing those, 
         rather then generating them over and over?
+        
+        Ans: Still not sure how, but good to think about. 
     
     Questions:
     ----------
     Can the index function be changed? Or will I just have to assign this elsewhere? 
-        -Think more about this
         Ans: Index function can be changed. Once the Vector is created, it's as simple as reassigning 
             the index function. This will also change the derivatives to be based upon the new
             index function. For now, I am writing the derivative functions solely for the ferro-
@@ -127,7 +62,7 @@ class Vector(object):
         
     Comments:
     ---------
-    If using another index function, need to make sure the only inputs are (x,y,z)
+    If using another index function, make sure the only inputs are (x,y,z)
     and that nx,ny,nz are used as fixed parameters, to maintain consistency. 
     '''
     
@@ -166,47 +101,6 @@ class Vector(object):
         else:
             print('Error. Value not given as a numpy array. Abort')
             raise Exception 
-
-#    @property
-#    def nx(self):
-#        return self._nx
-#    @nx.setter
-#    def nx(self,val):
-#        self._nx = val
-#        if val == 1:
-#            print('Error, change discretization so 2D is in z-axis')
-#        elif val == 2:
-#            print('Error, discretization not available')
-#        else:
-#            pass   
-#        
-#    @property
-#    def ny(self):
-#        return self._ny
-#    @ny.setter
-#    def ny(self,val):
-#        self._ny = val
-#        if val == 1:
-#            print('Error, change discretization so 2D is in z-axis')
-#        elif val == 2:
-#            print('Error, discretization not available')
-#        else:
-#            pass 
-#        
-#    @property
-#    def nz(self):
-#        return self._nz
-#    @nz.setter
-#    def nz(self,val):
-#        self._nz = val
-#        if val == 1:
-#            print('Reduction to 2-dimensions apparent. \n',
-#                  'Altering derivatives. Dz derivative no ',
-#                  'longer available')
-#        elif val == 2:
-#            print('Discretization not available, please define nz == 1 or >= 3 only')
-#        else:
-#            pass
         
     def myind_std(self,x,y,z):
         '''
@@ -236,7 +130,7 @@ class Vector(object):
         
         val = j + k*self.nx + l*self.nx*self.ny
         
-        return val
+        return np.int(np.round(val))
     
     def myind_std_rev(self, m):
         '''
@@ -389,6 +283,9 @@ class Vector(object):
                     if kk == 0 or kk == self.ny:
                         pass
                     else:
+#                        print('a: ',ind(jj*dx,kk*dy,ll*dz),'\n'
+#                              'b: ',ind(jj*dx,(kk+1)*dy,ll*dz),'\n'
+#                              'c: ',ind(jj*dx,(kk-1)*dy,ll*dz))
                         Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk+1)*dy,ll*dz)] = 1/(2*dy)
                         Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk-1)*dy,ll*dz)] = -1/(2*dy)
                         
@@ -444,12 +341,17 @@ class Field_2(object):
         stores the first component of the field
     y,z similar to x
     
+    values: np.array of 3 by x
+        Stores the values to initialize the Vectors x,y,z respectively. 
+    
     TODO:
         - (done) Add in setter properties for x,y,z? This will force the user
             to use the Vector class.
             
-        - Boundary conditions need to be implemented. Think more about how
+        - (done) Boundary conditions need to be implemented. Think more about how
             to implement these
+            
+            Ans: Done in system
             
     '''
     
@@ -460,21 +362,6 @@ class Field_2(object):
         self.size_z = size_z
         self.disc = disc
         self.values = values
-#        self.x = values[0]
-#        self.y = values[1]
-#        self.z = values[2]
-        
-#    @property
-#    def index(self):
-#        return self._index
-#    @index.setter
-#    def index(self,ind):
-#        self._index = ind
-#        self.x.index = ind
-#        self.y.index = ind
-#        self.z.index = ind
-        
-        self.E = False
         
     @property 
     def x(self):
@@ -513,100 +400,7 @@ class Field_2(object):
 #        else:
 #            print('Error. Values not given in proper format')
         
-    def conv_DEx_to_Bz(self,arr):
-        '''
-        Removes first and last slice of an derivative approximation of Ex or Ey
-        so that it's size matches Bz
-        '''
-        
-        m = self.x.nx*self.y.ny
-        f_s = np.arange(0,m)
-        l_s = np.arange(arr.shape[0]-m, arr.shape[0])
-        
-        obj = np.concatenate([f_s,l_s])
-        
-        arr = np.delete(arr, [obj],axis=0)
-#        print(arr,'\n','f_s: ',f_s, 'l_s: ',l_s, 'obj: ',obj)
-        
-        return arr
-    
-    def conv_DEz_to_By(self,arr):
-        '''
-        Removes boundary derivative approximations of Ez w.r.t x
-        on rows of inner slices
-        
-        Can also be used to reduce z-derivative approximations of Ex
-        
-        Note: DEz w.r.t. x now lives on Ex nodes \pm a slice. So need to
-        get rid of anywhere Ex is on a boundary. 
-        '''
-        
-        Ez = self.z
-        Ex = self.x
-        rem = np.array([])
-        
-        for ll in np.arange(0,Ez.nz):
-            for kk in np.arange(0,Ex.ny):
-                if kk == 0 or kk == Ex.ny-1:
-                    ind = kk*Ex.nx+ll*Ex.nx*Ex.ny
-                    f_r = np.arange(ind,ind+Ex.nx)
-                    rem = np.concatenate([rem, f_r])
-#                    print('ind: ',ind,'\n',
-#                          'll: ',ll,'\n',
-#                          'kk: ',kk,'\n',
-#                          'rem: ',rem,'\n')
-                    
-        arr = np.delete(arr, [rem], axis=0)
-        
-        return arr
-    
-    def conv_DEz_to_Bx(self,arr):
-        '''
-        Removes boundary derivative approximations of Ez w.r.t y
-        on columns of inner slices
-        
-        Can also be used to reduce z-derivative approximations of Ey
-        
-        Note: DEz w.r.t. y now lives on Ey nodes \pm a slice. So need to
-        get rid of anywhere Ey is on a boundary. 
-        '''
-        
-        Ez = self.z
-        Ey = self.y
-        rem = np.array([])
-        
-        for ll in np.arange(0,Ez.nz):
-            for kk in np.arange(0,Ey.ny):
-                for jj in np.arange(0,Ey.nx):
-                    if jj == 0 or jj == Ey.nx-1:
-                        ind = np.arange(jj + kk*Ey.nx + ll*Ey.nx*Ey.ny,
-                                        jj + kk*Ey.nx + ll*Ey.nx*Ey.ny+1)
-                        rem = np.concatenate([rem, ind])
-                            
-        arr = np.delete(arr, [rem], axis=0)
-        
-        return arr
-    
-#    def conv_DBx_to_Ez(self,arr):
-#        ''' 
-#        Add the empty first and last rows (or columns, same number) 
-#        to each slice of derivative approximations of Bx,By
-#        so that this can be added to Ez properly
-#        '''
-#        Bx = self.x
-#        Bz = self.z
-#        
-#        for ll in np.arange(0,Bx.nz):
-#            for kk in np.arange(0,Bx.ny+2):
-#                for jj in np.arange(0,Bx.nx+2):
-#                    if jj == 0 or jj == Bx.nx+1:
-##                        add = np.zeros((Bx.nx+2,1)).T
-#                        ind = 
-#                        ind_total = np.concatenate([ind_total, ind])
-#                        
-#                        
-        
-        
+
     def curl(self):
         '''
         Finds an approximation to the curl, given the index and x,y,z values
@@ -615,17 +409,13 @@ class Field_2(object):
         Returns as three vectors. Can be used to generate a field 
         '''
         
-        if self.E == True:
-            curl_x = self.conv_DEz_to_Bx(self.z.Dy()) - self.conv_DEz_to_Bx(self.y.Dz())
-            curl_y = self.conv_DEz_to_By(self.y.Dz()) - self.conv_DEz_to_By(self.z.Dx())
-            curl_z = self.conv_DEx_to_Bz(self.y.Dx()) - self.conv_DEx_to_Bz(self.x.Dy())
-        else:
-        
-            curl_x = self.z.Dy() - self.y.Dz()
-            curl_y = self.x.Dz() - self.z.Dx()
-            curl_z = self.y.Dx() - self.x.Dy()
+        curl_x = self.z.Dy() - self.y.Dz()
+        curl_y = self.x.Dz() - self.z.Dx()
+        curl_z = self.y.Dx() - self.x.Dy()
         
         return np.array([curl_x,curl_y,curl_z])
+    
+
 
             
         

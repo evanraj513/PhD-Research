@@ -143,24 +143,68 @@ Ferro_sys = ferro_system1.Ferro_sys
 #
 #surf = ax.plot_surface(x, y, z) ## This will plot where size gives value
 
-fig = plt.figure()
-ax = plt.axes(projection='3d')
-E_old = R_sys.E_old
+#fig = plt.figure()
+#ax = fig.add_subplot(111, projection='3d')
+#E_old = R_sys.E_old
+#
+#x1 = np.zeros(shape = (E_old.x.nx*E_old.x.ny,1))
+#y1 = np.copy(x1)
+#z1 = np.copy(x1)
+#
+#for k in np.arange(0,x1.shape[0]):
+#    x1[k] = R_sys.ind_rev_x_out(k)[0]
+#    y1[k] = R_sys.ind_rev_x_out(k)[1]
+#    z1[k] = E_old.x.value[k]
+#
+#
+#plt.show()
 
-x1 = np.zeros(shape = (E_old.x.nx*E_old.x.ny,1))
-y1 = np.copy(x1)
-z1 = np.copy(x1)
 
-for k in np.arange(0,x1.shape[0]):
-    x1[k] = R_sys.ind_rev_x_out(k)[0]
-    y1[k] = R_sys.ind_rev_x_out(k)[1]
-    z1[k] = E_old.x.value[k]
+# Now debugging the secant method. Let's find out if I got it right
 
-x,y = np.meshgrid(x1,y1)
-z = z1
+M_old, B_old, B_new, H_s = R_sys.M_old, R_sys.B_old, R_sys.B_new, R_sys.H_s
 
-surf = ax.plot_surface(x, y, z) ## This will plot where size gives value
+val = np.zeros(shape = M_old.values.shape)
 
-plt.show()
+M_new_values = val
+        
+M_on = (M_new_values + M_old.values)/2
+B_on = (B_old.values + B_new.values)/2
+
+if type(val) != np.ndarray:
+    print('Error, function cannot be evaluated for this input. Abort')
+    raise Exception
+    
+elif val.shape != M_old.values.shape:
+    print('Error in input size. Abort')
+    raise Exception
+
+a =1/dt*(M_new_values - M_old.values)
+b = abs(gamma)*( (1/mu_0)*B_on - M_on + K*P*M_on)
+
+bt = np.cross(a = b,b = M_on)
+
+c = alpha/np.norm(M_on) * M_on
+ct = np.cross(c, a)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
