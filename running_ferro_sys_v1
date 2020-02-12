@@ -14,6 +14,8 @@ from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
 from matplotlib import cm
 plt.rcParams['backend'] = "Qt4Agg"
+from collections import OrderedDict
+import pandas as pd
 
 l_path = '..'
 m_path = os.path.abspath(l_path)
@@ -123,7 +125,7 @@ R_sys.fx = f_x
 R_sys.fy = f_y
 R_sys.fz = f_z
 
-for t in np.arange(0,T,dt):
+for t in np.arange(dt,T,dt):
     ### re-initializing the system
     R_sys.set_up()
     
@@ -145,8 +147,29 @@ for t in np.arange(0,T,dt):
     
     
 ## Saving data
+name = 'test1'
 
-R_sys.save_data('test1')
+R_sys.save_data(name)
+
+    # Run parameters
+        #Global Parameters
+data = OrderedDict()
+data['mu0'] = mu0
+data['eps'] = eps 
+data['gamma'] = gamma
+data['K'] = K
+data['alpha'] = alpha
+data['H_s'] = H_s_guess
+
+        # Parameters (system)
+data['max_x'] = max_x
+data['disc'] = disc[0]
+data['T'] = T
+data['dt'] = dt
+
+df = pd.DataFrame(data)
+df.to_csv(name+'_parameters.csv')
+
 
 ## Plotting stuff
 
