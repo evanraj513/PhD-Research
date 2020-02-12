@@ -84,7 +84,7 @@ B0_y = np.zeros(shape = (int(a[4]),1))
 B0_z = np.zeros(shape = (int(a[5]),1))
 M0_x = np.zeros(shape = (int(a[3]),1))
 M0_y = np.zeros(shape = (int(a[4]),1))
-M0_z = np.zeros(shape = (int(a[5]),1))
+M0_z = 100*np.ones(shape = (int(a[5]),1))
 E0 = np.array([E0_x, E0_y, E0_z])
 H0 = np.array([B0_x, B0_y, B0_z])
 M0 = np.array([M0_x, M0_y, M0_z])
@@ -99,7 +99,7 @@ def f_x(x,y,z,t):
     if x == 0 or x == max_x:
         val = 0
     else:
-        val = 1
+        val = 0
     
     return val
 
@@ -150,8 +150,8 @@ fig_My = R_sys.plot_slice('M','y',10)
 fig_Mz = R_sys.plot_slice('M','z',10)
 
 fig_Mx.savefig('Mx_10')
-fig_Mx.savefig('My_10')
-fig_Mx.savefig('My_10')
+fig_My.savefig('My_10')
+fig_Mz.savefig('Mz_10')
 
 
 
