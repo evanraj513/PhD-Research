@@ -18,10 +18,10 @@ x = np.array([0])
 y = np.array([0])
 z = np.array([0])
 
-a = 4*np.pi
+a = np.pi
 da = (np.pi/32)
 for rho in np.arange(0,1,.1):
-    for psi in np.arange(0,a,da):
+    for psi in np.arange(0,2*a,da):
         for phi in np.arange(0,a,da):
             x1 = [(R + rho*np.cos(psi))*np.cos(phi)]
             y1 = [(R + rho*np.cos(psi))*np.sin(phi)]
@@ -66,4 +66,4 @@ ax21.set_ylabel('z')
 
 fig3.savefig('DG_hw5_xz.png')
 
-#plt.show()
+plt.show()
