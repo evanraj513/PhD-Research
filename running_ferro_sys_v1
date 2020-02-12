@@ -145,13 +145,13 @@ for t in np.arange(0,T,dt):
 
 ## Plotting stuff
 
-fig_Mx = R_sys.plot_slice('M','x',110)
-fig_My = R_sys.plot_slice('M','y',100)
-fig_Mz = R_sys.plot_slice('M','z',100)
+fig_Mx = R_sys.plot_slice('M','x',10)
+fig_My = R_sys.plot_slice('M','y',10)
+fig_Mz = R_sys.plot_slice('M','z',10)
 
-fig_Mx.save_fig('Mx_110')
-fig_Mx.save_fig('My_100')
-fig_Mx.save_fig('My_100')
+fig_Mx.save_fig('Mx_10')
+fig_Mx.save_fig('My_10')
+fig_Mx.save_fig('My_10')
 
 
 
