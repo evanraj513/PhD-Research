@@ -149,9 +149,9 @@ fig_Mx = R_sys.plot_slice('M','x',10)
 fig_My = R_sys.plot_slice('M','y',10)
 fig_Mz = R_sys.plot_slice('M','z',10)
 
-fig_Mx.save_fig('Mx_10')
-fig_Mx.save_fig('My_10')
-fig_Mx.save_fig('My_10')
+fig_Mx.savefig('Mx_10')
+fig_Mx.savefig('My_10')
+fig_Mx.savefig('My_10')
 
 
 
