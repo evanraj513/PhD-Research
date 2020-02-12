@@ -43,8 +43,9 @@ H_s_guess = 10**5
 ### Parameters (system)
 max_x = 16.4
 disc = [0.4, 0.4, 0.4]
-T = 6e-8
+
 dt = 5e-10
+T = 2*dt
 
 if (max_x/disc[0])%2 == 0:
     print('Warning. Grid could fail, untested')
