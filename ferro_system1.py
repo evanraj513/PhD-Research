@@ -891,7 +891,7 @@ class Ferro_sys(object):
         
         self.H_new = B_new_values/mu0 - M_new_values
         
-    def opt_func(self,val):
+    def res_func(self,val):
         '''
         Returns the residual for a given guess of M
         
@@ -968,8 +968,8 @@ class Ferro_sys(object):
             
             k += 1
             
-            print('{0:10d} {1:12.5f} {2:12.5f} {3:12.5f} {4:12.5f}'\
-            .format(k, xprev, fprev, rel_step, alpha*dx))
+#            print('{0:10d} {1:12.5f} {2:12.5f} {3:12.5f} {4:12.5f}'\
+#            .format(k, xprev, fprev, rel_step, alpha*dx))
                     
         return x
     

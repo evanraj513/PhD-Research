@@ -167,7 +167,7 @@ data['disc'] = disc[0]
 data['T'] = T
 data['dt'] = dt
 
-df = pd.DataFrame(data)
+df = pd.DataFrame([data])
 df.to_csv(name+'_parameters.csv')
 
 
