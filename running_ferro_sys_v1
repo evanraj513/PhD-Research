@@ -164,6 +164,7 @@ data['H_s'] = H_s_guess
         # Parameters (system)
 data['max_x'] = max_x
 data['disc'] = disc[0]
+data['size'] = size
 data['T'] = T
 data['dt'] = dt
 
