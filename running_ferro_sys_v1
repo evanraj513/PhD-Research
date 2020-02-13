@@ -45,8 +45,7 @@ max_x = 16.4
 disc = [0.4, 0.4, 0.4]
 
 dt = 5e-10
-T = 2*dt
-
+T = 6e-8
 if (max_x/disc[0])%2 == 0:
     print('Warning. Grid could fail, untested')
     size = round(max_x/disc[0])
