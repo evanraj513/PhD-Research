@@ -6,4 +6,47 @@ Created on Wed Feb 12 10:39:35 2020
 @author: evanraj
 """
 
+import os
+import sys
+
+l_path = '..'
+m_path = os.path.abspath(l_path)
+if not os.path.exists(m_path):
+    print('Error importing modules. Need to specify new path')
+    raise Exception
+else:
+    sys.path.append(m_path)
+
+import numpy as np
+#import scipy as sp
+from scipy.sparse import lil_matrix
+from mpl_toolkits import mplot3d # Needed even though 'unused' variable
+import matplotlib.pyplot as plt
+#from matplotlib import cm
+plt.rcParams['backend'] = "Qt4Agg"
+
+## For saving data
 import pandas as pd
+from collections import OrderedDict
+
+from Research import field_class
+Field = field_class.Field_2
+Vector = field_class.Vector
+
+from Research import ferro_system1
+Ferro_sys = ferro_system1.Ferro_sys
+
+name = 'test1'
+
+try: 
+    df_inner = pd.read_csv(name+'_inner.csv')
+    df_outer = pd.read_csv(name+'_outer.csv')
+    df_param = pd.read_csv(name+'_param.csv')
+except FileNotFoundError:
+    print('Error importing csv. Abort')
+    raise Exception
+
+
+
+
+R_sys = Ferro_sys(size,disc,E0,H0,M0,H_s)
