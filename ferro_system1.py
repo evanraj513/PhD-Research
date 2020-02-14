@@ -873,7 +873,7 @@ class Ferro_sys(object):
         B_on = (B_old.values + B_new_values)/2
         
         f = 2*M_old.values
-        a = -(abs(gamma)*self.dt/2)*(B_on/mu0 + self.H_s.values) - alpha*M_old.values
+        a = -(abs(gamma)*dt/2)*(B_on/mu0 + self.H_s.values) - alpha*M_old.values
 #        lam = -K*abs(gamma)*self.dt/4
         
         a_dot_f =  bdp(a.T,f.T).T

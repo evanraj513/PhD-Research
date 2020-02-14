@@ -42,7 +42,7 @@ eps = 0.88422e-11
 gamma = 2.2e5
 K = 0
 alpha = 0.2
-H_s_guess = 10**5
+H_s_val = 10**5
 
 ### Parameters (system)
 max_x = 16.4
@@ -104,9 +104,9 @@ H0_y = np.zeros(shape = (int(a[4]),1))
 H0_z = np.zeros(shape = (int(a[5]),1))
 H0 = np.concatenate((H0_x, H0_y, H0_z),axis=1).T
 
-H_s_x = np.zeros(shape = (int(a[3]),1))
-H_s_y = np.zeros(shape = (int(a[4]),1))
-H_s_z = np.zeros(shape = (int(a[5]),1))
+H_s_x = H_s_val*np.ones(shape = (int(a[3]),1))
+H_s_y = H_s_val*np.ones(shape = (int(a[4]),1))
+H_s_z = H_s_val*np.ones(shape = (int(a[5]),1))
 H_s = np.concatenate((H_s_x, H_s_y, H_s_z),axis=1).T
 
 R_sys = Ferro_sys(size,disc,E0,H0,M0,H_s)
