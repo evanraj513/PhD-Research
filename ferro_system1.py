@@ -849,9 +849,10 @@ class Ferro_sys(object):
         
         dt = self.dt
         b_ind = self.bound_ind
+        bdp = self.better_dot_pdt
         
         ## Actual computation of time stepping
-        F = np.array([self.Fx(t), self.Fy(t), self.Fz(t)])
+        F = np.concatenate((self.Fx(t), self.Fy(t), self.Fz(t)),axis=1)
         E_new_values = E_old.values + dt*H_old.curl()
         
         #Setting all E boundaries to 0
@@ -863,7 +864,7 @@ class Ferro_sys(object):
             E_new_values[2][l] = 0
         
         #Forcing term and boundary conditions inside F
-        E_new_values = E_new_values+F
+        E_new_values = E_new_values+F.T
         self.E_new = E_new_values
         
         B_new_values = B_old.values - dt*self.E_new.curl()
@@ -875,21 +876,22 @@ class Ferro_sys(object):
         a = -(abs(gamma)*self.dt/2)*(B_on/mu0 + self.H_s.values) - alpha*M_old.values
 #        lam = -K*abs(gamma)*self.dt/4
         
-        a_dot_f = np.array([a[0].T@f[0], a[1].T@f[1], a[2].T@f[2]])
+        a_dot_f =  bdp(a.T,f.T).T
+        
+#        a_dot_f = np.array([a[0].T@f[0], a[1].T@f[1], a[2].T@f[2]])
         
         if K == 0 or t == dt:
-            M_new_values = (f + (a_dot_f)*a - np.cross(a.T,f.T).T) 
-            Mnv_denom = (1+np.linalg.norm(a,axis=1)**2)
+            x_new_num = f + (a_dot_f)*a - np.cross(a.T,f.T).T
+            x_new_den = np.array(1+np.linalg.norm(a,axis=0)**2).T
             
-            for k in np.arange(0,M_new_values.shape[0]):
-                M_new_values[k] = M_new_values[k]/Mnv_denom[k]
+            x_new_values = np.divide(x_new_num.T, np.array([x_new_den]).T)
                 
         else:
             pass
             
-        self.M_new = M_new_values
+        self.M_new = x_new_values.T - M_old.values
         
-        self.H_new = B_new_values/mu0 - M_new_values
+        self.H_new = B_new_values/mu0 - self.M_new.values
         
     def res_func(self,val):
         '''
@@ -931,7 +933,45 @@ class Ferro_sys(object):
         return a-(bt+ct)
         
         
+    def better_dot_pdt(self,a,b):
+        '''
+        This computes the dot-product applied to two arrays of 
+        function values. Returns array of dot-product values i.e. 
         
+        a.shape = [m,n]
+        b.shape = [m,n]
+        
+        Let k be either a or b
+        
+        k = (k_x, k_y, k_z)
+        
+        k_ij = k(i)_j = k[i][j]
+        
+        bdp(a,b)[l] = a[1][l] * b[1][l] + ... + a[n-1][l] * b[n-1][l]
+        
+                            This sum will be done with np.dot
+                            
+                            
+        '''
+        
+        if a.shape != b.shape:
+            print('Error in dot pdt. Abort')
+            raise Exception
+            
+        val = np.zeros(shape = (a.shape[0], 1))
+            
+        for k in np.arange(0,a.shape[0]):
+            try:
+                val[k] = np.dot(a[k], b[k])
+            except:
+                print('Error at k = ',k,' assignment')
+                raise Exception
+#            else:
+#                print('Something went wrong, I dont know what'
+#                      '\n','Aborting')
+#                raise Exception
+            
+        return val
         
         
         
