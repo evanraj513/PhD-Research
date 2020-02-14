@@ -1028,21 +1028,21 @@ class Ferro_sys(object):
         data_outer = OrderedDict()
         data_inner = OrderedDict()
         
-        data_outer['E.x'] = E_old.x.value[0:,0]
-        data_outer['E.y'] = E_old.y.value[0:,0]
-        data_outer['E.z'] = E_old.z.value[0:,0]
+        data_outer['E.x'] = E_old.x.value
+        data_outer['E.y'] = E_old.y.value
+        data_outer['E.z'] = E_old.z.value
         
-        data_inner['B.x'] = B_old.x.value[0:,0]
-        data_inner['B.y'] = B_old.y.value[0:,0]
-        data_inner['B.z'] = B_old.z.value[0:,0]
+        data_inner['B.x'] = B_old.x.value
+        data_inner['B.y'] = B_old.y.value
+        data_inner['B.z'] = B_old.z.value
         
-        data_inner['H.x'] = H_old.x.value[0:,0]
-        data_inner['H.y'] = H_old.y.value[0:,0]
-        data_inner['H.z'] = H_old.z.value[0:,0]
+        data_inner['H.x'] = H_old.x.value
+        data_inner['H.y'] = H_old.y.value
+        data_inner['H.z'] = H_old.z.value
     
-        data_inner['M.x'] = M_old.x.value[0:,0]
-        data_inner['M.y'] = M_old.y.value[0:,0]
-        data_inner['M.z'] = M_old.z.value[0:,0]
+        data_inner['M.x'] = M_old.x.value
+        data_inner['M.y'] = M_old.y.value
+        data_inner['M.z'] = M_old.z.value
         
         ## Converting to DataFrame and Saving
         df_outer = pd.DataFrame(data_outer)
