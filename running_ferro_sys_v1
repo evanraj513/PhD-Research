@@ -8,6 +8,10 @@ Created on Tue Feb  4 18:30:34 2020
 
 import os
 import sys
+from datetime import date
+
+today1 = date.today()
+today = today1.strftime("%d_%m_%y")
 
 import numpy as np
 from mpl_toolkits import mplot3d
@@ -192,10 +196,25 @@ fig_Bz = R_sys.plot_slice('B','z',10)
 fig_Ez = R_sys.plot_slice('E','z',10)
 fig_Hz = R_sys.plot_slice('H','z',10)
 
-fig_Mz.savefig('Mz_10')
-fig_Bz.savefig('Bz_10')
-fig_Ez.savefig('Ez_10')
-fig_Hz.savefig('Hz_10')
+def mkdir_p(mypath):
+    '''Creates a directory. equivalent to using mkdir -p on the command line'''
+
+    from errno import EEXIST
+    from os import makedirs,path
+
+    try:
+        makedirs(mypath)
+    except OSError as exc: 
+        if exc.errno == EEXIST and path.isdir(mypath):
+            pass
+        else: raise
+
+mkdir_p(today)
+
+fig_Mz.savefig(today+'/Mz_10')
+fig_Bz.savefig(today+'/Bz_10')
+fig_Ez.savefig(today+'/Ez_10')
+fig_Hz.savefig(today+'/Hz_10')
 
 
 
