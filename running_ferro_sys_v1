@@ -161,33 +161,6 @@ for t in np.arange(dt,T,dt):
     R_sys.B_old = R_sys.B_new.values
     
     print('Current time: ', '{:.2e}'.format(t))
-    
-    
-## Saving data
-name = 'test1'
-
-R_sys.save_data(name)
-
-    # Run parameters
-        #Global Parameters
-data = OrderedDict()
-data['mu0'] = mu0
-data['eps'] = eps 
-data['gamma'] = gamma
-data['K'] = K
-data['alpha'] = alpha
-data['H_s'] = H_s_guess
-
-        # Parameters (system)
-data['max_x'] = max_x
-data['disc'] = disc[0]
-data['size'] = size
-data['T'] = T
-data['dt'] = dt
-
-df = pd.DataFrame([data])
-df.to_csv(name+'_parameters.csv')
-
 
 ## Plotting stuff
 
@@ -211,10 +184,35 @@ def mkdir_p(mypath):
 
 mkdir_p(today)
 
-fig_Mz.savefig(today+'/Mz_10')
-fig_Bz.savefig(today+'/Bz_10')
-fig_Ez.savefig(today+'/Ez_10')
-fig_Hz.savefig(today+'/Hz_10')
+## Saving data
+name = 'test1'
+
+R_sys.save_data(today+'/'+name)
+
+    # Run parameters
+        #Global Parameters
+data = OrderedDict()
+data['mu0'] = mu0
+data['eps'] = eps 
+data['gamma'] = gamma
+data['K'] = K
+data['alpha'] = alpha
+data['H_s'] = H_s_val
+
+        # Parameters (system)
+data['max_x'] = max_x
+data['disc'] = disc[0]
+data['size'] = size
+data['T'] = T
+data['dt'] = dt
+
+df = pd.DataFrame([data])
+df.to_csv(today+'/'+name+'_param.csv')
+
+fig_Mz.savefig(today+'/'+name+'Mz_10')
+fig_Bz.savefig(today+'/'+name+'Bz_10')
+fig_Ez.savefig(today+'/'+name+'Ez_10')
+fig_Hz.savefig(today+'/'+name+'Hz_10')
 
 
 
