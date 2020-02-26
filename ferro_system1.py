@@ -857,7 +857,7 @@ class Ferro_sys(object):
         
         #Setting all E boundaries to 0
         for j in b_ind[0]:
-            E_new_values[0][j] = 0
+            E_new_values[0][j] = 0 #x_bound(j)
         for k in b_ind[1]:
             E_new_values[1][k] = 0
         for l in b_ind[2]:

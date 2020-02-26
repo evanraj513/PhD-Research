@@ -12,58 +12,126 @@ from matplotlib import cm
 plt.rcParams['backend'] = "Qt4Agg"
 import numpy as np
 
-R = 5.0
+#R = 5.0
+#
+#x = np.array([0])
+#y = np.array([0])
+#z = np.array([0])
+#
+#a = np.pi
+#da = (np.pi/32)
+#for rho in np.arange(0,1,.1):
+#    for psi in np.arange(0,2*a,da):
+#        for phi in np.arange(0,a,da):
+#            x1 = [(R + rho*np.cos(psi))*np.cos(phi)]
+#            y1 = [(R + rho*np.cos(psi))*np.sin(phi)]
+#            z1 = [rho*np.sin(psi)]
+##            print('rho; ',rho,'\n',
+##                  'psi: ',psi,'\n',
+##                  'phi: ',phi,'\n',
+##                  'x1: ',x1,'\n',
+##                  'y1: ',y1,'\n',
+##                  'z1: ',z1)            
+#            x = np.concatenate((x,x1))
+#            y = np.concatenate((y,y1))
+#            z = np.concatenate((z,z1))
+#            
+#x = np.delete(x,[0])
+#y = np.delete(y,[0])
+#z = np.delete(z,[0])
+#            
+#fig1 = plt.figure()
+#fig2 = plt.figure()
+#fig3 = plt.figure()
+#ax3 = fig1.add_subplot(111, projection='3d')
+#ax2 = fig2.add_subplot(111)
+#ax21 = fig3.add_subplot(111)
+#
+#ax3.scatter(x,y,z)
+#ax3.set_xlabel('x')
+#ax3.set_ylabel('y')
+#ax3.set_zlabel('z')
+#
+#fig1.savefig('DG_hw5_3d.png')
+#
+#ax2.scatter(x,y)
+#ax2.set_xlabel('x')
+#ax2.set_ylabel('y')
+#
+#fig2.savefig('DG_hw5_xy.png')
+#
+#ax21.scatter(x,z)
+#ax21.set_xlabel('x')
+#ax21.set_ylabel('z')
+#
+#fig3.savefig('DG_hw5_xz.png')
+#
+#plt.show()
 
-x = np.array([0])
-y = np.array([0])
-z = np.array([0])
+#### Midterm question 2
 
-a = np.pi
-da = (np.pi/32)
-for rho in np.arange(0,1,.1):
-    for psi in np.arange(0,2*a,da):
-        for phi in np.arange(0,a,da):
-            x1 = [(R + rho*np.cos(psi))*np.cos(phi)]
-            y1 = [(R + rho*np.cos(psi))*np.sin(phi)]
-            z1 = [rho*np.sin(psi)]
-#            print('rho; ',rho,'\n',
-#                  'psi: ',psi,'\n',
-#                  'phi: ',phi,'\n',
-#                  'x1: ',x1,'\n',
-#                  'y1: ',y1,'\n',
-#                  'z1: ',z1)            
-            x = np.concatenate((x,x1))
-            y = np.concatenate((y,y1))
-            z = np.concatenate((z,z1))
-            
-x = np.delete(x,[0])
-y = np.delete(y,[0])
-z = np.delete(z,[0])
-            
+#d_theta = np.pi/32
+#theta = np.arange(0,2*np.pi+d_theta,d_theta)
+#
+#xplot = np.zeros(shape = (int(theta[-1]/d_theta)+1))
+#yplot = np.copy(xplot)
+#zplot = np.copy(xplot)
+#
+#for t in theta:
+#    k = int(t/d_theta)
+#    xplot[k] = 2*np.cos(t)
+#    yplot[k] = np.sin(t)
+#    zplot[k] = np.sqrt(3)*np.sin(t)
+#    print('t: ',t,'\n',
+#          'k: ',k,'\n',
+#          'x: ',xplot[k],'\n',
+#          'y: ',yplot[k],'\n',
+#          'z: ',zplot[k])
+#    
+#fig1 = plt.figure()
+#ax3 = fig1.add_subplot(111, projection = '3d')
+#ax3.scatter(xplot, yplot, zplot)
+#
+#fig2 = plt.figure()
+#ax = fig2.add_subplot(111)
+#ax.scatter(xplot,yplot)
+#
+#plt.show()
+
+##### Spherical Coordinates, hw 6
+a = 1
+d_theta = np.pi/32
+theta = np.arange(0,2*np.pi+d_theta,d_theta)
+phi = np.arange(0,2*np.pi+d_theta,d_theta)
+
+xplot = np.zeros(shape = ((int(theta[-1]/d_theta)+1)**2))
+yplot = np.copy(xplot)
+zplot = np.copy(xplot)
+
+for t in theta:
+    for p in phi:
+        k = int(t*phi.shape[0] + p)
+        xplot[k] = a*np.sin(t)*np.sin(p)
+        yplot[k] = a*np.sin(t)*np.cos(p)
+        zplot[k] = a*np.cos(t)
+#        print('t: ',t,'\n',
+#              'p: ',p,'\n'
+##              'k: ',k,'\n',
+#              'x: ',xplot[k],'\n',
+#              'y: ',yplot[k],'\n',
+#              'z: ',zplot[k])
+    
 fig1 = plt.figure()
+ax3 = fig1.add_subplot(111, projection = '3d')
+ax3.scatter(xplot, yplot, zplot)
+
 fig2 = plt.figure()
-fig3 = plt.figure()
-ax3 = fig1.add_subplot(111, projection='3d')
-ax2 = fig2.add_subplot(111)
-ax21 = fig3.add_subplot(111)
-
-ax3.scatter(x,y,z)
-ax3.set_xlabel('x')
-ax3.set_ylabel('y')
-ax3.set_zlabel('z')
-
-fig1.savefig('DG_hw5_3d.png')
-
-ax2.scatter(x,y)
-ax2.set_xlabel('x')
-ax2.set_ylabel('y')
-
-fig2.savefig('DG_hw5_xy.png')
-
-ax21.scatter(x,z)
-ax21.set_xlabel('x')
-ax21.set_ylabel('z')
-
-fig3.savefig('DG_hw5_xz.png')
+ax = fig2.add_subplot(111)
+ax.scatter(xplot,yplot)
 
 plt.show()
+
+
+
+
+

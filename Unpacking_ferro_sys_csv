@@ -40,7 +40,8 @@ Vector = field_class.Vector
 from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
-name = today+'/'+'test1'
+#name = today+'/'+'test1'
+name = '25_02_20/test1'
 
 try: 
     df_inner = pd.read_csv(name+'_inner.csv')
