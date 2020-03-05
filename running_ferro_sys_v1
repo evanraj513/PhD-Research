@@ -83,7 +83,9 @@ def sizing(nx):
 # To give number of nodes
 a = np.round(np.array(sizing(size)).prod(axis=1))
 
-### Initial conditions
+####################################################
+########### Initial conditions ################
+####################################################
 E0_x = np.zeros(shape = (int(a[0]),1))
 E0_y = np.zeros(shape = (int(a[1]),1))
 E0_z = np.zeros(shape = (int(a[2]),1))
@@ -96,7 +98,7 @@ B0 = np.concatenate((B0_x, B0_y, B0_z),axis=1).T
 
 M0_x = np.zeros(shape = (int(a[3]),1))
 M0_y = np.zeros(shape = (int(a[4]),1))
-M0_z = 100*np.ones(shape = (int(a[5]),1)) 
+M0_z = 100*np.ones(shape = (int(a[5]),1)) # Initial conditions for M
 M0 = np.concatenate((M0_x, M0_y, M0_z),axis=1).T
 
 H0_x = np.zeros(shape = (int(a[3]),1))
@@ -112,6 +114,11 @@ H_s = np.concatenate((H_s_x, H_s_y, H_s_z),axis=1).T
 R_sys = Ferro_sys(size,disc,E0,H0,M0,H_s)
 R_sys.dt = dt
 
+####################################################
+#### Boundary conditions, and Forcing terms ########
+####################################################
+
+### Some random test code for Forcing conditiosn
 #def f_x(x,y,z,t):
 #    if t < 0.2:
 #        val = 0
@@ -138,7 +145,9 @@ R_sys.dt = dt
 #    
 #    return val
 
-#### Ricker Pulse parameters
+#### Ricker Pulse
+
+## Ricker Pulse parameters
 beta0 = 4E4
 f = 4E7
 a = 1.34
@@ -154,13 +163,18 @@ def g(x):
         pb = (np.e**(-k*(x-a)**2))
         
         return pa*pb
+    else:
+        return 0
+    
+### Ricker Pulse forcing conditions at x = 0 
+### 'Normal' boundary conditions
 
 def f_x(x,y,z,t):
     '''
     Ricker Pulse for x
     '''
-    if y < 1E-12: #approx 0
-        d = beta0*g(t-x/c)*f
+    if x < 1E-12: #approx 0
+        d = beta0*g(f*t)
         return d
     else:
         return 0

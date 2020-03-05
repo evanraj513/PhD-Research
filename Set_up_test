@@ -23,155 +23,154 @@ if not os.path.exists(m_path):
 else:
     sys.path.append(m_path)
 
-import numpy as np
-import scipy as sp
-from scipy.sparse import csr_matrix
+#import scipy as sp
+#from scipy.sparse import csr_matrix
 
 from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
-### Parameters (global)
-mu0 = 1.25667e-6
-eps = 0.88422e-11
-gamma = 2.2e5
-K = 0
-alpha = 0.2
-H_s_guess = 10**5
+#### Parameters (global)
+#mu0 = 1.25667e-6
+#eps = 0.88422e-11
+#gamma = 2.2e5
+#K = 0
+#alpha = 0.2
+#H_s_guess = 10**5
+#
+#### Parameters (system)
+#max_x = 16.4
+#disc = [0.4, 0.4, 0.4]
+#
+#dt = 5e-10
+#T = 6e-8
 
-### Parameters (system)
-max_x = 16.4
-disc = [0.4, 0.4, 0.4]
+#if (max_x/disc[0])%2 == 0:
+#    print('Warning. Grid could fail, untested')
+#    size = round(max_x/disc[0])
+#    
+#elif (max_x/disc[0])%2 == 1:
+#    size = round(max_x/disc[0])
+#    
+#else:
+#    print('That domain and disc not available'
+#          '\n','Attempting closest available disc.')
+#    max_x = max_x - (max_x/disc[0])%2
+#    size = round(max_x/disc[0])
+#
+#
+#def sizing(nx):
+#    size_Ex = np.array([(nx-1)/2, (nx+1)/2, (nx+1)/2])
+#    size_Ey = np.array([(nx+1)/2, (nx-1)/2, (nx+1)/2])
+#    size_Ez = np.array([(nx+1)/2, (nx+1)/2, (nx-1)/2])
+#
+##    size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2])
+##    size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2])
+##    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2])
+#    
+#    size_Bx = np.array([(nx+1)/2, (nx-1)/2, (nx-1)/2])
+#    size_By = np.array([(nx-1)/2, (nx+1)/2, (nx-1)/2])
+#    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx+1)/2])
+#    return [size_Ex, size_Ey, size_Ez, size_Bx, size_By, size_Bz]
+#
+### To give number of nodes
+#a = np.array(sizing(size)).prod(axis=1)
+#
+#### Initial conditions
+#E0_x = np.zeros(shape = (int(a[0]),1))
+#E0_y = np.zeros(shape = (int(a[1]),1))
+#E0_z = np.zeros(shape = (int(a[2]),1))
+#E0 = np.concatenate((E0_x, E0_y, E0_z),axis=1).T
+#
+#B0_x = np.zeros(shape = (int(a[3]),1))
+#B0_y = np.zeros(shape = (int(a[4]),1))
+#B0_z = np.zeros(shape = (int(a[5]),1))
+#B0 = np.concatenate((B0_x, B0_y, B0_z),axis=1).T
+#
+#M0_x = np.zeros(shape = (int(a[3]),1))
+#M0_y = np.zeros(shape = (int(a[4]),1))
+#M0_z = 100*np.ones(shape = (int(a[5]),1)) 
+#M0 = np.concatenate((M0_x, M0_y, M0_z),axis=1).T
+#
+#H0_x = np.zeros(shape = (int(a[3]),1))
+#H0_y = np.zeros(shape = (int(a[4]),1))
+#H0_z = np.zeros(shape = (int(a[5]),1))
+#H0 = np.concatenate((H0_x, H0_y, H0_z),axis=1).T
+#
+#H_s_x = np.zeros(shape = (int(a[3]),1))
+#H_s_y = np.zeros(shape = (int(a[4]),1))
+#H_s_z = np.zeros(shape = (int(a[5]),1))
+#H_s = np.concatenate((H_s_x, H_s_y, H_s_z),axis=1).T
+#
+#R_sys = Ferro_sys(size,disc,E0,H0,M0,H_s)
+#R_sys.set_up()
+#
+#E_old = R_sys.E_old
+#H_old = R_sys.H_old
+#M_old = R_sys.M_old
+#B_old = R_sys.B_old
+#
+#b_ind = R_sys.bound_ind
 
-dt = 5e-10
-T = 6e-8
-
-if (max_x/disc[0])%2 == 0:
-    print('Warning. Grid could fail, untested')
-    size = round(max_x/disc[0])
-    
-elif (max_x/disc[0])%2 == 1:
-    size = round(max_x/disc[0])
-    
-else:
-    print('That domain and disc not available'
-          '\n','Attempting closest available disc.')
-    max_x = max_x - (max_x/disc[0])%2
-    size = round(max_x/disc[0])
-
-
-def sizing(nx):
-    size_Ex = np.array([(nx-1)/2, (nx+1)/2, (nx+1)/2])
-    size_Ey = np.array([(nx+1)/2, (nx-1)/2, (nx+1)/2])
-    size_Ez = np.array([(nx+1)/2, (nx+1)/2, (nx-1)/2])
-
-#    size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2])
-#    size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2])
-#    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2])
-    
-    size_Bx = np.array([(nx+1)/2, (nx-1)/2, (nx-1)/2])
-    size_By = np.array([(nx-1)/2, (nx+1)/2, (nx-1)/2])
-    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx+1)/2])
-    return [size_Ex, size_Ey, size_Ez, size_Bx, size_By, size_Bz]
-
-## To give number of nodes
-a = np.array(sizing(size)).prod(axis=1)
-
-### Initial conditions
-E0_x = np.zeros(shape = (int(a[0]),1))
-E0_y = np.zeros(shape = (int(a[1]),1))
-E0_z = np.zeros(shape = (int(a[2]),1))
-E0 = np.concatenate((E0_x, E0_y, E0_z),axis=1).T
-
-B0_x = np.zeros(shape = (int(a[3]),1))
-B0_y = np.zeros(shape = (int(a[4]),1))
-B0_z = np.zeros(shape = (int(a[5]),1))
-B0 = np.concatenate((B0_x, B0_y, B0_z),axis=1).T
-
-M0_x = np.zeros(shape = (int(a[3]),1))
-M0_y = np.zeros(shape = (int(a[4]),1))
-M0_z = 100*np.ones(shape = (int(a[5]),1)) 
-M0 = np.concatenate((M0_x, M0_y, M0_z),axis=1).T
-
-H0_x = np.zeros(shape = (int(a[3]),1))
-H0_y = np.zeros(shape = (int(a[4]),1))
-H0_z = np.zeros(shape = (int(a[5]),1))
-H0 = np.concatenate((H0_x, H0_y, H0_z),axis=1).T
-
-H_s_x = np.zeros(shape = (int(a[3]),1))
-H_s_y = np.zeros(shape = (int(a[4]),1))
-H_s_z = np.zeros(shape = (int(a[5]),1))
-H_s = np.concatenate((H_s_x, H_s_y, H_s_z),axis=1).T
-
-R_sys = Ferro_sys(size,disc,E0,H0,M0,H_s)
-R_sys.set_up()
-
-E_old = R_sys.E_old
-H_old = R_sys.H_old
-M_old = R_sys.M_old
-B_old = R_sys.B_old
-
-b_ind = R_sys.bound_ind
-
-R_sys = Ferro_sys(size,disc,E0,H0,M0,H_s)
-R_sys.dt = dt
-
-def f_x(x,y,z,t):
-    if t < 0.2:
-        val = 0
-    if x == 0 or x == max_x:
-        val = 0
-    else:
-        val = 0
-    
-    return val
-
-def f_y(x,y,z,t):
-    
-    val = 0
-    if y == 0 or y == max_x:
-        val = 0
-    
-    return val
-
-def f_z(x,y,z,t):
-    val = 0
-    
-    if z == 0 or z == max_x:
-        val = 0
-    
-    return val
-
-R_sys.fx = f_x
-R_sys.fy = f_y
-R_sys.fz = f_z
+#R_sys = Ferro_sys(size,disc,E0,H0,M0,H_s)
+#R_sys.dt = dt
+#
+#def f_x(x,y,z,t):
+#    if t < 0.2:
+#        val = 0
+#    if x == 0 or x == max_x:
+#        val = 0
+#    else:
+#        val = 0
+#    
+#    return val
+#
+#def f_y(x,y,z,t):
+#    
+#    val = 0
+#    if y == 0 or y == max_x:
+#        val = 0
+#    
+#    return val
+#
+#def f_z(x,y,z,t):
+#    val = 0
+#    
+#    if z == 0 or z == max_x:
+#        val = 0
+#    
+#    return val
+#
+#R_sys.fx = f_x
+#R_sys.fy = f_y
+#R_sys.fz = f_z
 
 ### Testing dot product
-t = dt
-
-F = np.concatenate((R_sys.Fx(t), R_sys.Fy(t), R_sys.Fz(t)), axis=1)
-E_new_values = E_old.values + dt*H_old.curl()
-
-#Setting all E boundaries to 0
-for j in b_ind[0]:
-    E_new_values[0][j] = 0
-for k in b_ind[1]:
-    E_new_values[1][k] = 0
-for l in b_ind[2]:
-    E_new_values[2][l] = 0
+#t = dt
+#
+#F = np.concatenate((R_sys.Fx(t), R_sys.Fy(t), R_sys.Fz(t)), axis=1)
+#E_new_values = E_old.values + dt*H_old.curl()
+#
+##Setting all E boundaries to 0
+#for j in b_ind[0]:
+#    E_new_values[0][j] = 0
+#for k in b_ind[1]:
+#    E_new_values[1][k] = 0
+#for l in b_ind[2]:
+#    E_new_values[2][l] = 0
 
 #Forcing term and boundary conditions inside F
-E_new_values = E_new_values+F.T
-R_sys.E_new = E_new_values
-
-B_new_values = B_old.values - dt*R_sys.E_new.curl()
-R_sys.B_new = B_new_values
-
-B_on = (B_old.values + B_new_values)/2
-
-f = 2*M_old.values
-a = -(abs(gamma)*dt/2)*(B_on/mu0 + R_sys.H_s.values) - alpha*M_old.values
-
-bdp = R_sys.better_dot_pdt
+#E_new_values = E_new_values+F.T
+#R_sys.E_new = E_new_values
+#
+#B_new_values = B_old.values - dt*R_sys.E_new.curl()
+#R_sys.B_new = B_new_values
+#
+#B_on = (B_old.values + B_new_values)/2
+#
+#f = 2*M_old.values
+#a = -(abs(gamma)*dt/2)*(B_on/mu0 + R_sys.H_s.values) - alpha*M_old.values
+#
+#bdp = R_sys.better_dot_pdt
 
 
 ### Testing E_curl shape, specifically last column
@@ -291,11 +290,221 @@ bdp = R_sys.better_dot_pdt
 #
 #t2 = pd.DataFrame(t1)
 
+### For plotting the Ricker Pulse
+#dx = 0.01
+#max_x = 16
+#dt = 5e-10
+#T = 6e-8
+#
+#
+#x_vals = np.arange(0,max_x+dx,dx)
+#t_vals = np.arange(0,T+dt,dt)
+#g_vals = np.zeros(x_vals.shape)
+#f = 4E7
+#a = 1.35
+#k = (np.pi/a)**2
+#c = 3E8
+#beta0 = 4e4 #This is E0 in Puttha's PhD, but beta0 in my notes
+#
+#def g(x):
+#    '''
+#    Actual Ricker pulse function
+#    '''
+#    if x < 3.48:
+#        pa = 2*k/11*(2*k*(x-a)**2-1)
+#        pb = (np.exp(-k*(x-a)**2))
+#        
+#        return pa*pb
+#    else:
+#        return 0
+#
+#fig = plt.figure()
+#ax = fig.add_subplot(111)
+#for t in t_vals:
+#    for k in np.arange(0,x_vals.shape[0]):
+#        g_vals[k] = beta0*g(f*(t - x_vals[k]/c))
+#    if round(t,9) == round(T-dt,9): ### Change this to see different times
+#        ax.plot(x_vals, g_vals)
+#        ax.add_title('time: ',t)
+#        plt.show()
+#        wait = input('press Enter to continue')
+#    else:
+#        pass
+
+### Debugging K!=0 case:
+
+### Parameters (global)
+mu0 = 1.25667e-6
+eps = 0.88422e-11
+gamma = 2.2e5
+K = 0
+alpha = 0.2
+H_s_val = 10**5
+
+### Parameters (system)
+max_x = 16.4
+disc = [0.4, 0.4, 0.4]
+
+dt = 5e-10
+T = 6e-8
+
+if (max_x/disc[0])%2 == 0:
+    print('Warning. Grid could fail, untested')
+    size = round(max_x/disc[0])
+    
+elif (max_x/disc[0])%2 == 1:
+    size = round(max_x/disc[0])
+    
+else:
+    print('That domain and disc not available'
+          '\n','Attempting closest available disc.')
+    max_x = max_x - (max_x/disc[0])%2
+    size = round(max_x/disc[0])
+    
+def sizing(nx):
+    size_Ex = np.array([(nx-1)/2, (nx+1)/2, (nx+1)/2])
+    size_Ey = np.array([(nx+1)/2, (nx-1)/2, (nx+1)/2])
+    size_Ez = np.array([(nx+1)/2, (nx+1)/2, (nx-1)/2])
+
+#    size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2])
+#    size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2])
+#    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2])
+    
+    size_Bx = np.array([(nx+1)/2, (nx-1)/2, (nx-1)/2])
+    size_By = np.array([(nx-1)/2, (nx+1)/2, (nx-1)/2])
+    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx+1)/2])
+    return [size_Ex, size_Ey, size_Ez, size_Bx, size_By, size_Bz]
 
 
 
+a = np.round(np.array(sizing(size)).prod(axis=1))
+
+### Initial conditions
+E0_x = np.zeros(shape = (int(a[0]),1))
+E0_y = np.zeros(shape = (int(a[1]),1))
+E0_z = np.zeros(shape = (int(a[2]),1))
+E0 = np.concatenate((E0_x, E0_y, E0_z),axis=1).T
+
+B0_x = np.zeros(shape = (int(a[3]),1))
+B0_y = np.zeros(shape = (int(a[4]),1))
+B0_z = np.zeros(shape = (int(a[5]),1))
+B0 = np.concatenate((B0_x, B0_y, B0_z),axis=1).T
+
+M0_x = np.zeros(shape = (int(a[3]),1))
+M0_y = np.zeros(shape = (int(a[4]),1))
+M0_z = 100*np.ones(shape = (int(a[5]),1)) 
+M0 = np.concatenate((M0_x, M0_y, M0_z),axis=1).T
+
+H0_x = np.zeros(shape = (int(a[3]),1))
+H0_y = np.zeros(shape = (int(a[4]),1))
+H0_z = np.zeros(shape = (int(a[5]),1))
+H0 = np.concatenate((H0_x, H0_y, H0_z),axis=1).T
+
+H_s_x = H_s_val*np.ones(shape = (int(a[3]),1))
+H_s_y = H_s_val*np.ones(shape = (int(a[4]),1))
+H_s_z = H_s_val*np.ones(shape = (int(a[5]),1))
+H_s = np.concatenate((H_s_x, H_s_y, H_s_z),axis=1).T
+
+R_sys = Ferro_sys(size,disc,E0,H0,M0,H_s)
+R_sys.dt = dt
+
+t = dt
+    
+E_old = R_sys.E_old
+H_old = R_sys.H_old
+M_old = R_sys.M_old
+B_old = R_sys.B_old
+
+dt = R_sys.dt
+b_ind = R_sys.bound_ind
+bdp = R_sys.better_dot_pdt
+
+## Actual computation of time stepping
+R_sys.set_up()
+
+F = np.concatenate((R_sys.Fx(t), R_sys.Fy(t), R_sys.Fz(t)),axis=1)
+E_new_values = E_old.values + dt*H_old.curl()
+
+#Setting all E boundaries to 0
+for j in b_ind[0]:
+    E_new_values[0][j] = 0 #x_bound(j)
+for k in b_ind[1]:
+    E_new_values[1][k] = 0
+for l in b_ind[2]:
+    E_new_values[2][l] = 0
+
+#Forcing term and boundary conditions inside F
+E_new_values = E_new_values+F.T
+R_sys.E_new = E_new_values
+
+B_new_values = B_old.values - dt*R_sys.E_new.curl()
+R_sys.B_new = B_new_values
+
+B_on = (B_old.values + B_new_values)/2
+
+f = 2*M_old.values
+a = -(abs(gamma)*dt/2)*(B_on/mu0 + R_sys.H_s.values) - alpha*M_old.values
+lam = -K*abs(gamma)*R_sys.dt/4
+
+a_dot_f =  bdp(a.T,f.T).T
+
+p_x = np.zeros(shape = (M_old.values.shape[1],1))
+p_y = np.copy(p_x)
+p_z = np.ones(shape = (M_old.values.shape[1],1))
+p = np.concatenate((p_x, p_y, p_z), axis = 1).T
 
 
+cubic_solver = R_sys.cubic_solver
+
+a1 = lam**2
+b1 = 2*lam*(bdp(a.T, p.T) + lam*(bdp(p.T, f.T)))
+c1 = 1+np.linalg.norm(a) - lam*(bdp(a.T, f.T)) + 3*lam*\
+(bdp(a.T, p.T)) * (bdp(p.T, f.T)) + \
+lam**2*(bdp(p.T, f.T))
+d1 = -lam*(bdp(a.T, p.T)*(bdp(p.T,f.T))) - (bdp(a.T, p.T)*(bdp(p.T,f.T)))\
++ lam*((bdp(a.T, p.T)*(bdp(p.T,f.T))**2))\
++np.linalg.norm(a)**2*(bdp(p.T, f.T))
+-bdp(np.cross(a.T, p.T),f.T)
+Z = np.zeros(shape = b1.shape)
+X = np.copy(Z)
+Y = np.copy(Z)
+x_new_values = np.copy(Z)
+for k in np.arange(0,x_new_values.shape[1]):
+    Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k])
+
+X = (bdp(a.T,f.T)) - lam*Z*(Z+bdp(p.T,f.T))
+Y = Z+bdp(p.T,f.T)
+
+x_new_values = 1/np.linalg.norm(np.cross(a.T,p.T).T)**2*\
+((X - (bdp(a.T,p.T))*Y).T*a\
+  + (((np.linalg.norm(a))**2*Y) - (bdp(a.T,p.T))).T*p\
+  + (Z*np.cross(a.T, p.T)).T)
+
+
+def cubic_solver(a,b,c,d,x0):
+    '''
+    Solves the cubic function f(x) = ax^3 + bx^2 + cx + d = 0
+    for the real root, assuming f(x) has only one real root
+    '''
+
+    step_size = 1/np.linalg.norm(R_sys.M_old.values)
+    ss = step_size
+
+    def res_cubic(x):
+        '''
+        cubic function
+        '''
+        return a*x**3 + b*x**2 + c*x + d
+    
+    root = R_sys.secant_method(res_cubic,x0,x0 + ss,maxit=100)
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    x = np.arange(root-50000*ss,root+50000*ss,100*ss)
+    ax.plot(x,res_cubic(x))
+    plt.show()
+
+    return root
 
 
 

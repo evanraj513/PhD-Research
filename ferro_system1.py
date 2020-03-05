@@ -874,11 +874,14 @@ class Ferro_sys(object):
         
         f = 2*M_old.values
         a = -(abs(gamma)*dt/2)*(B_on/mu0 + self.H_s.values) - alpha*M_old.values
-#        lam = -K*abs(gamma)*self.dt/4
+        lam = -K*abs(gamma)*self.dt/4
         
         a_dot_f =  bdp(a.T,f.T).T
         
-#        a_dot_f = np.array([a[0].T@f[0], a[1].T@f[1], a[2].T@f[2]])
+        p_x = np.zeros(shape = (M_old.values.shape[1],1))
+        p_y = np.copy(p_x)
+        p_z = np.ones(shape = (M_old.values.shape[1],1))
+        p = np.concatenate((p_x, p_y, p_z), axis = 1).T
         
         if K == 0 or t == dt:
             x_new_num = f + (a_dot_f)*a - np.cross(a.T,f.T).T
@@ -887,11 +890,68 @@ class Ferro_sys(object):
             x_new_values = np.divide(x_new_num.T, np.array([x_new_den]).T)
                 
         else:
-            pass
+            
+            cubic_solver = self.cubic_solver
+            
+            a1 = lam**2
+            b1 = 2*lam*(bdp(a.T, p.T) + lam*(bdp(p.T, f.T)))
+            c1 = 1+np.linalg.norm(a) - lam*(bdp(a.T, f.T)) + 3*lam*\
+            (bdp(a.T, p.T)) * (bdp(p.T, f.T)) + \
+            lam**2*(bdp(p.T, f.T))
+            d1 = -lam*(bdp(a.T, p.T)*(bdp(p.T,f.T))) - (bdp(a.T, p.T)*(bdp(p.T,f.T)))\
+            + lam*((bdp(a.T, p.T)*(bdp(p.T,f.T))**2))\
+            +np.linalg.norm(a)**2*(bdp(p.T, f.T))
+            -bdp(np.cross(a.T, p.T),f.T)
+            Z = np.zeros(shape = b1.shape)
+            X = np.copy(Z)
+            Y = np.copy(Z)
+            x_new_values = np.copy(Z)
+            for k in np.arange(0,x_new_values.shape[1]):
+                if k%100 == 1:
+                    Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k],disp = 'Yes')
+                else:
+                    Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k],disp = 'no')
+            
+            X = (bdp(a.T,f.T)) - lam*Z*(Z+bdp(p.T,f.T))
+            Y = Z+bdp(p.T,f.T)
+            
+            x_new_values = 1/np.linalg.norm(np.cross(a.T,p.T).T)**2*\
+            ((X - (bdp(a.T,p.T))*Y).T*a\
+              + (((np.linalg.norm(a))**2*Y) - (bdp(a.T,p.T))).T*p\
+              + (Z*np.cross(a.T, p.T)).T)
+            
             
         self.M_new = x_new_values.T - M_old.values
         
         self.H_new = B_new_values/mu0 - self.M_new.values
+        
+    def cubic_solver(self,a,b,c,d,x0,disp = 'no'):
+        '''
+        Solves the cubic function f(x) = ax^3 + bx^2 + cx + d = 0
+        for the real root, assuming f(x) has only one real root
+        '''
+        
+        step_size = 1/np.linalg.norm(self.M_old.values)
+        ss = step_size
+        
+        def res_cubic(x):
+            '''
+            cubic function
+            '''
+            return a*x**3 + b*x**2 + c*x + d
+        
+        root = self.secant_method(res_cubic,x0,x0 + ss,maxit=100)
+        
+        if disp == 'yes' or disp == 'Yes':
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            x = np.arange(root-50000*ss,root+50000*ss,100*ss)
+            ax.plot(x,res_cubic(x))
+            plt.show()
+        else:
+            pass
+        
+        return root
         
     def res_func(self,val):
         '''
@@ -975,14 +1035,15 @@ class Ferro_sys(object):
         
         
         
-    def secant_method(func, x0, x1, alpha=1.0, tol=1E-9, maxit=200):
+    def secant_method(self,func, x0, x1, alpha=1.0, tol=1E-9, maxit=200):
         """
         Uses the secant method to find f(x)=0.  
         
         INPUTS
         
             * f     : function f(x)
-            * x0    : initial guess for x
+            * x0    : initial guess for root
+            * x1    : second guess for root
             * alpha : relaxation coefficient: modifies Secant step size
             * tol   : convergence tolerance
             * maxit : maximum number of iteration, default=200        
