@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "running_ferro_sys_v1", line 179, in <module>
-    data['H_s'] = H_s_guess
-NameError: name 'H_s_guess' is not defined
