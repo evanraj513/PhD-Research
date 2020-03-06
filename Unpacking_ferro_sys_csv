@@ -41,7 +41,7 @@ from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
 #name = today+'/'+'test1'
-name = '25_02_20/test1'
+name = '05_03_20/test_new_Fx'
 
 try: 
     df_inner = pd.read_csv(name+'_inner.csv')

@@ -419,95 +419,172 @@ dt = R_sys.dt
 b_ind = R_sys.bound_ind
 bdp = R_sys.better_dot_pdt
 
+beta0 = 4E4
+f = 4E7
+a = 1.34
+k = (np.pi/a)**2
+c = 3E8
+
+def g(x):
+    '''
+    Actual Ricker pulse function
+    '''
+    if x < a:
+        pa = 2*k/11*(2*k*(x-a)**2-1)
+        pb = (np.e**(-k*(x-a)**2))
+        
+        return pa*pb
+    else:
+        return 0
+    
+### Ricker Pulse forcing conditions at x = 0 
+### 'Normal' boundary conditions
+
+def f_x(x,y,z,t):
+    '''
+    Ricker Pulse for x
+    '''
+    if z < 1E-12: #approx 0
+        d = beta0*g(f*t)
+        return d
+    else:
+        return 0
+    
+    
+    
+def f_y(x,y,z,t):
+    '''
+    Ricker Pulse for y
+    '''
+    return 0
+    
+    
+def f_z(x,y,z,t):
+    '''
+    Ricker Pulse for z
+    '''
+    return 0
+
+R_sys.fx = f_x
+R_sys.fy = f_y
+R_sys.fz = f_z
+
+
 ## Actual computation of time stepping
 R_sys.set_up()
 
-F = np.concatenate((R_sys.Fx(t), R_sys.Fy(t), R_sys.Fz(t)),axis=1)
-E_new_values = E_old.values + dt*H_old.curl()
-
-#Setting all E boundaries to 0
-for j in b_ind[0]:
-    E_new_values[0][j] = 0 #x_bound(j)
-for k in b_ind[1]:
-    E_new_values[1][k] = 0
-for l in b_ind[2]:
-    E_new_values[2][l] = 0
-
-#Forcing term and boundary conditions inside F
-E_new_values = E_new_values+F.T
-R_sys.E_new = E_new_values
-
-B_new_values = B_old.values - dt*R_sys.E_new.curl()
-R_sys.B_new = B_new_values
-
-B_on = (B_old.values + B_new_values)/2
-
-f = 2*M_old.values
-a = -(abs(gamma)*dt/2)*(B_on/mu0 + R_sys.H_s.values) - alpha*M_old.values
-lam = -K*abs(gamma)*R_sys.dt/4
-
-a_dot_f =  bdp(a.T,f.T).T
-
-p_x = np.zeros(shape = (M_old.values.shape[1],1))
-p_y = np.copy(p_x)
-p_z = np.ones(shape = (M_old.values.shape[1],1))
-p = np.concatenate((p_x, p_y, p_z), axis = 1).T
-
-
-cubic_solver = R_sys.cubic_solver
-
-a1 = lam**2
-b1 = 2*lam*(bdp(a.T, p.T) + lam*(bdp(p.T, f.T)))
-c1 = 1+np.linalg.norm(a) - lam*(bdp(a.T, f.T)) + 3*lam*\
-(bdp(a.T, p.T)) * (bdp(p.T, f.T)) + \
-lam**2*(bdp(p.T, f.T))
-d1 = -lam*(bdp(a.T, p.T)*(bdp(p.T,f.T))) - (bdp(a.T, p.T)*(bdp(p.T,f.T)))\
-+ lam*((bdp(a.T, p.T)*(bdp(p.T,f.T))**2))\
-+np.linalg.norm(a)**2*(bdp(p.T, f.T))
--bdp(np.cross(a.T, p.T),f.T)
-Z = np.zeros(shape = b1.shape)
-X = np.copy(Z)
-Y = np.copy(Z)
-x_new_values = np.copy(Z)
-for k in np.arange(0,x_new_values.shape[1]):
-    Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k])
-
-X = (bdp(a.T,f.T)) - lam*Z*(Z+bdp(p.T,f.T))
-Y = Z+bdp(p.T,f.T)
-
-x_new_values = 1/np.linalg.norm(np.cross(a.T,p.T).T)**2*\
-((X - (bdp(a.T,p.T))*Y).T*a\
-  + (((np.linalg.norm(a))**2*Y) - (bdp(a.T,p.T))).T*p\
-  + (Z*np.cross(a.T, p.T)).T)
+#F = np.concatenate((R_sys.Fx(t), R_sys.Fy(t), R_sys.Fz(t)),axis=1)
+#E_new_values = E_old.values + dt*H_old.curl()
+#
+##Setting all E boundaries to 0
+#for j in b_ind[0]:
+#    E_new_values[0][j] = 0 #x_bound(j)
+#for k in b_ind[1]:
+#    E_new_values[1][k] = 0
+#for l in b_ind[2]:
+#    E_new_values[2][l] = 0
+#
+#### Forcing term and boundary conditions inside F
+#E_new_values = E_new_values+F.T
+#R_sys.E_new = E_new_values
+#
+#B_new_values = B_old.values - dt*R_sys.E_new.curl()
+#R_sys.B_new = B_new_values
+#
+#B_on = (B_old.values + B_new_values)/2
+#
+#f = 2*M_old.values
+#a = -(abs(gamma)*dt/2)*(B_on/mu0 + R_sys.H_s.values) - alpha*M_old.values
+#lam = -K*abs(gamma)*R_sys.dt/4
+#
+#a_dot_f =  bdp(a.T,f.T).T
+#
+#p_x = np.zeros(shape = (M_old.values.shape[1],1))
+#p_y = np.copy(p_x)
+#p_z = np.ones(shape = (M_old.values.shape[1],1))
+#p = np.concatenate((p_x, p_y, p_z), axis = 1).T
 
 
-def cubic_solver(a,b,c,d,x0):
-    '''
-    Solves the cubic function f(x) = ax^3 + bx^2 + cx + d = 0
-    for the real root, assuming f(x) has only one real root
-    '''
+#cubic_solver = R_sys.cubic_solver
+#
+#a1 = lam**2
+#b1 = 2*lam*(bdp(a.T, p.T) + lam*(bdp(p.T, f.T)))
+#c1 = 1+np.linalg.norm(a) - lam*(bdp(a.T, f.T)) + 3*lam*\
+#(bdp(a.T, p.T)) * (bdp(p.T, f.T)) + \
+#lam**2*(bdp(p.T, f.T))
+#d1 = -lam*(bdp(a.T, p.T)*(bdp(p.T,f.T))) - (bdp(a.T, p.T)*(bdp(p.T,f.T)))\
+#+ lam*((bdp(a.T, p.T)*(bdp(p.T,f.T))**2))\
+#+np.linalg.norm(a)**2*(bdp(p.T, f.T))
+#-bdp(np.cross(a.T, p.T),f.T)
+#Z = np.zeros(shape = b1.shape)
+#X = np.copy(Z)
+#Y = np.copy(Z)
+#x_new_values = np.copy(Z)
+#for k in np.arange(0,x_new_values.shape[1]):
+#    Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k])
+#
+#X = (bdp(a.T,f.T)) - lam*Z*(Z+bdp(p.T,f.T))
+#Y = Z+bdp(p.T,f.T)
+#
+#x_new_values = 1/np.linalg.norm(np.cross(a.T,p.T).T)**2*\
+#((X - (bdp(a.T,p.T))*Y).T*a\
+#  + (((np.linalg.norm(a))**2*Y) - (bdp(a.T,p.T))).T*p\
+#  + (Z*np.cross(a.T, p.T)).T)
+#
+#
+#def cubic_solver(a,b,c,d,x0):
+#    '''
+#    Solves the cubic function f(x) = ax^3 + bx^2 + cx + d = 0
+#    for the real root, assuming f(x) has only one real root
+#    '''
+#
+#    step_size = 1/np.linalg.norm(R_sys.M_old.values)
+#    ss = step_size
+#
+#    def res_cubic(x):
+#        '''
+#        cubic function
+#        '''
+#        return a*x**3 + b*x**2 + c*x + d
+#    
+#    root = R_sys.secant_method(res_cubic,x0,x0 + ss,maxit=100)
+#    
+#    fig = plt.figure()
+#    ax = fig.add_subplot(111)
+#    x = np.arange(root-50000*ss,root+50000*ss,100*ss)
+#    ax.plot(x,res_cubic(x))
+#    plt.show()
+#
+#    return root
 
-    step_size = 1/np.linalg.norm(R_sys.M_old.values)
-    ss = step_size
+### Debugging boundary conditions
+E_old = R_sys.E_old
 
-    def res_cubic(x):
-        '''
-        cubic function
-        '''
-        return a*x**3 + b*x**2 + c*x + d
+def Fx(t):
+    F_x = np.zeros(shape=(E_old.x.value.shape[0],1))
+    x = np.copy(F_x)
+    y = np.copy(x)
+    z = np.copy(x)
     
-    root = R_sys.secant_method(res_cubic,x0,x0 + ss,maxit=100)
-    
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    x = np.arange(root-50000*ss,root+50000*ss,100*ss)
-    ax.plot(x,res_cubic(x))
-    plt.show()
+    dx = disc[0]
+    dy = disc[1]
+    dz = disc[2]
 
-    return root
+    nx = E_old.x.nx
+    ny = E_old.x.ny
+    nz = E_old.x.nz
+    for ll in np.arange(0,nz-1):
+        for kk in np.arange(0,ny-1):
+            for jj in np.arange(0,nx-1):
+#                    print('jj',jj,'\n',
+#                          'kk',kk,'\n',
+#                          'll',ll)
+                x = (jj+1/2)*2*dx
+                y = kk*2*dy
+                z = ll*2*dz
+                F_x[jj + nx*kk + nx*ny*ll] = R_sys.fx(x,y,z,t)
 
-
-
+    return F_x
 
 
 

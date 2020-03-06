@@ -49,7 +49,7 @@ max_x = 16.4
 disc = [0.4, 0.4, 0.4]
 
 dt = 5e-10
-T = 6e-8
+T = 3*dt
 
 if (max_x/disc[0])%2 == 0:
     print('Warning. Grid could fail, untested')
@@ -173,13 +173,11 @@ def f_x(x,y,z,t):
     '''
     Ricker Pulse for x
     '''
-    if x < 1E-12: #approx 0
+    if z < 1E-12: #approx 0
         d = beta0*g(f*t)
         return d
     else:
         return 0
-    
-    
     
 def f_y(x,y,z,t):
     '''
@@ -241,7 +239,7 @@ def mkdir_p(mypath):
 mkdir_p(today)
 
 ## Saving data
-name = 'test1'
+name = 'test_new_Fx'
 
 R_sys.save_data(today+'/'+name)
 
@@ -277,7 +275,8 @@ def det_E_M():
     '''
     M = R_sys.M_old.values
     
-    E_M = abs(np.linalg.norm(M,axis=0) - np.linalg.norm(M0,axis=0))/(np.linalg.norm(M0,axis=0))
+    E_M = abs(np.linalg.norm(M,axis=0) - np.linalg.norm(M0,axis=0))\
+    /(np.linalg.norm(M0,axis=0))
     
     return E_M
     
