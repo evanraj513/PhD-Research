@@ -49,7 +49,7 @@ max_x = 16.4
 disc = [0.4, 0.4, 0.4]
 
 dt = 5e-10
-T = 3*dt
+T = 1e-8
 
 if (max_x/disc[0])%2 == 0:
     print('Warning. Grid could fail, untested')
