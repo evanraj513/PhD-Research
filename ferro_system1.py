@@ -60,9 +60,10 @@ class Ferro_sys(object):
     X0: list
         3 columns of initial conditions for field X, each column corresponding to 
         the X,Y,Z components        
-    size: integer
+    size: np.array, length = 1 or 3
         Will give the number of nodes in one 'direction'
             - Assuming same number of nodes in each row
+                if only one number is passed
     disc: np_array of length 3
         Contains the step-size in the x,y,z direction, in that order
     dt: float
@@ -79,46 +80,60 @@ class Ferro_sys(object):
 
         self.disc = disc
         self.size = size
-        nx = size
+        if size.size == 1:
+            nx = size
+            ny = size
+            nz = size
+        elif size.size == 3:
+            nx = size[0]
+            ny = size[1]
+            nz = size[2]
+            
         
         # Sizing #
+        '''
+        This is now done in the function "sizing" below, so that it can be changed
+        on the fly
+        '''
         ### Sizing for even number of nodes v.1.1
-        
-        if nx%2 == 0:
-            print('Warning: Beta-testing still under-way; possible poor grid')
-            wait = input('Press ENTER to continue, or CTRL C to break')
-            self.size_outer_x = np.array([nx/2, nx/2, nx/2]).astype('int')
-            self.size_outer_y = np.array([nx/2, nx/2, nx/2]).astype('int')
-            self.size_outer_z = np.array([nx/2, nx/2, nx/2]).astype('int')
-            
-            self.size_inner_x = np.array([nx/2, nx/2, nx/2]).astype('int')
-            self.size_inner_y = np.array([nx/2, nx/2, nx/2]).astype('int')
-            self.size_inner_z = np.array([nx/2, nx/2, nx/2]).astype('int')
-        
-        ### Sizing for odd number of nodes below 
-        else:
-            self.size_outer_x = np.array([(nx-1)/2, (nx+1)/2, (nx+1)/2]).astype('int')
-            self.size_outer_y = np.array([(nx+1)/2, (nx-1)/2, (nx+1)/2]).astype('int')
-            self.size_outer_z = np.array([(nx+1)/2, (nx+1)/2, (nx-1)/2]).astype('int')
-            
-            self.size_inner_x = np.array([(nx+1)/2, (nx-1)/2, (nx-1)/2]).astype('int')
-            self.size_inner_y = np.array([(nx-1)/2, (nx+1)/2, (nx-1)/2]).astype('int')
-            self.size_inner_z = np.array([(nx-1)/2, (nx-1)/2, (nx+1)/2]).astype('int')
+#        if nx%2 == 0:
+#            print('Warning: Beta-testing still under-way; possible poor grid')
+#            wait = input('Press ENTER to continue, or CTRL C to break')
+#            self.size_outer_x = np.array([nx/2, nx/2, nx/2]).astype('int')
+#            self.size_outer_y = np.array([nx/2, nx/2, nx/2]).astype('int')
+#            self.size_outer_z = np.array([nx/2, nx/2, nx/2]).astype('int')
+#            
+#            self.size_inner_x = np.array([nx/2, nx/2, nx/2]).astype('int')
+#            self.size_inner_y = np.array([nx/2, nx/2, nx/2]).astype('int')
+#            self.size_inner_z = np.array([nx/2, nx/2, nx/2]).astype('int')
+#        
+#        ### Sizing for odd number of nodes below 
+#        else:
+#            self.size_outer_x = np.array([(nx-1)/2, (nx+1)/2, (nx+1)/2]).astype('int')
+#            self.size_outer_y = np.array([(nx+1)/2, (nx-1)/2, (nx+1)/2]).astype('int')
+#            self.size_outer_z = np.array([(nx+1)/2, (nx+1)/2, (nx-1)/2]).astype('int')
+#            
+#            self.size_inner_x = np.array([(nx+1)/2, (nx-1)/2, (nx-1)/2]).astype('int')
+#            self.size_inner_y = np.array([(nx-1)/2, (nx+1)/2, (nx-1)/2]).astype('int')
+#            self.size_inner_z = np.array([(nx-1)/2, (nx-1)/2, (nx+1)/2]).astype('int')
             
     #       ### Old sizing v.1
     #        self.size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2]).astype('int')
     #        self.size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2]).astype('int')
     #        self.size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2]).astype('int')
         
+    
+        a = np.round(np.array(self.sizing(nx,ny,nz)).prod(axis=1))
+        
         ## See Research Notes 1/27/20 for more explanation on above ##
         
-        self.size_Ex = self.size_outer_x
-        self.size_Ey = self.size_outer_y
-        self.size_Ez = self.size_outer_z
+        self.size_Ex = np.zeros(shape = (int(a[0]),1))
+        self.size_Ey = np.zeros(shape = (int(a[1]),1))
+        self.size_Ez = np.zeros(shape = (int(a[2]),1))
         
-        self.size_Bx = self.size_inner_x
-        self.size_By = self.size_inner_y
-        self.size_Bz = self.size_inner_z
+        self.size_Bx = np.zeros(shape = (int(a[3]),1))
+        self.size_By = np.zeros(shape = (int(a[4]),1))
+        self.size_Bz = np.zeros(shape = (int(a[5]),1))
         
         # Field set-up #
         self.E_old = E0
@@ -299,6 +314,41 @@ class Ferro_sys(object):
             
         else: 
             pass
+        
+    def sizing(self,nx,ny,nz):
+        if nz != 1:
+            size_outer_x = np.array([(nx-1)/2, (ny+1)/2, (nz+1)/2])
+            size_outer_y = np.array([(nx+1)/2, (ny-1)/2, (nz+1)/2])
+            size_outer_z = np.array([(nx+1)/2, (ny+1)/2, (nz-1)/2])
+        
+        #    size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2])
+        #    size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2])
+        #    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2])
+            
+            size_inner_x = np.array([(nx+1)/2, (ny-1)/2, (nz-1)/2])
+            size_inner_y = np.array([(nx-1)/2, (ny+1)/2, (nz-1)/2])
+            size_inner_z = np.array([(nx-1)/2, (ny-1)/2, (nz+1)/2])
+            
+        else:
+            '''
+            Note that for this case, the not-used will have the amount of 
+            the field with which they are associated, simply to make concatentation
+            work properly
+            '''
+            size_outer_x = np.array([(nx-1)/2, (ny+1)/2, 1])
+            size_outer_y = np.array([(nx+1)/2, (ny-1)/2, 1])
+            size_outer_z = np.array([(nx+1)/2, (ny-1)/2, 1]) # This will not be included in calculations
+        
+        #    size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2])
+        #    size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2])
+        #    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2])
+            
+            size_inner_x = np.array([(nx-1)/2, (ny-1)/2, 1]) # This will not be included in calculations
+            size_inner_y = np.array([(nx-1)/2, (ny-1)/2, 1]) # This will not be included in calculations
+            size_inner_z = np.array([(nx-1)/2, (ny-1)/2, 1])
+            
+        return [size_outer_x, size_outer_y, size_outer_z,\
+                size_inner_x, size_inner_y, size_inner_z]
         
     def ind_rev_x_out(self,m):
         '''
@@ -1068,9 +1118,11 @@ class Ferro_sys(object):
             fprev, f = f, func(x)
             
             k += 1
-            
-#            print('{0:10d} {1:12.5f} {2:12.5f} {3:12.5f} {4:12.5f}'\
-#            .format(k, xprev, fprev, rel_step, alpha*dx))
+        if k == maxit-1:
+            print('Warning: convergence reached to: ', func(x),
+                  'Method terminated as max iterations reached',
+                  '\n Proceed? \n')
+            wait = input('Press ENTER, or CTRL C to break')        
                     
         return x
     

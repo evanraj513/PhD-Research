@@ -558,33 +558,68 @@ R_sys.set_up()
 #    return root
 
 ### Debugging boundary conditions
-E_old = R_sys.E_old
+#E_old = R_sys.E_old
+#
+#def Fx(t):
+#    F_x = np.zeros(shape=(E_old.x.value.shape[0],1))
+#    x = np.copy(F_x)
+#    y = np.copy(x)
+#    z = np.copy(x)
+#    
+#    dx = disc[0]
+#    dy = disc[1]
+#    dz = disc[2]
+#
+#    nx = E_old.x.nx
+#    ny = E_old.x.ny
+#    nz = E_old.x.nz
+#    for ll in np.arange(0,nz-1):
+#        for kk in np.arange(0,ny-1):
+#            for jj in np.arange(0,nx-1):
+##                    print('jj',jj,'\n',
+##                          'kk',kk,'\n',
+##                          'll',ll)
+#                x = (jj+1/2)*2*dx
+#                y = kk*2*dy
+#                z = ll*2*dz
+#                F_x[jj + nx*kk + nx*ny*ll] = R_sys.fx(x,y,z,t)
+#
+#    return F_x
 
-def Fx(t):
-    F_x = np.zeros(shape=(E_old.x.value.shape[0],1))
-    x = np.copy(F_x)
-    y = np.copy(x)
-    z = np.copy(x)
+### Debugging Dz
+
+from scipy.sparse import lil_matrix   
+
+def Dz(R_sys):
+    '''
+    Gives vector approximation to derivative w.r.t. z               
+    '''
+    x = R_sys.E_old.x
     
-    dx = disc[0]
-    dy = disc[1]
-    dz = disc[2]
-
-    nx = E_old.x.nx
-    ny = E_old.x.ny
-    nz = E_old.x.nz
-    for ll in np.arange(0,nz-1):
-        for kk in np.arange(0,ny-1):
-            for jj in np.arange(0,nx-1):
-#                    print('jj',jj,'\n',
-#                          'kk',kk,'\n',
-#                          'll',ll)
-                x = (jj+1/2)*2*dx
-                y = kk*2*dy
-                z = ll*2*dz
-                F_x[jj + nx*kk + nx*ny*ll] = R_sys.fx(x,y,z,t)
-
-    return F_x
+    ind = x.myind_std
+    dx = x.dx
+    dy = x.dy
+    dz = x.dz
+    
+    row_num = x.nx*x.ny*(x.nz-1)
+                    ## rows       columns
+    Al = lil_matrix((int(row_num), int(x.length)), dtype='float')
+    for ll in range(1,x.nz-1): #Moving through each slice
+        for kk in range(0,x.ny): #Moving through each row
+            for jj in range(0,x.nx): #Moving through each node
+                try:
+                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)] = 1/(2*dz)
+                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll-1)*dz)] = -1/(2*dz)
+                except IndexError:
+                    print('This is where the error is',
+                          'jj: ',jj,'\n',
+                          'kk: ',kk,'\n',
+                          'll: ',ll,'\n',
+                          'ind: ',ind(jj*dx,kk*dy,ll*dz))
+                    raise Exception
+    A1 = Al.tocsr()
+        
+    return A1*x.value
 
 
 

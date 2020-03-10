@@ -49,7 +49,7 @@ max_x = 16.4
 disc = [0.4, 0.4, 0.4]
 
 dt = 5e-10
-T = 1e-8
+T = 3*dt
 
 if (max_x/disc[0])%2 == 0:
     print('Warning. Grid could fail, untested')
@@ -64,24 +64,45 @@ else:
     max_x = max_x - (max_x/disc[0])%2
     size = round(max_x/disc[0])
     
-def sizing(nx):
-    size_Ex = np.array([(nx-1)/2, (nx+1)/2, (nx+1)/2])
-    size_Ey = np.array([(nx+1)/2, (nx-1)/2, (nx+1)/2])
-    size_Ez = np.array([(nx+1)/2, (nx+1)/2, (nx-1)/2])
-
-#    size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2])
-#    size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2])
-#    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2])
+def sizing(nx,ny,nz):
+    if nz != 1:
+        size_outer_x = np.array([(nx-1)/2, (ny+1)/2, (nz+1)/2])
+        size_outer_y = np.array([(nx+1)/2, (ny-1)/2, (nz+1)/2])
+        size_outer_z = np.array([(nx+1)/2, (ny+1)/2, (nz-1)/2])
     
-    size_Bx = np.array([(nx+1)/2, (nx-1)/2, (nx-1)/2])
-    size_By = np.array([(nx-1)/2, (nx+1)/2, (nx-1)/2])
-    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx+1)/2])
-    return [size_Ex, size_Ey, size_Ez, size_Bx, size_By, size_Bz]
+    #    size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2])
+    #    size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2])
+    #    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2])
+        
+        size_inner_x = np.array([(nx+1)/2, (ny-1)/2, (nz-1)/2])
+        size_inner_y = np.array([(nx-1)/2, (ny+1)/2, (nz-1)/2])
+        size_inner_z = np.array([(nx-1)/2, (ny-1)/2, (nz+1)/2])
+        
+    else:
+        '''
+        Note that for this case, the not-used will have the amount of 
+        the field with which they are associated, simply to make concatentation
+        work properly
+        '''
+        size_outer_x = np.array([(nx-1)/2, (ny+1)/2, 1])
+        size_outer_y = np.array([(nx+1)/2, (ny-1)/2, 1])
+        size_outer_z = np.array([(nx+1)/2, (ny-1)/2, 1]) # This will not be included in calculations
+    
+    #    size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2])
+    #    size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2])
+    #    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2])
+        
+        size_inner_x = np.array([(nx-1)/2, (ny-1)/2, 1]) # This will not be included in calculations
+        size_inner_y = np.array([(nx-1)/2, (ny-1)/2, 1]) # This will not be included in calculations
+        size_inner_z = np.array([(nx-1)/2, (ny-1)/2, 1])
+        
+    return [size_outer_x, size_outer_y, size_outer_z,\
+            size_inner_x, size_inner_y, size_inner_z]
 
 ### Initial conditions
 
 # To give number of nodes
-a = np.round(np.array(sizing(size)).prod(axis=1))
+a = np.round(np.array(sizing(size,size,1)).prod(axis=1))
 
 ####################################################
 ########### Initial conditions ################
@@ -151,6 +172,7 @@ R_sys.dt = dt
 beta0 = 4E4
 f = 4E7
 a = 1.34
+b = 3.4
 k = (np.pi/a)**2
 c = 3E8
 
@@ -158,7 +180,7 @@ def g(x):
     '''
     Actual Ricker pulse function
     '''
-    if x < a:
+    if x < b:
         pa = 2*k/11*(2*k*(x-a)**2-1)
         pb = (np.e**(-k*(x-a)**2))
         
@@ -173,7 +195,7 @@ def f_x(x,y,z,t):
     '''
     Ricker Pulse for x
     '''
-    if z < 1E-12: #approx 0
+    if y < 1E-12: #approx 0
         d = beta0*g(f*t)
         return d
     else:
@@ -267,6 +289,49 @@ fig_Mz.savefig(today+'/'+name+'Mz_10')
 fig_Bz.savefig(today+'/'+name+'Bz_10')
 fig_Ez.savefig(today+'/'+name+'Ez_10')
 fig_Hz.savefig(today+'/'+name+'Hz_10')
+
+def cardanos_method(a,b,c,d,eps = 1E-12):
+    '''
+    Solves for the real root of a cubic polynomial. 
+    Note that it will not solve for the symmetric
+    real roots, even if they exist. 
+    See here for more explanation:
+        https://brilliant.org/wiki/cardano-method/
+    '''
+    if abs(a) < eps:
+        print('*'*40,'\n','Error, not a cubic. Aborting','\n','*'*40)
+        raise Exception
+        
+    def real_cubic_root(arg):
+        '''
+        Forces python to return the real root of a cubic. 
+        Note: "< 0" case works as 
+            -(-n)^(1/3) = ((-1)^3(-n))^(1/3) = ((-1)(-n))^(1/3) = (n)^1/3
+        '''
+        if arg < 0:
+            return -(-arg)**(1/3)
+        else:
+            return (arg)**(1/3)
+    
+    Q = (3*a*c - b**2)/(9*a**2)
+    R = (9*a*b*c - 27*a**2*d - 2*b**3)/(54*a**3)
+    print('Q: ',Q,'\n'*2,
+          'R: ',R,'\n'*2)
+          #'S: ',S,'\n'*2,
+          #'T: ',T,'\n'*2)
+    
+    if Q**3 > R**2-eps:
+        print('*'*40,'\n','Break. Error in cardanos method, cannot use',
+              'Dont know why, but Q**3 > R**2 is hard.','\n','*'*40)
+        raise Exception
+    
+    S = real_cubic_root(R + (Q**3 + R**2)**(1/2))
+    T = real_cubic_root(R - (Q**3 + R**2)**(1/2))
+    
+    root = S+T - (b)/(3*a)
+    
+    return root
+    
 
 def det_E_M():
     '''

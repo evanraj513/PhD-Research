@@ -114,11 +114,11 @@ class Vector(object):
          
          
         
-          3      4
+          2      3
           .      .
         (1,0)  (1,1)  
           
-          1      2              
+          0      1              
           .      .
         (0,0)  (1,0)
         
@@ -226,7 +226,7 @@ class Vector(object):
                     Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll-1)*dz)] = -1/(2*dz)
                     
         A1 = Al.tocsr()
-            
+        
         return A1*self.value
     
     def Dx_B(self):
