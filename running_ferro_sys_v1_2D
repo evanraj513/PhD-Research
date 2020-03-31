@@ -46,23 +46,25 @@ H_s_val = 10**5
 
 ### Parameters (system)
 max_x = 16.4
-disc = [0.4, 0.4, 0.4]
+disc = np.array([0.4, 0.4, 0.4])
+              # Not used
 
 dt = 5e-10
-T = 3*dt
+T = dt*100
+
 
 if (max_x/disc[0])%2 == 0:
     print('Warning. Grid could fail, untested')
-    size = round(max_x/disc[0])
+    nx = round(max_x/disc[0])
     
 elif (max_x/disc[0])%2 == 1:
-    size = round(max_x/disc[0])
+    nx = round(max_x/disc[0])
     
 else:
     print('That domain and disc not available'
           '\n','Attempting closest available disc.')
     max_x = max_x - (max_x/disc[0])%2
-    size = round(max_x/disc[0])
+    nx = round(max_x/disc[0])
     
 def sizing(nx,ny,nz):
     if nz != 1:
@@ -81,7 +83,7 @@ def sizing(nx,ny,nz):
     else:
         '''
         Note that for this case, the not-used will have the amount of 
-        the field with which they are associated, simply to make concatenation
+        the field with which they are associated, simply to make concatentation
         work properly
         '''
         size_outer_x = np.array([(nx-1)/2, (ny+1)/2, 1])
@@ -102,7 +104,9 @@ def sizing(nx,ny,nz):
 ### Initial conditions
 
 # To give number of nodes
-a = np.round(np.array(sizing(size,size,1)).prod(axis=1))
+ny = nx
+node_count = np.array([nx, ny, 1])
+a = np.round(np.array(sizing(node_count[0], node_count[1], node_count[2])).prod(axis=1))
 
 ####################################################
 ########### Initial conditions ################
@@ -132,39 +136,12 @@ H_s_y = H_s_val*np.ones(shape = (int(a[4]),1))
 H_s_z = H_s_val*np.ones(shape = (int(a[5]),1))
 H_s = np.concatenate((H_s_x, H_s_y, H_s_z),axis=1).T
 
-R_sys = Ferro_sys(size,disc,E0,H0,M0,H_s)
+R_sys = Ferro_sys(node_count,disc,E0,H0,M0,H_s)
 R_sys.dt = dt
 
 ####################################################
 #### Boundary conditions, and Forcing terms ########
 ####################################################
-
-### Some random test code for Forcing conditiosn
-#def f_x(x,y,z,t):
-#    if t < 0.2:
-#        val = 0
-#    if x == 0 or x == max_x:
-#        val = 0
-#    else:
-#        val = 0
-#    
-#    return val
-#
-#def f_y(x,y,z,t):
-#    
-#    val = 0
-#    if y == 0 or y == max_x:
-#        val = 0
-#    
-#    return val
-#
-#def f_z(x,y,z,t):
-#    val = 0
-#    
-#    if z == 0 or z == max_x:
-#        val = 0
-#    
-#    return val
 
 #### Ricker Pulse
 
@@ -188,24 +165,25 @@ def g(x):
     else:
         return 0
     
-### Ricker Pulse forcing conditions at x = 0 
-### 'Normal' boundary conditions
+### Ricker Pulse forcing conditions at x = 0, applied to E_y 
+### 'Normal' boundary conditions else
+        
 
 def f_x(x,y,z,t):
     '''
     Ricker Pulse for x
     '''
-    if y < 1E-12: #approx 0
-        d = beta0*g(f*t)
-        return d
-    else:
-        return 0
+    return 0
     
 def f_y(x,y,z,t):
     '''
     Ricker Pulse for y
     '''
-    return 0
+    if x < 1E-12: #approx 0
+        d = beta0*g(f*t)
+        return d
+    else:
+        return 0
     
     
 def f_z(x,y,z,t):
@@ -225,6 +203,24 @@ for t in np.arange(dt,T,dt):
     ### Running the system
     R_sys.single_run(t)
     
+    ## Plotting stuff to demo
+    if abs(t/dt%2) < 1E-12:
+        fig_Mz = R_sys.plot_slice('M','z',0)
+        fig_Ez = R_sys.plot_slice('E','x',0)
+        fig_Ey = R_sys.plot_slice('E','y',0)
+        
+        fig = plt.figure()
+        t_val = np.arange(0,T,dt)
+        Ricker_vec = np.vectorize(f_y)
+        ax = fig.add_subplot(111)
+        ax.plot(t_val,Ricker_vec(0,0,0,t_val))
+        ax.axvline(x=t)
+        Title = 'Current Boundary value: '+str(round(f_y(0,0,0,t),2))
+        ax.set_title(Title)
+        plt.show()
+        
+#        wait = input('Press Enter to continue')
+    
     ## Updating old fields
     R_sys.E_old2 = R_sys.E_old.values
     R_sys.B_old2 = R_sys.B_old.values
@@ -235,15 +231,15 @@ for t in np.arange(dt,T,dt):
     R_sys.H_old = R_sys.H_new.values
     R_sys.M_old = R_sys.M_new.values
     R_sys.B_old = R_sys.B_new.values
-    
-    print('Current time: ', '{:.2e}'.format(t))
+    if abs(t/dt%10) < 1E-12:    
+        print('Current time: ', '{:.2e}'.format(t))
 
 ## Plotting stuff
 
-fig_Mz = R_sys.plot_slice('M','z',10)
-fig_Bz = R_sys.plot_slice('B','z',10)
-fig_Ez = R_sys.plot_slice('E','z',10)
-fig_Hz = R_sys.plot_slice('H','z',10)
+#fig_Mz = R_sys.plot_slice('M','z',10)
+#fig_Bz = R_sys.plot_slice('B','z',10)
+#fig_Ez = R_sys.plot_slice('E','z',10)
+#fig_Hz = R_sys.plot_slice('H','z',10)
 
 def mkdir_p(mypath):
     '''Creates a directory. equivalent to using mkdir -p on the command line'''
@@ -278,17 +274,113 @@ data['H_s'] = H_s_val
         # Parameters (system)
 data['max_x'] = max_x
 data['disc'] = disc[0]
-data['size'] = size
+data['size'] = node_count
 data['T'] = T
 data['dt'] = dt
 
 df = pd.DataFrame([data])
 df.to_csv(today+'/'+name+'_param.csv')
 
-fig_Mz.savefig(today+'/'+name+'Mz_10')
-fig_Bz.savefig(today+'/'+name+'Bz_10')
-fig_Ez.savefig(today+'/'+name+'Ez_10')
-fig_Hz.savefig(today+'/'+name+'Hz_10')
+#fig_Mz.savefig(today+'/'+name+'Mz_10')
+#fig_Bz.savefig(today+'/'+name+'Bz_10')
+#fig_Ez.savefig(today+'/'+name+'Ez_10')
+#fig_Hz.savefig(today+'/'+name+'Hz_10')
+
+def make_1D_plot(Field = 'E', comp = 'y', cs = 0, s = 0):
+    '''
+    Function to plot a 'flat' (i.e. 2D) plot of the comp of the field,
+    at some specific cross-section. Not a 3D slice, but a 2D cross-section
+    of a specific slice
+    '''
+    F = Field
+    
+
+    if F == 'E':
+        if comp == 'x':
+            pc = R_sys.E_old.x
+            ind = R_sys.ind_rev_x_out
+        elif comp == 'y':
+            pc = R_sys.E_old.y
+            ind = R_sys.ind_rev_y_out
+        elif comp == 'z':
+            pc = R_sys.E_old.z
+            ind = R_sys.ind_rev_z_out
+        else:
+            print('Error, not "x", "y", "z". No comprendo, start over')
+            raise Exception
+            
+    elif F == 'B':
+        if comp == 'x':
+            pc = R_sys.B_old.x
+            ind = R_sys.ind_rev_x_inn
+        elif comp == 'y':
+            pc = R_sys.B_old.y
+            ind = R_sys.ind_rev_y_inn
+        elif comp == 'z':
+            pc = R_sys.B_old.z
+            ind = R_sys.ind_rev_z_inn
+        else:
+            print('Error, not "x", "y", "z". No comprendo, start over')
+            raise Exception
+            
+    elif F == 'M':
+        if comp == 'x':
+            pc = R_sys.B_old.x
+            ind = R_sys.ind_rev_x_inn
+        elif comp == 'y':
+            pc = R_sys.B_old.y
+            ind = R_sys.ind_rev_y_inn
+        elif comp == 'z':
+            pc = R_sys.B_old.z
+            ind = R_sys.ind_rev_z_inn
+        else:
+            print('Error, not "x", "y", "z". No comprendo, start over')
+            raise Exception
+            
+    elif F == 'H':
+        if comp == 'x':
+            pc = R_sys.B_old.x
+            ind = R_sys.ind_rev_x_inn
+        elif comp == 'y':
+            pc = R_sys.B_old.y
+            ind = R_sys.ind_rev_y_inn
+        elif comp == 'z':
+            pc = R_sys.B_old.z
+            ind = R_sys.ind_rev_z_inn
+        else:
+            print('Error, not "x", "y", "z". No comprendo, start over')
+            raise Exception
+        
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    
+    m_s = s*pc.nx*pc.ny
+    if s >= pc.nz:
+        print('Error, outside of domain. Cannot plot')
+        raise Exception
+        
+    if comp == 'x':
+        m_cs = pc.nx*cs
+        
+        x1 = np.zeros(shape = (pc.nx,1))
+        y1 = np.copy(x1)
+        
+        for k in np.arange(m_s+m_cs,m_s+m_cs+x1.shape[0]):
+            x1[k-m_s] = ind(k)[0]
+            y1[k-m_s] = pc.value[k]
+            
+                  #   (num rows, num cols)
+        x1 = x1.reshape(pc.ny, pc.nx)
+        y1 = y1.reshape(pc.ny, pc.nx)
+        ax.plot(x1,y1)
+        title = 'Plot of: '+F+'_'+comp+'\n'+ 'slice number: '+str(s)+\
+                '\n'+'cross_section: '+str(cs)
+    #        print(title)
+        ax.set_title(title)
+    
+    return fig
+
+    
 
 def cardanos_method(a,b,c,d,eps = 1E-12):
     '''

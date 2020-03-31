@@ -44,7 +44,7 @@ alpha = 0.2
 H_s_guess = 10**5
 
 ''' TO DO 
-    1. Find values for mu0, eps that are realistic (check paper again)
+    1. (done) Find values for mu0, eps that are realistic (check paper again)
     2. (done) Determine how we will find M_new. In paper, just need to read it again
     3. (done) Determine if np.cross is working
     4. (done) Determine path stuff
@@ -52,15 +52,13 @@ H_s_guess = 10**5
     '''
 
 class Ferro_sys(object):
-    '''
-    First attempt at coding system from (INSERT NAME). 
-    
-    Attributes
-    ----------
+    '''    
+    Initialization Attributes
+    -------------------------
     X0: list
         3 columns of initial conditions for field X, each column corresponding to 
         the X,Y,Z components        
-    size: np.array, length = 1 or 3
+    global_node_count: np.array, length = 1 or 3       Note: In old code, this was "size"
         Will give the number of nodes in one 'direction'
             - Assuming same number of nodes in each row
                 if only one number is passed
@@ -71,69 +69,67 @@ class Ferro_sys(object):
     T: float
         Final time
         
+    System Attributes
+    -----------------    
+    gn_: int
+        gives the global number of nodes in any direction. 
+    a: np.ndarray
+        Gives the different sizing for each component of the inner/outer Fields
+    E_n_: np.ndarray
+        [nx, ny, nz] for E_(_)
+    B_n_: np.ndarray
+        [nx, ny, nz] for B_(_) = H_(_) = M_(_)
+    
+        
     '''
     
-    def __init__(self,size,disc,E0,H0,M0,H_s = H_s_guess):
+    def __init__(self,global_node_count,disc,E0,H0,M0,H_s = H_s_guess):
         # Parameter Set-up
         self.dt = 0.1 
         self.T = 1.0
 
         self.disc = disc
-        self.size = size
-        if size.size == 1:
-            nx = size
-            ny = size
-            nz = size
-        elif size.size == 3:
-            nx = size[0]
-            ny = size[1]
-            nz = size[2]
-            
-        
+        self.node_count = global_node_count
+        if global_node_count.size == 1:
+            self.gnx = global_node_count
+            self.gny = global_node_count
+            self.gnz = global_node_count
+        elif global_node_count.size == 3:
+            self.gnx = global_node_count[0]
+            self.gny = global_node_count[1]
+            self.gnz = global_node_count[2]
+        else:
+            print('*'*40,'\n','Error in given node_count. Abort','\n','*'*40)
+            raise Exception
+
         # Sizing #
         '''
         This is now done in the function "sizing" below, so that it can be changed
         on the fly
         '''
-        ### Sizing for even number of nodes v.1.1
-#        if nx%2 == 0:
-#            print('Warning: Beta-testing still under-way; possible poor grid')
-#            wait = input('Press ENTER to continue, or CTRL C to break')
-#            self.size_outer_x = np.array([nx/2, nx/2, nx/2]).astype('int')
-#            self.size_outer_y = np.array([nx/2, nx/2, nx/2]).astype('int')
-#            self.size_outer_z = np.array([nx/2, nx/2, nx/2]).astype('int')
-#            
-#            self.size_inner_x = np.array([nx/2, nx/2, nx/2]).astype('int')
-#            self.size_inner_y = np.array([nx/2, nx/2, nx/2]).astype('int')
-#            self.size_inner_z = np.array([nx/2, nx/2, nx/2]).astype('int')
-#        
-#        ### Sizing for odd number of nodes below 
-#        else:
-#            self.size_outer_x = np.array([(nx-1)/2, (nx+1)/2, (nx+1)/2]).astype('int')
-#            self.size_outer_y = np.array([(nx+1)/2, (nx-1)/2, (nx+1)/2]).astype('int')
-#            self.size_outer_z = np.array([(nx+1)/2, (nx+1)/2, (nx-1)/2]).astype('int')
-#            
-#            self.size_inner_x = np.array([(nx+1)/2, (nx-1)/2, (nx-1)/2]).astype('int')
-#            self.size_inner_y = np.array([(nx-1)/2, (nx+1)/2, (nx-1)/2]).astype('int')
-#            self.size_inner_z = np.array([(nx-1)/2, (nx-1)/2, (nx+1)/2]).astype('int')
-            
-    #       ### Old sizing v.1
-    #        self.size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2]).astype('int')
-    #        self.size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2]).astype('int')
-    #        self.size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2]).astype('int')
         
-    
-        a = np.round(np.array(self.sizing(nx,ny,nz)).prod(axis=1))
+        a = self.sizing(self.gnx,self.gny,self.gnz)
+        self.a = a
         
-        ## See Research Notes 1/27/20 for more explanation on above ##
+        self.E_nx = a[0].astype('int')
+        self.E_ny = a[1].astype('int')
+        self.E_nz = a[2].astype('int')
         
-        self.size_Ex = np.zeros(shape = (int(a[0]),1))
-        self.size_Ey = np.zeros(shape = (int(a[1]),1))
-        self.size_Ez = np.zeros(shape = (int(a[2]),1))
+        self.B_nx = a[3].astype('int')
+        self.B_ny = a[4].astype('int')
+        self.B_nz = a[5].astype('int')
+         
+        ### Included here to make up for a previous mistake
+        ### and to deal with my laziness to change all
+        ### of the following code. 
         
-        self.size_Bx = np.zeros(shape = (int(a[3]),1))
-        self.size_By = np.zeros(shape = (int(a[4]),1))
-        self.size_Bz = np.zeros(shape = (int(a[5]),1))
+        self.size_Ex = self.E_nx
+        self.size_Ey = self.E_ny
+        self.size_Ez = self.E_nz
+        
+        self.size_Bx = self.B_nx
+        self.size_By = self.B_ny
+        self.size_Bz = self.B_nz
         
         # Field set-up #
         self.E_old = E0
@@ -158,7 +154,6 @@ class Ferro_sys(object):
     def E_old2(self, values):
         self._E_old2 = Field(self.size_Ex, self.size_Ey,self.size_Ez,self.disc,values)
 #        self._E_old.E = True
-        
         if type(values) != np.ndarray or values.shape[0] != 3:
             print('Something is wrong. Assigned incorrect array to E_old')
             raise Exception
@@ -204,6 +199,7 @@ class Ferro_sys(object):
         return self._E_old
     @E_old.setter
     def E_old(self, values):
+#        print(self.size_Ex, self.size_Ey, self.size_Ez)
         self._E_old = Field(self.size_Ex, self.size_Ey,self.size_Ez,self.disc,values)
 #        self._E_old.E = True
         
@@ -316,6 +312,17 @@ class Ferro_sys(object):
             pass
         
     def sizing(self,nx,ny,nz):
+        '''
+        For a given global nx, ny, nz, gives the nx, ny, nz that is associated with
+        the x, y, z of both the 'inner' fields and 'outer fields' of the Yee Scheme
+
+        The inner field refers to which Field has x,y components on the odd slices
+        and the outer field refers to which Field has x,y, comp on the even slices
+        
+        Note that slices refer to z-slices. 
+        '''
+        
+        
         if nz != 1:
             size_outer_x = np.array([(nx-1)/2, (ny+1)/2, (nz+1)/2])
             size_outer_y = np.array([(nx+1)/2, (ny-1)/2, (nz+1)/2])
@@ -337,14 +344,14 @@ class Ferro_sys(object):
             '''
             size_outer_x = np.array([(nx-1)/2, (ny+1)/2, 1])
             size_outer_y = np.array([(nx+1)/2, (ny-1)/2, 1])
-            size_outer_z = np.array([(nx+1)/2, (ny-1)/2, 1]) # This will not be included in calculations
+            size_outer_z = np.array([(nx-1)/2, (ny+1)/2, 1]) # Not included in calculations
         
         #    size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2])
         #    size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2])
         #    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2])
             
-            size_inner_x = np.array([(nx-1)/2, (ny-1)/2, 1]) # This will not be included in calculations
-            size_inner_y = np.array([(nx-1)/2, (ny-1)/2, 1]) # This will not be included in calculations
+            size_inner_x = np.array([(nx-1)/2, (ny-1)/2, 1]) # Not included in calculations
+            size_inner_y = np.array([(nx-1)/2, (ny-1)/2, 1]) # Not included in calculations
             size_inner_z = np.array([(nx-1)/2, (ny-1)/2, 1])
             
         return [size_outer_x, size_outer_y, size_outer_z,\
@@ -573,6 +580,103 @@ class Ferro_sys(object):
         y1 = y1.reshape(pc.ny, pc.nx)
         z1 = z1.reshape(pc.ny, pc.nx)
         ax.plot_surface(x1,y1,z1)
+        title = 'Plot of: '+F+'_'+comp+'\n'+ 'slice number: '+str(s)
+#        print(title)
+        ax.set_title(title)
+        
+        return fig
+    
+    def plot_line(self,Field = 'E', comp = 'y', cs = 0, s = 0):
+        '''
+        Function to plot a 'flat' (i.e. 2D) plot of the comp of the field,
+        at some specific cross-section. Not a 3D slice, but a 2D cross-section
+        of a specific slice
+        '''
+        F = Field
+        
+    
+        if F == 'E':
+            if comp == 'x':
+                pc = self.E_old.x
+                ind = self.ind_rev_x_out
+            elif comp == 'y':
+                pc = self.E_old.y
+                ind = self.ind_rev_y_out
+            elif comp == 'z':
+                pc = self.E_old.z
+                ind = self.ind_rev_z_out
+            else:
+                print('Error, not "x", "y", "z". No comprendo, start over')
+                raise Exception
+                
+        elif F == 'B':
+            if comp == 'x':
+                pc = self.B_old.x
+                ind = self.ind_rev_x_inn
+            elif comp == 'y':
+                pc = self.B_old.y
+                ind = self.ind_rev_y_inn
+            elif comp == 'z':
+                pc = self.B_old.z
+                ind = self.ind_rev_z_inn
+            else:
+                print('Error, not "x", "y", "z". No comprendo, start over')
+                raise Exception
+                
+        elif F == 'M':
+            if comp == 'x':
+                pc = self.B_old.x
+                ind = self.ind_rev_x_inn
+            elif comp == 'y':
+                pc = self.B_old.y
+                ind = self.ind_rev_y_inn
+            elif comp == 'z':
+                pc = self.B_old.z
+                ind = self.ind_rev_z_inn
+            else:
+                print('Error, not "x", "y", "z". No comprendo, start over')
+                raise Exception
+                
+        elif F == 'H':
+            if comp == 'x':
+                pc = R_sys.B_old.x
+                ind = R_sys.ind_rev_x_inn
+            elif comp == 'y':
+                pc = R_sys.B_old.y
+                ind = R_sys.ind_rev_y_inn
+            elif comp == 'z':
+                pc = R_sys.B_old.z
+                ind = R_sys.ind_rev_z_inn
+            else:
+                print('Error, not "x", "y", "z". No comprendo, start over')
+                raise Exception
+            
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        
+        m_s = s*pc.nx*pc.ny
+        if s >= pc.nz:
+            print('Error, outside of domain. Cannot plot')
+            raise Exception
+            
+        if comp == 'x':
+            m_cs = pc.nx*cs
+            
+            x1 = np.zeros(shape = (pc.nx,1))
+            y1 = np.copy(x1)
+            
+            for k in np.arange(m_s+m_cs,m_s+m_cs+x1.shape[0]):
+                x1[k-m_s] = ind(k)[0]
+                y1[k-m_s] = pc.value[k]
+                
+                      #   (num rows, num cols)
+            x1 = x1.reshape(pc.ny, pc.nx)
+            y1 = y1.reshape(pc.ny, pc.nx)
+            ax.plot(x1,y1)
+            title = 'Plot of: '+F+'_'+comp+'\n'+ 'slice number: '+str(s)+\
+                    '\n'+'cross_section: '+str(cs)
+        #        print(title)
+            ax.set_title(title)
         
         return fig
                        
@@ -649,16 +753,44 @@ class Ferro_sys(object):
         nx = self.E_old.x.nx
         ny = self.E_old.x.ny
         nz = self.E_old.x.nz
-        for ll in np.arange(0,nz-1):
-            for kk in np.arange(0,ny-1):
-                for jj in np.arange(0,nx-1):
-#                    print('jj',jj,'\n',
-#                          'kk',kk,'\n',
-#                          'll',ll)
-                    x = (jj+1/2)*2*dx
-                    y = kk*2*dy
-                    z = ll*2*dz
-                    F_x[jj + nx*kk + nx*ny*ll] = self.fx(x,y,z,t)
+        if nz != 1:
+            for ll in np.arange(0,nz-1):
+                for kk in np.arange(0,ny-1):
+                    for jj in np.arange(0,nx-1):
+                        x = jj*2*dx
+                        y = (kk+1/2)*2*dy
+                        z = ll*2*dz
+    #                    print('jj',jj,'\n',
+    #                          'kk',kk,'\n',
+    #                          'll',ll,'\n',
+    #                          'x: ',x,'\n',
+    #                          'y: ',y,'\n',
+    #                          'z: ',z,'\n')
+    #                    if jj == nx-2:
+    #                        wait = input('Press ENTER to continue')
+                            
+                        F_x[jj + nx*kk + nx*ny*ll] = self.fx(x,y,z,t)
+        else:
+            for ll in np.arange(0,1):
+                for kk in np.arange(0,ny-1):
+                    for jj in np.arange(0,nx-1):
+                        x = jj*2*dx
+                        y = (kk+1/2)*2*dy
+                        z = ll*2*dz
+    #                    print('jj',jj,'\n',
+    #                          'kk',kk,'\n',
+    #                          'll',ll,'\n',
+    #                          'x: ',x,'\n',
+    #                          'y: ',y,'\n',
+    #                          'z: ',z,'\n',
+    #                          'f: ',R_sys.fy(x,y,z,t),'\n')
+    #                    if jj == nx-2:
+    #                        wait = input('Press ENTER to continue')
+    
+                        F_x[jj + nx*kk + nx*ny*ll] = self.fx(x,y,z,t) 
+            
+    
+        return F_x
                     
         return F_x
         
@@ -667,19 +799,48 @@ class Ferro_sys(object):
         dx = self.disc[0]
         dy = self.disc[1]
         dz = self.disc[2]
-        
+    
         nx = self.E_old.y.nx
         ny = self.E_old.y.ny
         nz = self.E_old.y.nz
-        for ll in np.arange(0,nz-1):
-            for kk in np.arange(0,ny-1):
-                for jj in np.arange(0,nx-1):
-                    x = jj*2*dx
-                    y = (kk+1/2)*2*dy
-                    z = ll*2*dz
-                    
-                    F_y[jj + nx*kk + nx*ny*ll] = self.fy(x,y,z,t)
-
+        
+        if nz != 1:
+            for ll in np.arange(0,nz-1):
+                for kk in np.arange(0,ny-1):
+                    for jj in np.arange(0,nx-1):
+                        x = jj*2*dx
+                        y = (kk+1/2)*2*dy
+                        z = ll*2*dz
+    #                    print('jj',jj,'\n',
+    #                          'kk',kk,'\n',
+    #                          'll',ll,'\n',
+    #                          'x: ',x,'\n',
+    #                          'y: ',y,'\n',
+    #                          'z: ',z,'\n')
+    #                    if jj == nx-2:
+    #                        wait = input('Press ENTER to continue')
+                            
+                        F_y[jj + nx*kk + nx*ny*ll] = self.fy(x,y,z,t)
+        else:
+            for ll in np.arange(0,1):
+                for kk in np.arange(0,ny-1):
+                    for jj in np.arange(0,nx-1):
+                        x = jj*2*dx
+                        y = (kk+1/2)*2*dy
+                        z = ll*2*dz
+    #                    print('jj',jj,'\n',
+    #                          'kk',kk,'\n',
+    #                          'll',ll,'\n',
+    #                          'x: ',x,'\n',
+    #                          'y: ',y,'\n',
+    #                          'z: ',z,'\n',
+    #                          'f: ',R_sys.fy(x,y,z,t),'\n')
+    #                    if jj == nx-2:
+    #                        wait = input('Press ENTER to continue')
+    
+                        F_y[jj + nx*kk + nx*ny*ll] = self.fy(x,y,z,t) 
+            
+    
         return F_y
     
     def Fz(self,t):
@@ -716,8 +877,9 @@ class Ferro_sys(object):
         Bz = self.B_old.z
         
         ### Indexing for Even node grid
-        if self.size%2 == 0:
-            print('Warning, untested grid style. Change to odd number size, or be forewarned')
+        if (self.node_count %2 == 0).all():
+            print('Warning, untested grid style. Change to odd number node_count, or be forewarned',
+                  '\n','    (bound_ind function noticiing)')
             wait = input('Press ENTER to continue, or CTRL C to break')
             
             ind_Ex = np.array([0]) #First node is always a boundary
@@ -809,7 +971,7 @@ class Ferro_sys(object):
         
         
         ### Indexing for Odd node count
-        else:
+        elif (self.node_count %2 == 1).all() and self.gnz != 1:
             ind_Ex = np.array([0])
             for ll in np.arange(0,Ex.nz):
                 for kk in np.arange(0,Ex.ny):
@@ -858,11 +1020,58 @@ class Ferro_sys(object):
                             ind_Ez = np.concatenate((ind_Ez, ind))
                             
             ind_Bz = np.array([])
-    #        for ll in np.arange(0,Bz.nz):
-    #            for kk in np.arange(0,Bz.ny):
-    #                for jj in np.arange(0,Bz.nx):
-    #                    ind = [jj+kk*Bz.nx + ll*Bz.nx*Bz.ny]
-    #                    if 
+            
+        ## Indexing for 2D case ##
+        elif (self.node_count %2 == 1).all() and self.gnz == 1:
+            print('we made it here')
+            ind_Ex = np.array([0])
+            for ll in np.arange(0,Ex.nz):
+                for kk in np.arange(0,Ex.ny):
+                    for jj in np.arange(0,Ex.nx):
+                        ind = [jj+kk*Ex.nx + ll*Ex.nx*Ex.ny]
+#                        if ll == 0 or ll == Ex.nz-1:
+#                            ind_Ex = np.concatenate((ind_Ex, ind))
+                        if kk == 0 or kk == Ex.ny-1:
+                            ind_Ex = np.concatenate((ind_Ex, ind))
+                            
+            ind_By = np.array([0])
+            for ll in np.arange(0,By.nz):
+                for kk in np.arange(0,By.ny):
+                    for jj in np.arange(0,By.nx):
+                        ind = [jj+kk*By.nx + ll*By.nx*By.ny]
+                        if kk == 0 or kk == By.ny-1:
+                            ind_By = np.concatenate((ind_By, ind))
+                            
+                            
+            ind_Ey = np.array([0])
+            for ll in np.arange(0,Ey.nz):
+                for kk in np.arange(0,Ey.ny):
+                    for jj in np.arange(0,Ey.nx):
+                        ind = [jj+kk*Ey.nx + ll*Ey.nx*Ey.ny]
+#                        if ll == 0 or ll == Ey.nz-1:
+#                            ind_Ey = np.concatenate((ind_Ey, ind))
+                        if jj == 0 or jj == Ey.nx-1:
+                            ind_Ey = np.concatenate((ind_Ey, ind))
+                            
+            ind_Bx = np.array([0])
+            for ll in np.arange(0,Bx.nz):
+                for kk in np.arange(0,Bx.ny):
+                    for jj in np.arange(0,Bx.nx):
+                        ind = [jj+kk*Bx.nx + ll*Bx.nx*Bx.ny]
+                        if jj == 0 or jj == Bx.nx-1:
+                            ind_Bx = np.concatenate((ind_Bx, ind))
+                            
+            ind_Ez = np.array([0])
+            for ll in np.arange(0,Ez.nz):
+                for kk in np.arange(0,Ez.ny):
+                    for jj in np.arange(0,Ez.nx):
+                        ind = [jj+kk*Ez.nx + ll*Ez.nx*Ez.ny]
+                        if kk == 0 or kk == Ez.ny-1:
+                            ind_Ez = np.concatenate((ind_Ez, ind))
+                        elif jj == 0 or jj == Ez.nx-1:
+                            ind_Ez = np.concatenate((ind_Ez, ind))
+                            
+            ind_Bz = np.array([])
                         
                         
         ind_Ex = np.unique(ind_Ex)
@@ -903,7 +1112,7 @@ class Ferro_sys(object):
         
         ## Actual computation of time stepping
         F = np.concatenate((self.Fx(t), self.Fy(t), self.Fz(t)),axis=1)
-        E_new_values = E_old.values + dt*H_old.curl()
+        E_new_values = E_old.values + dt/eps*H_old.curl()
         
         #Setting all E boundaries to 0
         for j in b_ind[0]:
@@ -921,6 +1130,101 @@ class Ferro_sys(object):
         self.B_new = B_new_values
         
         B_on = (B_old.values + B_new_values)/2
+        
+        f = 2*M_old.values
+        a = -(abs(gamma)*dt/2)*(B_on/mu0 + self.H_s.values) - alpha*M_old.values
+        lam = -K*abs(gamma)*self.dt/4
+        
+        a_dot_f =  bdp(a.T,f.T).T
+        
+        p_x = np.zeros(shape = (M_old.values.shape[1],1))
+        p_y = np.copy(p_x)
+        p_z = np.ones(shape = (M_old.values.shape[1],1))
+        p = np.concatenate((p_x, p_y, p_z), axis = 1).T
+        
+        if K == 0 or t == dt:
+            x_new_num = f + (a_dot_f)*a - np.cross(a.T,f.T).T
+            x_new_den = np.array(1+np.linalg.norm(a,axis=0)**2).T
+            
+            x_new_values = np.divide(x_new_num.T, np.array([x_new_den]).T)
+                
+        else:
+            
+            cubic_solver = self.cubic_solver
+            
+            a1 = lam**2
+            b1 = 2*lam*(bdp(a.T, p.T) + lam*(bdp(p.T, f.T)))
+            c1 = 1+np.linalg.norm(a) - lam*(bdp(a.T, f.T)) + 3*lam*\
+            (bdp(a.T, p.T)) * (bdp(p.T, f.T)) + \
+            lam**2*(bdp(p.T, f.T))
+            d1 = -lam*(bdp(a.T, p.T)*(bdp(p.T,f.T))) - (bdp(a.T, p.T)*(bdp(p.T,f.T)))\
+            + lam*((bdp(a.T, p.T)*(bdp(p.T,f.T))**2))\
+            +np.linalg.norm(a)**2*(bdp(p.T, f.T))
+            -bdp(np.cross(a.T, p.T),f.T)
+            Z = np.zeros(shape = b1.shape)
+            X = np.copy(Z)
+            Y = np.copy(Z)
+            x_new_values = np.copy(Z)
+            for k in np.arange(0,x_new_values.shape[1]):
+                if k%100 == 1:
+                    Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k],disp = 'Yes')
+                else:
+                    Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k],disp = 'no')
+            
+            X = (bdp(a.T,f.T)) - lam*Z*(Z+bdp(p.T,f.T))
+            Y = Z+bdp(p.T,f.T)
+            
+            x_new_values = 1/np.linalg.norm(np.cross(a.T,p.T).T)**2*\
+            ((X - (bdp(a.T,p.T))*Y).T*a\
+              + (((np.linalg.norm(a))**2*Y) - (bdp(a.T,p.T))).T*p\
+              + (Z*np.cross(a.T, p.T)).T)
+            
+            
+        self.M_new = x_new_values.T - M_old.values
+        
+        self.H_new = B_new_values/mu0 - self.M_new.values
+        
+    def single_run_FD(self, t):
+        '''
+        A single time-step implemented, as done in a FD scheme, 
+        i.e. anything on the RHS is 'old'
+        
+        T: at what time step is this?
+            
+        '''
+        ## Set-up field parameters
+#        size = self.sizes
+#        disc = self.disc
+        
+        E_old = self.E_old
+        H_old = self.H_old
+        M_old = self.M_old
+        B_old = self.B_old
+        
+        dt = self.dt
+        b_ind = self.bound_ind
+        bdp = self.better_dot_pdt
+        
+        ## Actual computation of time stepping
+        F = np.concatenate((self.Fx(t), self.Fy(t), self.Fz(t)),axis=1)
+        E_new_values = E_old.values + dt/eps*H_old.curl()
+        
+        #Setting all E boundaries to 0
+        for j in b_ind[0]:
+            E_new_values[0][j] = 0 #x_bound(j)
+        for k in b_ind[1]:
+            E_new_values[1][k] = 0
+        for l in b_ind[2]:
+            E_new_values[2][l] = 0
+        
+        #Forcing term and boundary conditions inside F
+        E_new_values = E_new_values+F.T
+        self.E_new = E_new_values
+        
+        B_new_values = B_old.values - dt*self.E_old.curl()
+        self.B_new = B_new_values
+        
+        B_on = B_old.values #Because FD
         
         f = 2*M_old.values
         a = -(abs(gamma)*dt/2)*(B_on/mu0 + self.H_s.values) - alpha*M_old.values

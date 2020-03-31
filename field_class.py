@@ -16,7 +16,7 @@ from scipy.sparse import lil_matrix
 class Vector(object):
     ''' 
     This will be the storing on one vector. Could be a component of a field, 
-        or a stand alone thing
+        or stand alone. 
         
     -- Think F = <F_x, F_y, F_z>
         This will be either F_x or F_y or F_z
@@ -27,28 +27,30 @@ class Vector(object):
     -----------
     value: np.ndarray
         Value for the vector as stored
+    nodal_count: np.ndarray 
+        Stores the nodal count in any direction
+        - If length == 1, uniform
+        - Elif length == 3, [nx ny nz] storage
+        *** Note that a Field requires the length to be 3 ***
     nx: float
-        Number of nodes in a single row
+        Number of nodes in a single row (x-direction)
     ny: float
-        Number of nodes in a single column
+        Number of nodes in a single column (y-direction)
     nz: float
-        Number of nodes in z-direction       
+        Number of nodes in z-direction (z-direction)
     d_: float
         Step-size in _-direction
     index: function
-        Function that is used to order spatial nodes into one vector
+        Converts (x,y,z) into (nx, ny, nz) specific to this Vector
     length: int
         Length of array being stored
         
     TODO:
     -----
     - (done) Add in check that values being given to Vector are always a np.arrray of size(x,1), not a matrix    
-    - As of now, first slice is included? Shouldn't be, but necessary for reduction to 2D? 
-        Ans: With current code, first slice is always required
     - Think about possibly just saving the dX,dY,dZ matrices? And then just reusing those, 
         rather then generating them over and over?
-        
-        Ans: Still not sure how, but good to think about. 
+    **  Ans: Still not sure how, but good to think about. 
     
     Questions:
     ----------
@@ -66,10 +68,19 @@ class Vector(object):
     and that nx,ny,nz are used as fixed parameters, to maintain consistency. 
     '''
     
-    def __init__(self,size,disc,init_value):
-        self.nx = size[0]
-        self.ny = size[1]
-        self.nz = size[2]
+    def __init__(self,nodal_count,disc,init_value):
+        size = nodal_count
+        if type(nodal_count) != np.ndarray:
+            print('Warning: Not a numpy array. Break')
+            raise Exception
+        if nodal_count.size == 3:
+            self.nx = size[0]
+            self.ny = size[1]
+            self.nz = size[2]
+        elif nodal_count.size == 1:
+            self.nx = size[0]
+            self.ny = size[0]
+            self.nz = size[0]
         
         self.value = init_value
         
@@ -87,15 +98,15 @@ class Vector(object):
     def value(self,val):
         self._value = val
         if type (val) == np.ndarray:
-            self.length = val.size
-            
+            self.length = val.size 
             if val.shape[0] != self.nx*self.ny*self.nz:
                 print('Error. Incorrect dimensions or value given. Abort')
-                print('size of value: ',val.shape[0],'\n'
+                print('Initiating value array length: ',val.shape[0],'\n'
                       ,'nx: ',self.nx,'\n'
                       ,'ny: ',self.ny,'\n'
                       ,'nz: ',self.nz,'\n'
                       ,'product: ',self.nx*self.ny*self.nz)
+                print('Note: proper initiation requires \n Initiating value array length = product')
                 raise Exception
             
         else:
@@ -171,15 +182,32 @@ class Vector(object):
         dy = self.dy
         dz = self.dz
         
-        row_num = (self.nx-1)*self.ny*self.nz
+        if self.nz != 1:
+            row_num = (self.nx-1)*self.ny*self.nz
+        elif self.nz == 1 and self.nx > self.ny:
+            row_num = (self.nx-1)*(self.ny)*(self.nz)
+        elif self.nz == 1 and self.ny > self.nx:
+            row_num = (self.nx)*(self.ny-1)*(self.nz)
+            '''
+            This is done as the Ef_z is assumed to match the Ef_x layout
+            and a sizing issue becomes apparent if this is not done. 
+            '''
                         ## rows       columns
         Al = lil_matrix((int(row_num), int(self.length)), dtype='float')
-        for ll in range(0,self.nz-1): #Moving through each inner slice
-            for kk in range(0,self.ny-1): #Moving through each inner row
-                for jj in range(1,self.nx-1): #Moving through each inner node
-                    Al[ind(jj*dx,kk*dy,ll*dz),ind((jj+1)*dx,kk*dy,ll*dz)] = 1/(2*dx)
-                    Al[ind(jj*dx,kk*dy,ll*dz),ind((jj-1)*dx,kk*dy,ll*dz)] = -1/(2*dx)
-                    
+        
+        if self.nz !=1:
+            for ll in range(0,self.nz-1): #Moving through each inner slice
+                for kk in range(0,self.ny-1): #Moving through each inner row
+                    for jj in range(1,self.nx-1): #Moving through each inner node
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind((jj+1)*dx,kk*dy,ll*dz)] = 1/(2*dx)
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind((jj-1)*dx,kk*dy,ll*dz)] = -1/(2*dx)
+        else:
+            for ll in range(0,self.nz): #Moving through each inner slice
+                for kk in range(0,self.ny-1): #Moving through each inner row
+                    for jj in range(1,self.nx-1): #Moving through each inner node
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind((jj+1)*dx,kk*dy,ll*dz)] = 1/(2*dx)
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind((jj-1)*dx,kk*dy,ll*dz)] = -1/(2*dx)
+                        
         A1 = Al.tocsr()
         
         return A1*self.value
@@ -197,11 +225,18 @@ class Vector(object):
         row_num = self.nx*(self.ny-1)*self.nz
                         ## rows       columns
         Al = lil_matrix((int(row_num), int(self.length)), dtype='float')
-        for ll in range(0,self.nz-1): #Moving through each inner slice
-            for kk in range(1,self.ny-1): #Moving through each inner row
-                for jj in range(0,self.nx-1): #Moving through each inner node
-                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk+1)*dy,ll*dz)] = 1/(2*dy)
-                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk-1)*dy,ll*dz)] = -1/(2*dy)
+        if self.nz != 1:
+            for ll in range(0,self.nz-1): #Moving through each inner slice
+                for kk in range(1,self.ny-1): #Moving through each inner row
+                    for jj in range(0,self.nx-1): #Moving through each inner node
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk+1)*dy,ll*dz)] = 1/(2*dy)
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk-1)*dy,ll*dz)] = -1/(2*dy)
+        else:
+            for ll in range(0,self.nz): #Moving through only slice
+                for kk in range(1,self.ny-1): #Moving through each inner row
+                    for jj in range(0,self.nx-1): #Moving through each inner node
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk+1)*dy,ll*dz)] = 1/(2*dy)
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk-1)*dy,ll*dz)] = -1/(2*dy)
                         
         A1 = Al.tocsr()
         
@@ -216,15 +251,27 @@ class Vector(object):
         dy = self.dy
         dz = self.dz
         
-        row_num = self.nx*self.ny*(self.nz-1)
+        if self.nz != 1:
+            row_num = self.nx*self.ny*(self.nz-1)
+        elif self.nz == 1 and self.nx > self.ny:
+            row_num = (self.nx-1)*(self.ny)*(self.nz)
+        elif self.nz == 1 and self.ny > self.nx:
+            row_num = (self.nx)*(self.ny-1)*(self.nz)
+            
                         ## rows       columns
         Al = lil_matrix((int(row_num), int(self.length)), dtype='float')
-        for ll in range(1,self.nz-1): #Moving through each slice
-            for kk in range(0,self.ny-1): #Moving through each row
-                for jj in range(0,self.nx-1): #Moving through each node
-                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)] = 1/(2*dz)
-                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll-1)*dz)] = -1/(2*dz)
-                    
+        if self.nz!=1:    
+            for ll in range(1,self.nz-1): #Moving through each slice
+                for kk in range(0,self.ny-1): #Moving through each row
+                    for jj in range(0,self.nx-1): #Moving through each node
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)] = 1/(2*dz)
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll-1)*dz)] = -1/(2*dz)
+        else:
+            for ll in range(1,self.nz): #Moving through only slice
+                for kk in range(0,self.ny-1): #Moving through each row
+                    for jj in range(0,self.nx-1): #Moving through each node
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)] = 1/(2*dz)
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll-1)*dz)] = -1/(2*dz)
         A1 = Al.tocsr()
         
         return A1*self.value
@@ -234,8 +281,8 @@ class Vector(object):
         Gives vector approximation to derivative w.r.t. x for By, Bz
         but includes the boundary nodes of E
         
-        These boundary nodes will lie on the x == 0, x == nx-1 nodes
-        where nx is the global node count in the x-direction. 
+        These boundary nodes will lie on the x == 0, x == gnx-1 nodes
+        where gnx is the global node count in the x-direction. 
         
         Note: the 'zero-values' being added = 2*nx*ny, for a uniform grid
                 
@@ -249,14 +296,24 @@ class Vector(object):
         row_num = int((self.nx-1)*self.ny*self.nz + 2*self.ny*self.nz)
                         ## rows       columns
         Al = lil_matrix((row_num, int(self.length)), dtype='float')
-        for ll in range(0,self.nz-1): #Moving through each inner slice
-            for kk in range(0,self.ny-1): #Moving through each inner row
-                for jj in range(0,self.nx): #Moving through each inner node
-                    if jj == 0 or jj == self.nx-1:
-                        pass
-                    else:
-                        Al[ind(jj*dx,kk*dy,ll*dz),ind((jj+1)*dx,kk*dy,ll*dz)] = 1/(2*dx)
-                        Al[ind(jj*dx,kk*dy,ll*dz),ind((jj-1)*dx,kk*dy,ll*dz)] = -1/(2*dx)
+        if self.nz != 1:
+            for ll in range(0,self.nz-1): #Moving through each inner slice
+                for kk in range(0,self.ny-1): #Moving through each inner row
+                    for jj in range(0,self.nx): #Moving through each inner node
+                        if jj == 0 or jj == self.nx-1:
+                            pass
+                        else:
+                            Al[ind(jj*dx,kk*dy,ll*dz),ind((jj+1)*dx,kk*dy,ll*dz)] = 1/(2*dx)
+                            Al[ind(jj*dx,kk*dy,ll*dz),ind((jj-1)*dx,kk*dy,ll*dz)] = -1/(2*dx)
+        else:
+            for ll in range(0,self.nz): #Moving through each inner slice
+                for kk in range(0,self.ny-1): #Moving through each inner row
+                    for jj in range(0,self.nx): #Moving through each inner node
+                        if jj == 0 or jj == self.nx-1:
+                            pass
+                        else:
+                            Al[ind(jj*dx,kk*dy,ll*dz),ind((jj+1)*dx,kk*dy,ll*dz)] = 1/(2*dx)
+                            Al[ind(jj*dx,kk*dy,ll*dz),ind((jj-1)*dx,kk*dy,ll*dz)] = -1/(2*dx)
                     
         A1 = Al.tocsr()
         
@@ -277,17 +334,30 @@ class Vector(object):
         row_num = int(self.nx*(self.ny-1)*self.nz + 2*self.nx*self.nz)
                         ## rows       columns
         Al = lil_matrix((row_num, int(self.length)), dtype='float')
-        for ll in range(0,self.nz-1): #Moving through each inner slice
-            for kk in range(0,self.ny): #Moving through each inner row
-                for jj in range(0,self.nx-1): #Moving through each inner node
-                    if kk == 0 or kk == self.ny:
-                        pass
-                    else:
-#                        print('a: ',ind(jj*dx,kk*dy,ll*dz),'\n'
-#                              'b: ',ind(jj*dx,(kk+1)*dy,ll*dz),'\n'
-#                              'c: ',ind(jj*dx,(kk-1)*dy,ll*dz))
-                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk+1)*dy,ll*dz)] = 1/(2*dy)
-                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk-1)*dy,ll*dz)] = -1/(2*dy)
+        if self.nz != 1:
+            for ll in range(0,self.nz-1): #Moving through each inner slice
+                for kk in range(0,self.ny): #Moving through each inner row
+                    for jj in range(0,self.nx-1): #Moving through each inner node
+                        if kk == 0 or kk == self.ny-1:
+                            pass
+                        else:
+    #                        print('a: ',ind(jj*dx,kk*dy,ll*dz),'\n'
+    #                              'b: ',ind(jj*dx,(kk+1)*dy,ll*dz),'\n'
+    #                              'c: ',ind(jj*dx,(kk-1)*dy,ll*dz))
+                            Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk+1)*dy,ll*dz)] = 1/(2*dy)
+                            Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk-1)*dy,ll*dz)] = -1/(2*dy)
+        else:
+            for ll in range(0,self.nz): #Moving through each inner slice
+                for kk in range(0,self.ny): #Moving through each inner row
+                    for jj in range(0,self.nx-1): #Moving through each inner node
+                        if kk == 0 or kk == self.ny-1:
+                            pass
+                        else:
+    #                        print('a: ',ind(jj*dx,kk*dy,ll*dz),'\n'
+    #                              'b: ',ind(jj*dx,(kk+1)*dy,ll*dz),'\n'
+    #                              'c: ',ind(jj*dx,(kk-1)*dy,ll*dz))
+                            Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk+1)*dy,ll*dz)] = 1/(2*dy)
+                            Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk-1)*dy,ll*dz)] = -1/(2*dy)
                         
         A1 = Al.tocsr()
         
@@ -303,19 +373,38 @@ class Vector(object):
         dy = self.dy
         dz = self.dz
 
-                    # Interior 'actual' values     zero values        
-        row_num = int(self.nx*self.ny*(self.nz-1) + 2*self.nx*self.ny)
+        if self.nz != 1:
+                        # Interior 'actual' values     zero values        
+            row_num = int(self.nx*self.ny*(self.nz-1) + 2*self.nx*self.ny)
+        else:
+            '''
+            If nz = 1, then no dz derivatives will actually matter. 
+            This is merely a place-holder for the zeros, so I can 
+            continue to use my other code more efficiently, i.e. curl etc. 
+            '''
+            row_num = int(self.nx*(self.ny-1)*(self.nz) + 2*self.nx)
                         ## rows       columns
         Al = lil_matrix((row_num, int(self.length)), dtype='float')
-        for ll in range(0,self.nz): #Moving through each slice
-            for kk in range(0,self.ny-1): #Moving through each row
-                for jj in range(0,self.nx-1): #Moving through each node
-                    if ll == 0 or ll == self.nz-1:
-                        pass
-                    else:
-                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)] = 1/(2*dz)
-                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll-1)*dz)] = -1/(2*dz)
-                    
+        
+        if self.nz != 1:
+            for ll in range(0,self.nz): #Moving through each slice
+                for kk in range(0,self.ny-1): #Moving through each row
+                    for jj in range(0,self.nx-1): #Moving through each node
+                        if ll == 0 or ll == self.nz-1:
+                            pass
+                        else:
+                            Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)] = 1/(2*dz)
+                            Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll-1)*dz)] = -1/(2*dz)
+        else: 
+            for ll in range(0,self.nz): #Moving through each slice
+                for kk in range(0,self.ny-1): #Moving through each row
+                    for jj in range(0,self.nx-1): #Moving through each node
+                        if ll == 0 or ll == self.nz-1:
+                            pass
+                        else:
+                            Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)] = 1/(2*dz)
+                            Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll-1)*dz)] = -1/(2*dz)
+                        
         A1 = Al.tocsr()
             
         return A1*self.value
@@ -324,19 +413,20 @@ class Vector(object):
         
 class Field_2(object):
     ''' 
-    This class is an update to the Field class above, for testing purposes. 
+    This class will store the values of a given field, as three vectors
+    The size will be determined by initialization
+    where each component is located will be based on my_ind()
     
-    ------- In Development -----------
+    It will be F = <F_x, F_y, F_z>
     
     Attributes:
     -----------
-    index: function
-        Converts (x,y,z) to k component for the vector fed into it
-    size_(): np_array of length 3
+    node_grid_(): np_array of length 3
         Contains the number of nodes in the x,y,z direction, in that order 
         of the () component of the field
     disc: np_array of length 3
-        Contains the uniform discretization in the x,y,z direction, in that order
+        Contains the spatial step-size
+        in the x,y,z direction, in that order
     x: Vector
         stores the first component of the field
     y,z similar to x
@@ -355,11 +445,20 @@ class Field_2(object):
             
     '''
     
-    def __init__(self,size_x, size_y, size_z,disc,values):
+    def __init__(self,node_grid_x, node_grid_y, node_grid_z, disc, values):
 #        self.index = index
-        self.size_x = size_x
-        self.size_y = size_y
-        self.size_z = size_z
+        if node_grid_x.size !=3 or node_grid_y.size !=3 or node_grid_z.size !=3:
+            print('*'*40,'\n','Error in field initialization.',
+                  'Incorrect nodal_count given. Abort. ')
+            raise Exception
+        elif disc.size !=3:
+            print('*'*40,'\n','Error in field initialization.',
+                  'Incorrect discretization given. Abort. ')
+            raise Exception
+        
+        self.node_grid_x = node_grid_x
+        self.node_grid_y = node_grid_y
+        self.node_grid_z = node_grid_z
         self.disc = disc
         self.values = values
         
@@ -368,21 +467,21 @@ class Field_2(object):
         return self._x
     @x.setter
     def x(self, val):
-        self._x = Vector(self.size_x, self.disc, val)
+        self._x = Vector(self.node_grid_x, self.disc, val)
         
     @property 
     def y(self):
         return self._y
     @y.setter
     def y(self, val):
-        self._y = Vector(self.size_y, self.disc, val)
+        self._y = Vector(self.node_grid_y, self.disc, val)
         
     @property 
     def z(self):
         return self._z
     @z.setter
     def z(self, val):
-        self._z = Vector(self.size_z, self.disc, val)
+        self._z = Vector(self.node_grid_z, self.disc, val)
                 
     @property
     def values(self):
@@ -392,14 +491,7 @@ class Field_2(object):
         self._values = vals
         self.x = vals[0]
         self.y = vals[1]
-        self.z = vals[2]
-#        if vals.shape[0] == 3 or vals.shape[1] == 3:
-#            self.z = vals[2]
-#        elif vals.shape[0] == 2  or vals.shape[1] == 2:
-#            print('Note, reduction to two-dimensions. In construction')
-#        else:
-#            print('Error. Values not given in proper format')
-        
+        self.z = vals[2]        
 
     def curl(self):
         '''
