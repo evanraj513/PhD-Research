@@ -748,6 +748,7 @@ Want to know why the forcing term is not dispersing across Ey.
 '''
 
 #################################
+#R_sys.set_up()
 #E_old = R_sys.E_old
 #B_old = R_sys.B_old
 #H_old = R_sys.H_old
@@ -755,10 +756,8 @@ Want to know why the forcing term is not dispersing across Ey.
 #b_ind = R_sys.bound_ind
 #
 ## Actual computation of time stepping
-#R_sys.set_up()
-#
 #F = np.concatenate((R_sys.Fx(t), R_sys.Fy(t), R_sys.Fz(t)),axis=1)
-#E_new_values = E_old.values + dt*H_old.curl()
+#E_new_values = E_old.values + dt/eps*H_old.curl()
 #
 ##Setting all E boundaries to 0
 #for j in b_ind[0]:
@@ -816,10 +815,136 @@ Want to know why the forcing term is not dispersing across Ey.
 #  + (Z*np.cross(a.T, p.T)).T)
 
 
+###################################################################
+## Debugging derivatives for E
+###################################################################
 
-
-
-
+## Ez, Dy, Bx
+#def ind_z2(x,y,z):
+#    j = x/dx
+#    k = y/dy
+#    l = z/dz
+#    nx = Ez.nx
+#    ny = Ez.ny
+#    nz = Ez.nz
+#    val = j + k*nx + l*nx*(ny-1)
+#    return np.int(np.round(val))
+#
+#for ll in np.arange(0,1):
+#    for kk in np.arange(0,Ez.ny-1):
+#        for jj in np.arange(0,Ez.nx):
+#            diff = Ez.nx
+#            print(jj,kk,ll,\
+#                ind_z2(jj*dx,kk*dy,ll*dz),\
+#                ind_z2(jj*dx,kk*dy,ll*dz)+ll*diff,\
+#                ind_z2(jj*dx,(kk+1)*dy,ll*dz)+ll*diff)
+#
+### Ex, Dy, Bz
+#def ind_x2(x,y,z):
+#    j = x/dx
+#    k = y/dy
+#    l = z/dz
+#    nx = Ex.nx
+#    ny = Ex.ny
+#    nz = Ex.nz
+#    val = j+k*nx + l*nx*(ny-1)
+#    return np.int(np.round(val))
+#
+#
+#for ll in np.arange(0,1):
+#   for kk in np.arange(0,Ex.ny-1):
+#       for jj in np.arange(0,Ex.nx):
+#           diff = Ex.nx
+#           print(jj,kk,ll,\
+#                    ind_x2(jj*dx,kk*dy,ll*dz),\
+#                    ind_x2(jj*dx,kk*dy,ll*dz)+ll*diff,\
+#                    ind_x2(jj*dx,(kk+1)*dy,ll*dz)+ll*diff)
+#
+### Ex, Dz, By
+#def ind_x3(x,y,z):
+#    j = x/dx
+#    k = y/dy
+#    l = z/dz
+#    nx = Ex.nx
+#    ny = Ex.ny
+#    nz = Ex.nz
+#    val = j+k*nx + l*nx*ny #By.nx = Ex.nx, By.ny = Ex.ny
+#    return np.int(np.round(val))
+#
+#
+#for ll in np.arange(0,1): #nz-1
+#   for kk in np.arange(0,Ex.ny):
+#       for jj in np.arange(0,Ex.nx):
+#           print(jj,kk,ll,\
+#                    ind_x3(jj*dx,kk*dy,ll*dz),\
+#                    ind_x3(jj*dx,kk*dy,ll*dz),\
+#                    ind_x3(jj*dx,kk*dy,(ll+1)*dz))
+#           
+### Ey, Dz, Bx
+#def ind_y2(x,y,z):
+#    j = x/dx
+#    k = y/dy
+#    l = z/dz
+#    nx = Ey.nx
+#    ny = Ey.ny
+#    nz = Ey.nz
+#    val = j+k*nx + l*nx*ny
+#    return np.int(np.round(val))
+#
+#
+#for ll in np.arange(0,1):
+#   for kk in np.arange(0,Ey.ny):
+#       for jj in np.arange(0,Ey.nx):
+#           print(jj,kk,ll,\
+#                    ind_y2(jj*dx,kk*dy,ll*dz),\
+#                    ind_y2(jj*dx,kk*dy,ll*dz),\
+#                    ind_y2(jj*dx,kk*dy,(ll+1)*dz))
+#          
+#           
+### Ey, Dx, Bz
+#def ind_y3(x,y,z):
+#    j = x/dx
+#    k = y/dy
+#    l = z/dz
+#    nx = Ey.nx
+#    ny = Ey.ny
+#    nz = Ey.nz
+#    val = j+k*(nx-1) + l*(nx-1)*ny
+#    return np.int(np.round(val))
+#
+#for ll in np.arange(0,1):
+#   for kk in np.arange(0,Ey.ny):
+#       for jj in np.arange(0,Ey.nx-1):
+#           diff = Ey.ny #abs(Ey.ny*Ey.nx - Bz.nx*Bz.ny) = abs(Ey.ny*Ey.nx - Ey.ny*(Ey.nx-1))
+#           diff2 = 1 #abs(Ey.nx - Bz.nx)
+#           print(jj,kk,ll,\
+#                    ind_y3(jj*dx,kk*dy,ll*dz),\
+#                    ind_y3(jj*dx,kk*dy,ll*dz)+ll*diff+kk*diff2,\
+#                    ind_y3((jj+1)*dx,kk*dy,ll*dz)+ll*diff+kk*diff2)
+#           
+### Ez, Dx, By
+#def ind_z3(x,y,z):
+#    j = x/dx
+#    k = y/dy
+#    l = z/dz
+#    nx = Ez.nx
+#    ny = Ez.ny
+#    nz = Ez.nz
+#    val = j + k*(nx-1) + l*(nx-1)*ny
+#    return np.int(np.round(val))
+#
+#for ll in np.arange(0,1):
+#    for kk in np.arange(0,Ez.ny):
+#        for jj in np.arange(0,Ez.nx-1):
+#            diff = Ez.nx 
+#            diff2 = 1 #Ez.nx - Bz.nx, adjust for each row wrapping
+#            print(jj,kk,ll,\
+#                ind_z3(jj*dx,kk*dy,ll*dz),\
+#                ind_z3(jj*dx,kk*dy,ll*dz)+ll*diff+kk*diff2,\
+#                ind_z3((jj+1)*dx,(kk)*dy,ll*dz)+ll*diff+kk*diff2)
+            
+## Everything above has been checked at least once.             
+################################################################################
 
 
 

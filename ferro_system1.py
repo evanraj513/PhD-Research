@@ -591,9 +591,21 @@ class Ferro_sys(object):
         Function to plot a 'flat' (i.e. 2D) plot of the comp of the field,
         at some specific cross-section. Not a 3D slice, but a 2D cross-section
         of a specific slice
+        
+        cs is the cross_section you want plotted
+        s is the slice number you will take the cross-section from.
+        
+        pc stands for plot component
+        ind stands for index
+        
+        m_s is the number of nodes to add to get to the correct slice
+        m_cs is the number of nodes to add to get to the correct cross_section
+        
+        Will always plot across the x_axis for now.
+        
         '''
         F = Field
-        
+
     
         if F == 'E':
             if comp == 'x':
@@ -639,14 +651,14 @@ class Ferro_sys(object):
                 
         elif F == 'H':
             if comp == 'x':
-                pc = R_sys.B_old.x
-                ind = R_sys.ind_rev_x_inn
+                pc = self.B_old.x
+                ind = self.ind_rev_x_inn
             elif comp == 'y':
-                pc = R_sys.B_old.y
-                ind = R_sys.ind_rev_y_inn
+                pc = self.B_old.y
+                ind = self.ind_rev_y_inn
             elif comp == 'z':
-                pc = R_sys.B_old.z
-                ind = R_sys.ind_rev_z_inn
+                pc = self.B_old.z
+                ind = self.ind_rev_z_inn
             else:
                 print('Error, not "x", "y", "z". No comprendo, start over')
                 raise Exception
@@ -665,19 +677,74 @@ class Ferro_sys(object):
             x1 = np.zeros(shape = (pc.nx,1))
             y1 = np.copy(x1)
             
+            for k in np.arange(m_s+m_cs,m_s+m_cs+x1.shape[0]-1):
+                x1[k-m_cs] = ind(k)[0]
+                y1[k-m_cs] = pc.value[k]
+                
+            ax.plot(x1,y1)
+#            title = 'Plot of: '+F+'_'+comp+'\n'+ 'slice number: '+str(s)+\
+#                    '\n'+'cross_section: '+str(cs)
+            title = 'Plot of: '+F+'_'+comp+'\n'+\
+                    '\n'+'cross_section: '+str(cs)
+            ax.set_xlabel('x')
+            ax.set_ylabel(F+comp)
+        #        print(title)
+            ax.set_title(title)
+            
+        elif comp == 'y':
+            '''
+            Why this works
+            --------------
+            m_cs is defined as is because the discretization is along the x-axis
+            so pc.nx represents how many nodes to add, regardless of which comp
+            you are plotting
+            
+            Similarly, this is why x1 is the shape of pc.nx
+            
+            If one were plotting a different axis, you would have to go through
+            and select the proper indices, probably building some sort of set of
+            indices. 
+            '''
+            
+            
+            m_cs = pc.nx*cs
+            
+            x1 = np.zeros(shape = (pc.nx,1))
+            y1 = np.copy(x1)
+            
             for k in np.arange(m_s+m_cs,m_s+m_cs+x1.shape[0]):
-                x1[k-m_s] = ind(k)[0]
-                y1[k-m_s] = pc.value[k]
+                x1[k-m_cs] = ind(k)[0]
+                y1[k-m_cs] = pc.value[k]
                 
                       #   (num rows, num cols)
-            x1 = x1.reshape(pc.ny, pc.nx)
-            y1 = y1.reshape(pc.ny, pc.nx)
             ax.plot(x1,y1)
             title = 'Plot of: '+F+'_'+comp+'\n'+ 'slice number: '+str(s)+\
                     '\n'+'cross_section: '+str(cs)
         #        print(title)
             ax.set_title(title)
-        
+            
+        elif comp == 'z':
+            '''
+            Why this works? See above
+            '''
+            
+            m_cs = pc.nx*cs
+            
+            x1 = np.zeros(shape = (pc.nx,1))
+            y1 = np.copy(x1)
+            
+            for k in np.arange(m_s+m_cs,m_s+m_cs+x1.shape[0]):
+                x1[k-m_cs] = ind(k)[0]
+                y1[k-m_cs] = pc.value[k]
+                
+                      #   (num rows, num cols)
+            ax.plot(x1,y1)
+            title = 'Plot of: '+F+'_'+comp+'\n'+ 'slice number: '+str(s)+\
+                    '\n'+'cross_section: '+str(cs)
+        #        print(title)
+            ax.set_title(title)
+            
+            
         return fig
                        
     def set_up(self):
@@ -687,6 +754,19 @@ class Ferro_sys(object):
             Ans: Probably not, as we will re-initialize each field as an update to
                 the single run. Thus, will need to keep reassigning derivatives and whatnot
         '''
+#        self.E_old.x.Dx = self.E_old.x.Dx_E
+        self.E_old.x.Dy = self.E_old.x.Dy_E
+        self.E_old.x.Dz = self.E_old.x.Dz_E
+        
+        self.E_old.y.Dx = self.E_old.y.Dx_E
+#        self.E_old.y.Dy = self.E_old.y.Dy_E
+        self.E_old.y.Dz = self.E_old.y.Dz_E
+        
+        self.E_old.z.Dx = self.E_old.z.Dx_E
+        self.E_old.z.Dy = self.E_old.z.Dy_E
+#        self.E_old.z.Dz = self.E_old.z.Dz_E
+        
+        
 #        self.H_old.x.Dx = self.H_old.x.Dx_B
         self.H_old.x.Dy = self.H_old.x.Dy_B
         self.H_old.x.Dz = self.H_old.x.Dz_B
@@ -723,6 +803,18 @@ class Ferro_sys(object):
         self.B_old.z.Dy = self.B_old.z.Dy_B
 #        self.B_old.z.Dz = self.B_old.z.Dz_B    
         
+    def E_new_setup(self):
+#        self.E_new.x.Dx = self.E_new.x.Dx_E
+        self.E_new.x.Dy = self.E_new.x.Dy_E
+        self.E_new.x.Dz = self.E_new.x.Dz_E
+        
+        self.E_new.y.Dx = self.E_new.y.Dx_E
+#        self.E_new.y.Dy = self.E_new.y.Dy_E
+        self.E_new.y.Dz = self.E_new.y.Dz_E
+        
+        self.E_new.z.Dx = self.E_new.z.Dx_E
+        self.E_new.z.Dy = self.E_new.z.Dy_E
+#        self.E_new.z.Dz = self.E_new.z.Dz_E
     
     
     def fx(self,x1,y1,z1,t1):
@@ -754,9 +846,9 @@ class Ferro_sys(object):
         ny = self.E_old.x.ny
         nz = self.E_old.x.nz
         if nz != 1:
-            for ll in np.arange(0,nz-1):
-                for kk in np.arange(0,ny-1):
-                    for jj in np.arange(0,nx-1):
+            for ll in np.arange(0,nz):
+                for kk in np.arange(0,ny):
+                    for jj in np.arange(0,nx):
                         x = jj*2*dx
                         y = (kk+1/2)*2*dy
                         z = ll*2*dz
@@ -772,8 +864,8 @@ class Ferro_sys(object):
                         F_x[jj + nx*kk + nx*ny*ll] = self.fx(x,y,z,t)
         else:
             for ll in np.arange(0,1):
-                for kk in np.arange(0,ny-1):
-                    for jj in np.arange(0,nx-1):
+                for kk in np.arange(0,ny):
+                    for jj in np.arange(0,nx):
                         x = jj*2*dx
                         y = (kk+1/2)*2*dy
                         z = ll*2*dz
@@ -788,9 +880,6 @@ class Ferro_sys(object):
     #                        wait = input('Press ENTER to continue')
     
                         F_x[jj + nx*kk + nx*ny*ll] = self.fx(x,y,z,t) 
-            
-    
-        return F_x
                     
         return F_x
         
@@ -805,9 +894,9 @@ class Ferro_sys(object):
         nz = self.E_old.y.nz
         
         if nz != 1:
-            for ll in np.arange(0,nz-1):
-                for kk in np.arange(0,ny-1):
-                    for jj in np.arange(0,nx-1):
+            for ll in np.arange(0,nz):
+                for kk in np.arange(0,ny):
+                    for jj in np.arange(0,nx):
                         x = jj*2*dx
                         y = (kk+1/2)*2*dy
                         z = ll*2*dz
@@ -823,8 +912,8 @@ class Ferro_sys(object):
                         F_y[jj + nx*kk + nx*ny*ll] = self.fy(x,y,z,t)
         else:
             for ll in np.arange(0,1):
-                for kk in np.arange(0,ny-1):
-                    for jj in np.arange(0,nx-1):
+                for kk in np.arange(0,ny):
+                    for jj in np.arange(0,nx):
                         x = jj*2*dx
                         y = (kk+1/2)*2*dy
                         z = ll*2*dz
@@ -852,14 +941,14 @@ class Ferro_sys(object):
         nx = self.E_old.z.nx
         ny = self.E_old.z.ny
         nz = self.E_old.z.nz
-        for ll in np.arange(0,nz-1):
-            for kk in np.arange(0,ny-1):
-                for jj in np.arange(0,nx-1):
+        for ll in np.arange(0,nz):
+            for kk in np.arange(0,ny):
+                for jj in np.arange(0,nx):
                     x = jj*2*dx
                     y = (kk+1/2)*2*dy
                     z = ll*2*dz
                     
-                    F_z[jj + nx*kk + nx*ny*ll] = self.fy(x,y,z,t)
+                    F_z[jj + nx*kk + nx*ny*ll] = self.fz(x,y,z,t)
 
         return F_z
     
@@ -1125,6 +1214,8 @@ class Ferro_sys(object):
         #Forcing term and boundary conditions inside F
         E_new_values = E_new_values+F.T
         self.E_new = E_new_values
+        
+        self.E_new_setup()
         
         B_new_values = B_old.values - dt*self.E_new.curl()
         self.B_new = B_new_values

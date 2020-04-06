@@ -139,7 +139,11 @@ class Vector(object):
         k = y/self.dy
         l = z/self.dz
         
-        val = j + k*self.nx + l*self.nx*self.ny
+        val = j + k*(self.nx) + l*(self.nx*self.ny)
+        
+#        print('j: ',j,'\n',
+#              'k: ',k,'\n',
+#              'l: ',l)
         
         return np.int(np.round(val))
     
@@ -212,6 +216,7 @@ class Vector(object):
         
         return A1*self.value
     
+   
     
     def Dy(self):
         '''
@@ -264,19 +269,261 @@ class Vector(object):
             for ll in range(1,self.nz-1): #Moving through each slice
                 for kk in range(0,self.ny-1): #Moving through each row
                     for jj in range(0,self.nx-1): #Moving through each node
-                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)] = 1/(2*dz)
-                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll-1)*dz)] = -1/(2*dz)
+                        diff = self.nx #Could also be ny I believe
+                        
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll)*dz)+kk+diff*ll] = -1/(2*dz)
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)+kk+diff*ll] = 1/(2*dz)
         else:
             for ll in range(1,self.nz): #Moving through only slice
                 for kk in range(0,self.ny-1): #Moving through each row
                     for jj in range(0,self.nx-1): #Moving through each node
-                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)] = 1/(2*dz)
-                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll-1)*dz)] = -1/(2*dz)
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll)*dz)+kk] = -1/(2*dz)
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)+kk] = 1/(2*dz)
         A1 = Al.tocsr()
         
         return A1*self.value
     
-    def Dx_B(self):
+    def ind_dx(self,x,y,z):
+        '''
+        Returns the Bz (for Ey) or By for (Ex) node to the *left* of given
+        (x,y,z), to be used solely for the Dx_E
+        
+        Note that the sizing is assumed to be:
+            E_nx = B_nx+1
+            E_ny = B_ny
+            E_nz = B_nz
+        
+        
+        '''
+        dx = self.dx
+        dy = self.dy
+        dz = self.dz
+
+        j = x/dx
+        k = y/dy
+        l = z/dz
+        nx = self.nx
+        ny = self.ny
+        val = j + k*(nx-1) + l*(nx-1)*ny
+        return np.int(np.round(val))
+    
+    
+    def Dx_E(self):
+        '''
+        Approximates derivative of E w.r.t. x, based on the following scheme
+                
+            .   x      ...
+          E_nx+1
+        ^     E_nx
+        |
+        y   .  x   .  x   .  x   . ... x   .
+        x-> 0      1      2      3        E_nx (E nodes)
+               0      1      2       (E_nx-1)  (DE/Dx nodes)
+               
+        Note: This is to be used for only Ey, Ez. Will not work for Ex
+        '''
+        dx = self.dx
+        dy = self.dy
+        dz = self.dz
+        nx = self.nx
+        ny = self.ny
+        nz = self.nz
+        
+        ind = self.ind_dx
+        if nz!=1:
+            if ny > nz:
+                row_num = nx*(ny-1)*nz
+            elif nz > ny:
+                row_num = nx*ny*(nz-1)
+        else:
+            if nx > ny:
+                row_num = (nx-1)*ny
+            elif ny > nx:
+                row_num = nx*(ny-1)
+        
+            '''
+            This is done as the Ef_z is assumed to match the Ef_x layout
+            and a sizing issue becomes apparent if this is not done. 
+            '''
+                        ## rows       columns
+        Al = lil_matrix((int(row_num), int(self.length)), dtype='float')
+        
+        for ll in np.arange(0,nz):
+           for kk in np.arange(0,ny):
+               for jj in np.arange(0,nx-1):
+                   #abs(Ey.ny*Ey.nx - Bz.nx*Bz.ny) = abs(Ey.ny*Ey.nx - Ey.ny*(Ey.nx-1))
+                   diff = ny ## Adjust for each slice number discrepancy. 
+                   diff2 = 1 #(Ey.nx - Bz.nx), adjust for each row wrapping
+                   Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)+ll*diff+kk*diff2] = -1/2*dx
+                   Al[ind(jj*dx,kk*dy,ll*dz),ind((jj+1)*dx,kk*dy,ll*dz)+ll*diff+kk*diff2] = 1/2*dx
+#                   print(jj,kk,ll,\
+#                            ind_y3(jj*dx,kk*dy,ll*dz),\
+#                            ind_y3(jj*dx,kk*dy,ll*dz)+ll*diff+kk*diff2,\
+#                            ind_y3((jj+1)*dx,kk*dy,ll*dz)+ll*diff+kk*diff2)
+                   
+        A1 = Al.tocsr()
+        
+        return A1*self.value
+
+    def ind_dy(self,x,y,z):
+        '''
+        Returns the Bz (for Ex) or Bx for (Ez) node to *above* given
+        (x,y,z), to be used solely for the Dy_E
+        
+        Note that the sizing is assumed to be:
+            E_nx = B_nx
+            E_ny = B_ny+1
+            E_nz = B_nz
+        
+        
+        '''
+        dx = self.dx
+        dy = self.dy
+        dz = self.dz
+
+        j = x/dx
+        k = y/dy
+        l = z/dz
+        nx = self.nx
+        ny = self.ny
+        val = j + k*nx + l*nx*(ny-1)
+        return np.int(np.round(val))
+                   
+    def Dy_E(self):
+        '''
+        Approximates derivative of E w.r.t. y, based on the following scheme
+                
+            .   x      ...
+            1
+        ^       1
+        |
+        x   .  x   .     x      .    ...       x        .
+        y-> 0    E_nx+1      2*(E_nx+1)            (E_ny)(E_nx+1)     (E nodes)
+               0      E_nx+1              (E_ny)(E_nx+1)              (DE/Dy nodes)
+               
+        Note: This is to be used for only Ex, Ez. Will not work for Ey
+        '''
+        dx = self.dx
+        dy = self.dy
+        dz = self.dz
+        nx = self.nx
+        ny = self.ny
+        nz = self.nz
+        
+        ind = self.ind_dy
+        if nz!=1:
+            if nx > nz:
+                row_num = (nx-1)*ny*nz
+            elif nz > nx:
+                row_num = nx*ny*(nz-1)
+        else:
+            if nx > ny:
+                row_num = (nx-1)*ny
+            elif ny > nx:
+                row_num = nx*(ny-1)
+            '''
+            This is done as the Ef_z is assumed to match the Ef_x layout
+            and a sizing issue becomes apparent if this is not done. 
+            '''
+                        ## rows       columns
+        Al = lil_matrix((int(row_num), int(self.length)), dtype='float')
+        
+        for ll in np.arange(0,nz):
+            for kk in np.arange(0,ny-1):
+                for jj in np.arange(0,nx):
+                    #abs(Ey.ny*Ey.nx - Bz.nx*Bz.ny) = abs(Ey.ny*Ey.nx - Ey.nx*(Ey.ny-1))
+#                    print(jj,kk,ll,\
+#                    ind(jj*dx,kk*dy,ll*dz),\
+#                    ind(jj*dx,kk*dy,ll*dz),\
+#                    ind(jj*dx,(kk+1)*dy,ll*dz))
+#                    
+#                    wait = input('Press Enter to continue')
+                    
+                    diff = nx 
+                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)+ll*diff] = -1/2*dy
+                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk+1)*dy,ll*dz)+ll*diff] = 1/2*dy
+                    
+        A1 = Al.tocsr()
+        
+        return A1*self.value
+    
+    
+    def ind_dz(self,x,y,z):
+        '''
+        Returns the Bz (for Ex) or Bx for (Ez) node to *above* given
+        (x,y,z), to be used solely for the Dy_E
+        
+        Note that the sizing is assumed to be:
+            E_nx = B_nx
+            E_ny = B_ny+1
+            E_nz = B_nz
+        
+        
+        '''
+        dx = self.dx
+        dy = self.dy
+        dz = self.dz
+
+        j = x/dx
+        k = y/dy
+        l = z/dz
+        nx = self.nx
+        ny = self.ny
+        val = j + k*nx + l*nx*ny
+        return np.int(np.round(val))
+    
+    def Dz_E(self):
+        '''
+        Approximates derivative of E w.r.t. z, based on the similar scheme to 
+        above
+               
+        Note: This is to be used for only Ex, Ez. Will not work for Ey
+        '''
+        dx = self.dx
+        dy = self.dy
+        dz = self.dz
+        nx = self.nx
+        ny = self.ny
+        nz = self.nz
+        
+        ind = self.ind_dz
+        
+        if nx > ny:
+            row_num = (nx-1)*ny*nz
+        elif ny > nx:
+            row_num = nx*(ny-1)*nz
+        
+#        if self.nz != 1:
+#            row_num = nx*(ny-1)*nz
+#        elif self.nz == 1 and self.nx > self.ny:
+#            row_num = (self.nx-1)*(self.ny)*(self.nz)
+#        elif self.nz == 1 and self.ny > self.nx:
+#            row_num = (self.nx)*(self.ny-1)*(self.nz)
+            '''
+            This is done as the Ef_z is assumed to match the Ef_x layout
+            and a sizing issue becomes apparent if this is not done. 
+            '''
+                        ## rows       columns
+        Al = lil_matrix((int(row_num), int(self.length)), dtype='float')
+        
+        for ll in np.arange(0,nz-1):
+            for kk in np.arange(0,ny):
+                for jj in np.arange(0,nx):
+#                    print(jj,kk,ll,\
+#                    ind(jj*dx,kk*dy,ll*dz),\
+#                    ind(jj*dx,kk*dy,ll*dz),\
+#                    ind(jj*dx,(kk+1)*dy,ll*dz))
+#                    
+#                    wait = input('Press Enter to continue')
+                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)] = -1/2*dz
+                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)] = 1/2*dz
+                    
+        A1 = Al.tocsr()
+        
+        return A1*self.value
+        
+    
+    def Dx_B_v1(self):
         '''
         Gives vector approximation to derivative w.r.t. x for By, Bz
         but includes the boundary nodes of E
@@ -319,8 +566,85 @@ class Vector(object):
         
         return A1*self.value
     
+    def ind_dx_B(self,x,y,z):
+        '''
+        Returns the Ey (for Bz) or Ex for (By) node to the *left* of given
+        (x,y,z), to be used solely for the Dx_B
+        
+        Note that the sizing is assumed to be:
+            E_nx = B_nx+1
+            E_ny = B_ny
+            E_nz = B_nz
+        
+        '''
+        dx = self.dx
+        dy = self.dy
+        dz = self.dz
+
+        j = x/dx
+        k = y/dy
+        l = z/dz
+        nx = self.nx
+        ny = self.ny
+        val = j + k*(nx+1) + l*(nx+1)*ny
+        return np.int(np.round(val))
     
-    def Dy_B(self):
+    
+    #### Correction as done in Dx_E but reverse?
+    def Dx_B(self):
+        '''
+        Gives vector approximation to derivative w.r.t. x for By, Bz
+        but includes the boundary nodes of E
+        
+        These boundary nodes will lie on the x == 0, x == gnx-1 nodes
+        where gnx is the global node count in the x-direction. 
+        
+        Note: the 'zero-values' being added = 2*nx*ny, for a uniform grid
+                
+        '''
+        ind = self.ind_dx_B
+        dx = self.dx
+        dy = self.dy
+        dz = self.dz
+        nx = self.nx
+        ny = self.ny
+        nz = self.nz
+        
+                    # Interior 'actual' values  +  zero values
+        row_num = int((nx-1)*ny*nz + 2*ny*nz)
+                        ## rows       columns
+        Al = lil_matrix((row_num, int(self.length)), dtype='float')
+        
+        for ll in range(0,self.nz): #Moving through each inner slice
+            for kk in range(0,self.ny): #Moving through each inner row
+                for jj in range(0,self.nx+1): #Moving through each inner node
+                    if jj == 0 or jj == self.nx:
+                        pass
+                    else:
+                        if nz < ny:
+                            diff = nz
+                        elif ny < nz:
+                            diff = ny
+                        diff2 = 1
+#                        print(jj,kk,ll,\
+#                            ind(jj*dx,kk*dy,ll*dz),\
+#                            ind((jj-1)*dx,kk*dy,ll*dz)-ll*diff-kk*diff2,\
+#                            ind(jj*dx,kk*dy,ll*dz)-ll*diff-kk*diff2)
+#                            
+#                        wait = input('Press Enter to continue')
+                        
+                        Al[ind(jj*dx,kk*dy,ll*dz)\
+                           ,ind((jj-1)*dx,kk*dy,ll*dz)-ll*diff-kk*diff2] = -1/(2*dx)
+                        Al[ind(jj*dx,kk*dy,ll*dz),\
+                           ind(jj*dx,kk*dy,ll*dz)-ll*diff-kk*diff2] = 1/(2*dx)
+                    
+        A1 = Al.tocsr()
+        
+        return A1*self.value
+    
+    
+    
+    def Dy_B_v1(self):
         '''
         Gives vector approximation to derivative w.r.t. y for Bx, Bz
         but includes the boundary nodes of E              
@@ -363,7 +687,69 @@ class Vector(object):
         
         return A1*self.value
     
-    def Dz_B(self):
+    def ind_dy_B(self,x,y,z):
+        '''
+        Returns the Ex (for Bz) or Ez for (Bx) node to *above* given
+        (x,y,z), to be used solely for the Dy_E
+        
+        Note that the sizing is assumed to be:
+            E_nx = B_nx
+            E_ny = B_ny+1
+            E_nz = B_nz
+        
+        
+        '''
+        dx = self.dx
+        dy = self.dy
+        dz = self.dz
+
+        j = x/dx
+        k = y/dy
+        l = z/dz
+        nx = self.nx
+        ny = self.ny
+        val = j + k*nx + l*nx*(ny+1)
+        return np.int(np.round(val))
+    
+    ### Correction in progress
+    def Dy_B(self):
+        '''
+        Gives vector approximation to derivative w.r.t. y for Bx, Bz
+        but includes the boundary nodes of E              
+        '''
+        ind = self.ind_dy_B
+        dx = self.dx
+        dy = self.dy
+        dz = self.dz
+        nx = self.nx
+        ny = self.ny
+        nz = self.nz
+
+                    # Interior 'actual' values     zero values        
+        row_num = int(self.nx*(self.ny-1)*self.nz + 2*self.nx*self.nz)
+                        ## rows       columns
+        Al = lil_matrix((row_num, int(self.length)), dtype='float')
+        
+        for ll in range(0,self.nz): #Moving through each inner slice
+            for kk in range(0,self.ny+1): #Moving through each inner row
+                for jj in range(0,self.nx): #Moving through each inner node
+                    if kk == 0 or kk == self.ny:
+                        pass
+                    else:
+                        if nx > nz:
+                            diff = nz
+                        elif nz > nx:
+                            diff = nx
+
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk-1)*dy,ll*dz)-ll*diff] = -1/(2*dy)
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)-ll*diff] = 1/(2*dy)
+        
+                        
+        A1 = Al.tocsr()
+        
+        return A1*self.value
+    
+    def Dz_B_v1(self):
         '''
         Gives vector approximation to derivative w.r.t. z for Bx, By
         but includes the boundary nodes of E          
@@ -405,6 +791,71 @@ class Vector(object):
                             Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)] = 1/(2*dz)
                             Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll-1)*dz)] = -1/(2*dz)
                         
+        A1 = Al.tocsr()
+            
+        return A1*self.value
+    
+    def ind_dz_B(self,x,y,z):
+        '''
+        Returns the Ex (for By) or Ey for (Bx) node to *above* given
+        (x,y,z), to be used solely for the Dy_E
+        
+        Note that the sizing is assumed to be:
+            E_nx = B_nx
+            E_ny = B_ny
+            E_nz = B_nz+1
+        
+        
+        '''
+        dx = self.dx
+        dy = self.dy
+        dz = self.dz
+
+        j = x/dx
+        k = y/dy
+        l = z/dz
+        nx = self.nx
+        ny = self.ny
+        val = j + k*nx + l*nx*ny
+        return np.int(np.round(val))
+    
+    def Dz_B(self):
+        '''
+        Gives vector approximation to derivative w.r.t. z for Bx, By
+        but includes the boundary nodes of E          
+        '''
+        ind = self.ind_dz_B
+        dx = self.dx
+        dy = self.dy
+        dz = self.dz
+        
+        nx = self.nx
+        ny = self.ny
+        nz = self.nz
+
+        if self.nz != 1:
+                        # Interior 'actual' values     zero values        
+            row_num = int(self.nx*self.ny*(self.nz-1) + 2*self.nx*self.ny)
+        else:
+            '''
+            If nz = 1, then no dz derivatives will actually matter. 
+            This is merely a place-holder for the zeros, so I can 
+            continue to use my other code more efficiently, i.e. curl etc. 
+            '''
+            row_num = int(self.nx*(self.ny-1)*(self.nz) + 2*self.nx)
+                        ## rows       columns
+        Al = lil_matrix((row_num, int(self.length)), dtype='float')
+        
+
+        for ll in range(0,self.nz+1): #Moving through each slice
+            for kk in range(0,self.ny): #Moving through each row
+                for jj in range(0,self.nx): #Moving through each node
+                    if ll == 0 or ll == self.nz:
+                        pass
+                    else:
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll-1)*dz)] = -1/(2*dz)
+                        Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)] = 1/(2*dz)
+                 
         A1 = Al.tocsr()
             
         return A1*self.value

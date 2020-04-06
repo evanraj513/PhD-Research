@@ -38,33 +38,34 @@ Ferro_sys = ferro_system1.Ferro_sys
 
 ### Parameters (global)
 mu0 = 1.25667e-6
-eps = 0.88422e-11
+eps = 0.88422e-12
 gamma = 2.2e5
 K = 0
 alpha = 0.2
 H_s_val = 10**5
 
 ### Parameters (system)
-max_x = 16.4
-disc = np.array([0.4, 0.4, 0.4])
-              # Not used
+max_x = 16.4 # 16.4
+disc = np.array([0.2, 0.2, 0.2])
+                            # Not used
 
-dt = 5e-10
-T = dt*100
+dt = 1e-10
+T = 5e-7
+T = np.round(T,14)
 
 
-if (max_x/disc[0])%2 == 0:
+if np.round(max_x/disc[0])%2 <= 1E-10:
     print('Warning. Grid could fail, untested')
-    nx = round(max_x/disc[0])
+    gnx = round(max_x/disc[0]-1)
     
-elif (max_x/disc[0])%2 == 1:
-    nx = round(max_x/disc[0])
+elif np.round(max_x/disc[0])%2 == 1:
+    gnx = round(max_x/disc[0])
     
-else:
-    print('That domain and disc not available'
-          '\n','Attempting closest available disc.')
-    max_x = max_x - (max_x/disc[0])%2
-    nx = round(max_x/disc[0])
+#else:
+#    print('That domain and disc not available'
+#          '\n','Attempting closest available disc.')
+#    max_x = max_x - (max_x/disc[0])%2
+#    nx = round(max_x/disc[0])
     
 def sizing(nx,ny,nz):
     if nz != 1:
@@ -104,8 +105,8 @@ def sizing(nx,ny,nz):
 ### Initial conditions
 
 # To give number of nodes
-ny = nx
-node_count = np.array([nx, ny, 1])
+gny = gnx
+node_count = np.array([gnx, gny, 1])
 a = np.round(np.array(sizing(node_count[0], node_count[1], node_count[2])).prod(axis=1))
 
 ####################################################
@@ -179,7 +180,7 @@ def f_y(x,y,z,t):
     '''
     Ricker Pulse for y
     '''
-    if x < 1E-12: #approx 0
+    if abs(x) < disc[0]/4: #approx 0
         d = beta0*g(f*t)
         return d
     else:
@@ -197,17 +198,28 @@ R_sys.fy = f_y
 R_sys.fz = f_z
 
 for t in np.arange(dt,T,dt):
-    ### re-initializing the system
     R_sys.set_up()
+    if cont == True:
+        pass
+    else:
+        break
     
+    ### re-initializing the system
+    print('Current Time: ',np.round(t,12))
+
     ### Running the system
     R_sys.single_run(t)
     
     ## Plotting stuff to demo
-    if abs(t/dt%2) < 1E-12:
+    if abs(t/dt%50) < 1E-12:
         fig_Mz = R_sys.plot_slice('M','z',0)
         fig_Ez = R_sys.plot_slice('E','x',0)
         fig_Ey = R_sys.plot_slice('E','y',0)
+        
+        fig_Ey0 = R_sys.plot_line('E','y',0,0)
+        fig_Ey1 = R_sys.plot_line('E','y',1,0)
+        fig_Ey2 = R_sys.plot_line('E','y',2,0)
+        fig_Ey3 = R_sys.plot_line('E','y',3,0)
         
         fig = plt.figure()
         t_val = np.arange(0,T,dt)
@@ -219,7 +231,7 @@ for t in np.arange(dt,T,dt):
         ax.set_title(Title)
         plt.show()
         
-#        wait = input('Press Enter to continue')
+        wait = input('Press Enter to continue')
     
     ## Updating old fields
     R_sys.E_old2 = R_sys.E_old.values
