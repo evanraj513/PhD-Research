@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "running_ferro_sys_v1_2D", line 266, in <module>
-    fig_Mz = R_sys.plot_slice('M','z',10)
-  File "/home/rajbhane/Git/Research/ferro_system1.py", line 567, in plot_slice
-    raise Exception
-Exception

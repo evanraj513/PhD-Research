@@ -46,7 +46,7 @@ H_s_val = 10**5
 
 ### Parameters (system)
 max_x = 16.4 # 16.4
-disc = np.array([0.4, 0.4, 0.4])
+disc = np.array([0.04, 0.04, 0.04])
                             # Not used
 
 dt = 1e-10
@@ -130,7 +130,7 @@ def set_up_system(gnx,gny,gnz,disc):
     
     M0_x = np.zeros(shape = (int(a[3]),1))
     M0_y = np.zeros(shape = (int(a[4]),1))
-    M0_z = 100*np.ones(shape = (int(a[5]),1)) # Initial conditions for M
+    M0_z = 100*np.zeros(shape = (int(a[5]),1)) # Initial conditions for M
     M0 = np.concatenate((M0_x, M0_y, M0_z),axis=1).T
     
     H0_x = np.zeros(shape = (int(a[3]),1))
@@ -263,9 +263,9 @@ for t in np.arange(dt,T,dt):
 
 ## Plotting stuff
 
-fig_Mz = R_sys.plot_slice('M','z',10)
+#fig_Mz = R_sys.plot_slice('M','z',10)
 #fig_Bz = R_sys.plot_slice('B','z',10)
-fig_Ey = R_sys.plot_slice('E','y',10)
+#fig_Ey = R_sys.plot_slice('E','y',10)
 #fig_Hz = R_sys.plot_slice('H','z',10)
 
 def mkdir_p(mypath):
@@ -285,7 +285,7 @@ mkdir_p(today)
 
 ## Saving data
 
-name ='Unrefined_grid_LLG' 
+name ='Refined_grid_free_space' 
 
 R_sys.save_data(today+'/'+name)
 
@@ -313,8 +313,8 @@ data['dt'] = dt
 df = pd.DataFrame([data])
 df.to_csv(today+'/'+name+'_param.csv')
 
-fig_Mz.savefig(today+'/'+name+'Mz')
-fig_Ey.savefig(today+'/'+name+'Ey')
+#fig_Mz.savefig(today+'/'+name+'Mz')
+#fig_Ey.savefig(today+'/'+name+'Ey')
 
 def make_1D_plot(Field = 'E', comp = 'y', cs = 0, s = 0):
     '''
