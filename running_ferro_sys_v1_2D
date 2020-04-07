@@ -130,7 +130,7 @@ def set_up_system(gnx,gny,gnz,disc):
     
     M0_x = np.zeros(shape = (int(a[3]),1))
     M0_y = np.zeros(shape = (int(a[4]),1))
-    M0_z = 100*np.zeros(shape = (int(a[5]),1)) # Initial conditions for M
+    M0_z = 100*np.ones(shape = (int(a[5]),1)) # Initial conditions for M
     M0 = np.concatenate((M0_x, M0_y, M0_z),axis=1).T
     
     H0_x = np.zeros(shape = (int(a[3]),1))
@@ -225,7 +225,8 @@ for t in np.arange(dt,T,dt):
     R_sys.single_run(t)
     
     ## Plotting stuff to demo
-    if abs(t/dt%50) < 1E-12:
+
+    if abs(t/dt%50000) < 1E-12:
         fig_Mz = R_sys.plot_slice('M','z',0)
         fig_Ez = R_sys.plot_slice('E','x',0)
         fig_Ey = R_sys.plot_slice('E','y',0)
@@ -283,7 +284,8 @@ def mkdir_p(mypath):
 mkdir_p(today)
 
 ## Saving data
-name = 'test_new_Fx'
+
+name ='Unrefined_grid_LLG' 
 
 R_sys.save_data(today+'/'+name)
 
