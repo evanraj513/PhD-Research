@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "running_ferro_sys_v1", line 135, in <module>
-    R_sys = Ferro_sys(size,disc,E0,H0,M0,H_s)
-  File "/home/rajbhane/Git/Research/ferro_system1.py", line 93, in __init__
-    if global_node_count.size == 1:
-AttributeError: 'int' object has no attribute 'size'
