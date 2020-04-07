@@ -38,7 +38,7 @@ Ferro_sys = ferro_system1.Ferro_sys
 
 ### Parameters (global)
 mu0 = 1.25667e-6
-eps = 0.88422e-12
+eps = 8.5422e-12
 gamma = 2.2e5
 K = 0
 alpha = 0.2
