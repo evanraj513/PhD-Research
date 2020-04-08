@@ -12,7 +12,7 @@ from datetime import date
 
 cont = 1 ## Continue with time-run. Else, just set up system.
 save_time_steps = True ## Turn on to save many time steps
-ho = 10
+ho = 50
 
 today1 = date.today()
 today = today1.strftime("%d_%m_%y")
@@ -50,12 +50,12 @@ H_s_val = 10**5
 
 ### Parameters (system)
 max_x = 16.4 # 16.4
-disc = np.array([0.4, 0.4, 0.4])
+disc = np.array([0.04, 0.04, 0.04])
                             # Not used
 
 dt = 1e-10
 
-T = 1e-8
+T = 1e-7
 T = np.round(T,14)
 
 ## Making sure we have an odd-number for global nodes, otherwise
