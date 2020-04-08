@@ -36,9 +36,11 @@ from collections import OrderedDict
 from Research import field_class
 Field = field_class.Field_2
 Vector = field_class.Vector
-mu0 = 1.25667e-6
-eps = 0.88422e-11
-gamma = 2.2e5
+
+### Ferrosystem parameters
+mu0 = 1.25667e-6 #Permeability of free space
+eps = 8.85422e-12 #Permoittivity of free space
+gamma = 2.2e5 #From Puttha's paper
 K = 0
 alpha = 0.2
 H_s_guess = 10**5

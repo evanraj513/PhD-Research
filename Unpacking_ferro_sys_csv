@@ -42,37 +42,52 @@ Ferro_sys = ferro_system1.Ferro_sys
 
 #name = today+'/'+'test1'
 name = '07_04_20/Unrefined_grid_LLG'
+def set_up_ferro_system(name):
+    try: 
+        df_inner = pd.read_csv(name+'_inner.csv')
+        df_outer = pd.read_csv(name+'_outer.csv')
+        df_param = pd.read_csv(name+'_param.csv')
+    except FileNotFoundError:
+        print('Error importing csv. Abort')
+        raise Exception
+    
+    E0 = np.concatenate((np.array([df_outer['E.x'].values]), 
+                         np.array([df_outer['E.y'].values]),
+                         np.array([df_outer['E.z'].values])),axis=0)
+    B0 = np.concatenate((np.array([df_inner['B.x'].values]), 
+                         np.array([df_inner['B.y'].values]), 
+                         np.array([df_inner['B.z'].values])),axis=0)
+    M0 = np.concatenate((np.array([df_inner['M.x'].values]),
+                         np.array([df_inner['M.y'].values]),
+                         np.array([df_inner['M.z'].values])),axis=0)
+    H0 = np.concatenate((np.array([df_inner['H.x'].values]), 
+                         np.array([df_inner['H.y'].values]),
+                         np.array([df_inner['H.z'].values])),axis=0)
+    
+    H_s_val = df_param['H_s'][0]
+    H_s = H_s_val * np.ones(shape = H0.shape)
+    node_count = np.ones(shape = (3,1))
+    node_count[0] = df_param['gnx'][0]
+    node_count[1] = df_param['gny'][0]
+    node_count[2] = df_param['gnz'][0]
+    disc = np.ones(shape = (3,1))
+    disc[0] = df_param['disc_x'][0]
+    disc[1] = df_param['disc_y'][0]
+    disc[2] = df_param['disc_z'][0]
+    
+    R_sys = Ferro_sys(node_count,disc,E0,H0,M0,H_s)
+    
+    return R_sys
+l1 = np.zeros(shape = (15))
+ticker = 0
+for k in l1:
+    print(ticker)
+    try:
+        ticker+=1
+        name = '07_04_20/time:'+str(ticker*1e-9)+'/Unrefined_grid_free_space'
+        R_sys = set_up_ferro_system(name) 
+        R_sys.plot_slice('E')
 
-try: 
-    df_inner = pd.read_csv(name+'_inner.csv')
-    df_outer = pd.read_csv(name+'_outer.csv')
-    df_param = pd.read_csv(name+'_param.csv')
-except FileNotFoundError:
-    print('Error importing csv. Abort')
-    raise Exception
-
-E0 = np.concatenate((np.array([df_outer['E.x'].values]), 
-                     np.array([df_outer['E.y'].values]),
-                     np.array([df_outer['E.z'].values])),axis=0)
-B0 = np.concatenate((np.array([df_inner['B.x'].values]), 
-                     np.array([df_inner['B.y'].values]), 
-                     np.array([df_inner['B.z'].values])),axis=0)
-M0 = np.concatenate((np.array([df_inner['M.x'].values]),
-                     np.array([df_inner['M.y'].values]),
-                     np.array([df_inner['M.z'].values])),axis=0)
-H0 = np.concatenate((np.array([df_inner['H.x'].values]), 
-                     np.array([df_inner['H.y'].values]),
-                     np.array([df_inner['H.z'].values])),axis=0)
-
-H_s_val = df_param['H_s'][0]
-H_s = H_s_val * np.ones(shape = H0.shape)
-node_count = np.ones(shape = (3,1))
-node_count[0] = df_param['gnx'][0]
-node_count[1] = df_param['gny'][0]
-node_count[2] = df_param['gnz'][0]
-disc = np.ones(shape = (3,1))
-disc[0] = df_param['disc_x'][0]
-disc[1] = df_param['disc_y'][0]
-disc[2] = df_param['disc_z'][0]
-
-R_sys = Ferro_sys(node_count,disc,E0,H0,M0,H_s)
+    except:
+        pass
+    

@@ -11,7 +11,7 @@ import sys
 from datetime import date
 
 cont = 1 ## Continue with time-run. Else, just set up system.
-save_time_steps = True ## Turn on to save many time steps
+save_time_steps = True ## Turn on to ho time steps from run
 ho = 50
 
 today1 = date.today()
@@ -135,7 +135,7 @@ def set_up_system(gnx,gny,gnz,disc):
     
     M0_x = np.zeros(shape = (int(a[3]),1))
     M0_y = np.zeros(shape = (int(a[4]),1))
-    M0_z = 100*np.zeros(shape = (int(a[5]),1)) # Initial conditions for M
+    M0_z = 100*np.zeros(shape = (int(a[5]),1)) # Initial conditions for M, free-space => zeros
     M0 = np.concatenate((M0_x, M0_y, M0_z),axis=1).T
     
     H0_x = np.zeros(shape = (int(a[3]),1))
@@ -219,7 +219,7 @@ def mkdir_p(mypath):
         else: raise
 
 mkdir_p(today)
-name ='Unrefined_grid_free_space' 
+name ='Refined_grid_free_space' 
 
 #################################################
 ########### Actually running system #############
@@ -251,30 +251,55 @@ for t in np.arange(dt,T,dt):
     ## Plotting stuff to demo
 
     if abs(ticker%ho) < 1E-12:
-        fig_Mz = R_sys.plot_slice('M','z',0)
-        fig_Ez = R_sys.plot_slice('E','x',0)
-        fig_Ey = R_sys.plot_slice('E','y',0)
+        # fig_Mz = R_sys.plot_slice('M','z',0)
+        # fig_Ez = R_sys.plot_slice('E','x',0)
+        # fig_Ey = R_sys.plot_slice('E','y',0)
         
-        fig_Ey0 = R_sys.plot_line('E','y',0,0)
-        fig_Ey1 = R_sys.plot_line('E','y',1,0)
-        fig_Ey2 = R_sys.plot_line('E','y',2,0)
-        fig_Ey3 = R_sys.plot_line('E','y',3,0)
+        # fig_Ey0 = R_sys.plot_line('E','y',0,0)
+        # fig_Ey1 = R_sys.plot_line('E','y',1,0)
+        # fig_Ey2 = R_sys.plot_line('E','y',2,0)
+        # fig_Ey3 = R_sys.plot_line('E','y',3,0)
         
-        fig = plt.figure()
-        t_val = np.arange(0,T,dt)
-        Ricker_vec = np.vectorize(f_y)
-        ax = fig.add_subplot(111)
-        ax.plot(t_val,Ricker_vec(0,0,0,t_val))
-        ax.axvline(x=t)
-        Title = 'Current Boundary value: '+str(round(f_y(0,0,0,t),2))
-        ax.set_title(Title)
-        plt.show()
+        # fig = plt.figure()
+        # t_val = np.arange(0,T,dt)
+        # Ricker_vec = np.vectorize(f_y)
+        # ax = fig.add_subplot(111)
+        # ax.plot(t_val,Ricker_vec(0,0,0,t_val))
+        # ax.axvline(x=t)
+        # Title = 'Current Boundary value: '+str(round(f_y(0,0,0,t),2))
+        # ax.set_title(Title)
+        # plt.show()
         
         # wait = input('Press Enter to continue')
+        
+######### Turn on above to plot as you run
+######### Only works for in Spyder running
+        
         if save_time_steps == True:
-            name2 = 'time:'+str(t)
-            mkdir_p(today+'/'+name2)
-            R_sys.save_data(today+'/'+name2+'/'+name)
+            name2 = 'time:'+str(round(t,14))
+            mkdir_p(today+'/'+name2) #Creates sub-directory for this specific time
+            R_sys.save_data(today+'/'+name2+'/'+name) #Saves data 
+            data = OrderedDict()
+            data['mu0'] = mu0
+            data['eps'] = eps 
+            data['gamma'] = gamma
+            data['K'] = K
+            data['alpha'] = alpha
+            data['H_s'] = H_s_val
+            
+                    # Parameters (system)
+            data['max_x'] = max_x
+            data['disc_x'] = disc[0]
+            data['disc_y'] = disc[1]
+            data['disc_z'] = disc[2]
+            data['gnx'] = gnx
+            data['gny'] = gny
+            data['gnz'] = gnz
+            data['T'] = T
+            data['dt'] = dt
+            
+            df = pd.DataFrame([data])
+            df.to_csv(today+'/'+name2+'/'+name+'_param.csv')
         
     
     ## Updating old fields
@@ -287,8 +312,6 @@ for t in np.arange(dt,T,dt):
     R_sys.H_old = R_sys.H_new.values
     R_sys.M_old = R_sys.M_new.values
     R_sys.B_old = R_sys.B_new.values
-    if abs(t/dt%10) < 1E-12:    
-        print('Current time: ', '{:.2e}'.format(t))
 
 ## Plotting stuff
 
@@ -300,9 +323,7 @@ for t in np.arange(dt,T,dt):
 
 ## Saving data
 
-
-
-R_sys.save_data(today+'/'+name) ## Name defined above for loop
+R_sys.save_data(today+'/'+name+'/'+'time:'+str(round(T-dt,14))) ## Name defined above for loop
 
     # Run parameters
         #Global Parameters
@@ -326,7 +347,7 @@ data['T'] = T
 data['dt'] = dt
 
 df = pd.DataFrame([data])
-df.to_csv(today+'/'+name+'_param.csv')
+df.to_csv(today+'/'+name+'/'+'time:'+str(round(T-dt,14))+'_param.csv')
 
 #fig_Mz.savefig(today+'/'+name+'Mz')
 #fig_Ey.savefig(today+'/'+name+'Ey')
