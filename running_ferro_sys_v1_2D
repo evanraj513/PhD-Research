@@ -12,7 +12,7 @@ from datetime import date
 
 cont = 1 ## Continue with time-run. Else, just set up system.
 save_time_steps = True ## Turn on to save many time steps
-ho = 50
+ho = 10
 
 today1 = date.today()
 today = today1.strftime("%d_%m_%y")
@@ -241,7 +241,9 @@ for t in np.arange(dt,T,dt):
         break
     
     ### re-initializing the system
-    print('Current Time: ',np.round(t,12))
+
+
+    print('Current Time: ',np.round(t,12),' and Ticker: ',ticker)
 
     ### Running the system
     R_sys.single_run(t)
