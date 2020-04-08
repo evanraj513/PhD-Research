@@ -41,7 +41,7 @@ from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
 #name = today+'/'+'test1'
-name = '07_04_20/Unrefined_grid_LLG'
+name = '08_04_20/Unrefined_grid_LLG'
 def set_up_ferro_system(name):
     try: 
         df_inner = pd.read_csv(name+'_inner.csv')
@@ -78,13 +78,13 @@ def set_up_ferro_system(name):
     R_sys = Ferro_sys(node_count,disc,E0,H0,M0,H_s)
     
     return R_sys
-l1 = np.zeros(shape = (15))
+l1 = np.zeros(shape = (20))
 ticker = 0
 for k in l1:
     print(ticker)
     try:
         ticker+=1
-        name = '07_04_20/time:'+str(ticker*1e-9)+'/Unrefined_grid_free_space'
+        name = '08_04_20/time:'+str(ticker*.5e-8)+'/Unrefined_grid_free_space'
         R_sys = set_up_ferro_system(name) 
         R_sys.plot_slice('E')
 
