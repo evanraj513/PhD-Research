@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "running_ferro_sys_v1_2D", line 247, in <module>
+    R_sys.single_run(t)
+  File "/home/rajbhane/Git/Research/ferro_system1.py", line 1220, in single_run
+    B_new_values = B_old.values - dt*self.E_new.curl()
+  File "/home/rajbhane/Git/Research/field_class.py", line 957, in curl
+    curl_z = self.y.Dx() - self.x.Dy()
+  File "/home/rajbhane/Git/Research/field_class.py", line 443, in Dy_E
+    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)+ll*diff] = -1/2*dy
+  File "/usr/share/anaconda3/lib/python3.7/site-packages/scipy/sparse/lil.py", line 320, in __setitem__
+    x = self.dtype.type(x)
+KeyboardInterrupt
