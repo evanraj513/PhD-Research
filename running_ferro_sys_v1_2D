@@ -55,7 +55,7 @@ disc = np.array([0.04, 0.04, 0.04])
 
 dt = 1e-10
 
-T = 1e-7
+T = 5e-7
 T = np.round(T,14)
 
 ## Making sure we have an odd-number for global nodes, otherwise
