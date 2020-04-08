@@ -50,7 +50,7 @@ H_s_val = 10**5
 
 ### Parameters (system)
 max_x = 16.4 # 16.4
-disc = np.array([0.04, 0.04, 0.04])
+disc = np.array([0.4, 0.4, 0.4])
                             # Not used
 
 dt = 1e-10
@@ -219,7 +219,7 @@ def mkdir_p(mypath):
         else: raise
 
 mkdir_p(today)
-name ='Refined_grid_free_space' 
+name ='Unrefined_grid_free_space' 
 
 #################################################
 ########### Actually running system #############
