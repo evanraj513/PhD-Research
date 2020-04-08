@@ -41,7 +41,7 @@ from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
 #name = today+'/'+'test1'
-name = '06_04_20/test_new_Fx'
+name = '07_04_20/Unrefined_grid_LLG'
 
 try: 
     df_inner = pd.read_csv(name+'_inner.csv')
@@ -66,14 +66,13 @@ H0 = np.concatenate((np.array([df_inner['H.x'].values]),
 
 H_s_val = df_param['H_s'][0]
 H_s = H_s_val * np.ones(shape = H0.shape)
-n1 = df_param['size']
 node_count = np.ones(shape = (3,1))
-node_count[0] = 81#df_param['gnx'][0]
-node_count[1] = 81#df_param['gny'][0]
-node_count[2] = 1#df_param['gnz'][0]
+node_count[0] = df_param['gnx'][0]
+node_count[1] = df_param['gny'][0]
+node_count[2] = df_param['gnz'][0]
 disc = np.ones(shape = (3,1))
-disc[0] = .2#df_param['disc_x'][0]
-disc[1] = .2#df_param['disc_y'][0]
-disc[2] = .2#df_param['disc_z'][0]
+disc[0] = df_param['disc_x'][0]
+disc[1] = df_param['disc_y'][0]
+disc[2] = df_param['disc_z'][0]
 
 R_sys = Ferro_sys(node_count,disc,E0,H0,M0,H_s)

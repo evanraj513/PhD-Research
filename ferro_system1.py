@@ -495,7 +495,7 @@ class Ferro_sys(object):
         
         return np.array([x,y,z])
     
-    def plot_slice(self,F,comp,s):
+    def plot_slice(self,F = 'E',comp = 'y',s = 0):
         '''
         Plots the 'comp' component of the 'F' field in the 's' slice down the z-axis
         
@@ -532,13 +532,13 @@ class Ferro_sys(object):
                 
         elif F == 'M':
             if comp == 'x':
-                pc = self.B_old.x
+                pc = self.M_old.x
                 ind = self.ind_rev_x_inn
             elif comp == 'y':
-                pc = self.B_old.y
+                pc = self.M_old.y
                 ind = self.ind_rev_y_inn
             elif comp == 'z':
-                pc = self.B_old.z
+                pc = self.M_old.z
                 ind = self.ind_rev_z_inn
             else:
                 print('Error, not "x", "y", "z". No comprendo, start over')
@@ -546,13 +546,13 @@ class Ferro_sys(object):
                 
         elif F == 'H':
             if comp == 'x':
-                pc = self.B_old.x
+                pc = self.H_old.x
                 ind = self.ind_rev_x_inn
             elif comp == 'y':
-                pc = self.B_old.y
+                pc = self.H_old.y
                 ind = self.ind_rev_y_inn
             elif comp == 'z':
-                pc = self.B_old.z
+                pc = self.H_old.z
                 ind = self.ind_rev_z_inn
             else:
                 print('Error, not "x", "y", "z". No comprendo, start over')

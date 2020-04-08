@@ -9,7 +9,11 @@ Created on Tue Feb  4 18:30:34 2020
 import os
 import sys
 from datetime import date
-cont = 1 ## Continue with time-run. Else, just set up system. 
+
+cont = 1 ## Continue with time-run. Else, just set up system.
+save_time_steps = True ## Turn on to save many time steps
+ho = 50
+
 today1 = date.today()
 today = today1.strftime("%d_%m_%y")
 
@@ -193,14 +197,28 @@ def f_y(x,y,z,t):
         return d
     else:
         return 0
-    
-    
+       
 def f_z(x,y,z,t):
     '''
     Ricker Pulse for z
     '''
     return 0
 
+def mkdir_p(mypath):
+    '''Creates a directory. equivalent to using mkdir -p on the command line'''
+
+    from errno import EEXIST
+    from os import makedirs,path
+
+    try:
+        makedirs(mypath)
+    except OSError as exc: 
+        if exc.errno == EEXIST and path.isdir(mypath):
+            pass
+        else: raise
+
+mkdir_p(today)
+name ='Refined_grid_free_space' 
 
 #################################################
 ########### Actually running system #############
@@ -211,8 +229,11 @@ R_sys.fx = f_x
 R_sys.fy = f_y
 R_sys.fz = f_z
 
+ticker = 0
+
 for t in np.arange(dt,T,dt):
     R_sys.set_up()
+    ticker += 1
     if cont == True:
         pass
     else:
@@ -226,7 +247,7 @@ for t in np.arange(dt,T,dt):
     
     ## Plotting stuff to demo
 
-    if abs(t/dt%50000) < 1E-12:
+    if abs(ticker%ho) < 1E-12:
         fig_Mz = R_sys.plot_slice('M','z',0)
         fig_Ez = R_sys.plot_slice('E','x',0)
         fig_Ey = R_sys.plot_slice('E','y',0)
@@ -246,7 +267,12 @@ for t in np.arange(dt,T,dt):
         ax.set_title(Title)
         plt.show()
         
-        wait = input('Press Enter to continue')
+        # wait = input('Press Enter to continue')
+        if save_time_steps == True:
+            name2 = 'time:'+str(t)
+            mkdir_p(today+'/'+name2)
+            R_sys.save_data(today+'/'+name2+'/'+name)
+        
     
     ## Updating old fields
     R_sys.E_old2 = R_sys.E_old.values
@@ -268,26 +294,12 @@ for t in np.arange(dt,T,dt):
 #fig_Ey = R_sys.plot_slice('E','y',10)
 #fig_Hz = R_sys.plot_slice('H','z',10)
 
-def mkdir_p(mypath):
-    '''Creates a directory. equivalent to using mkdir -p on the command line'''
-
-    from errno import EEXIST
-    from os import makedirs,path
-
-    try:
-        makedirs(mypath)
-    except OSError as exc: 
-        if exc.errno == EEXIST and path.isdir(mypath):
-            pass
-        else: raise
-
-mkdir_p(today)
 
 ## Saving data
 
-name ='Refined_grid_free_space' 
 
-R_sys.save_data(today+'/'+name)
+
+R_sys.save_data(today+'/'+name) ## Name defined above for loop
 
     # Run parameters
         #Global Parameters
