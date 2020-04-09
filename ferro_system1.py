@@ -907,11 +907,6 @@ class Ferro_sys(object):
     
         return F_y
     
-                        F_y[jj + nx*kk + nx*ny*ll] = self.fy(x,y,z,t) 
-            
-    
-        return F_y
-    
     def Fz(self,t):
         F_z = np.zeros(shape=(self.E_old.z.value.shape[0],1))
         dx = self.disc[0]
