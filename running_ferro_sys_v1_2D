@@ -10,12 +10,18 @@ import os
 import sys
 from datetime import date
 
-cont = 1 ## Continue with time-run. Else, just set up system.
-save_time_steps = True ## Turn on to ho time steps from run
-ho = 50
+def mkdir_p(mypath):
+    '''Creates a directory. equivalent to using mkdir -p on the command line'''
 
-today1 = date.today()
-today = today1.strftime("%d_%m_%y")
+    from errno import EEXIST
+    from os import makedirs,path
+
+    try:
+        makedirs(mypath)
+    except OSError as exc: 
+        if exc.errno == EEXIST and path.isdir(mypath):
+            pass
+        else: raise
 
 import numpy as np
 from mpl_toolkits import mplot3d
@@ -40,39 +46,50 @@ else:
 from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
+### Saving parameters
+cont = 1 ## Continue with time-run. Else, just set up system.
+save_time_steps = True ## Turn on to ho time steps from run
+ho = 50 ## How often to save data
+
+today1 = date.today()
+name_date = today1.strftime("%d_%m_%y")
+mkdir_p(name_date)
+name_data ='Refined_grid_free_space' 
+
 ### Parameters (global)
 mu0 = 1.25667e-6
 eps = 8.5422e-12
 gamma = 2.2e5
 K = 0
 alpha = 0.2
-H_s_val = 10**5
+H_s_val = 10**5 ## H_s value
+init_mag = 0 ## Magnetization initialization constant for M_z, 0 => free-space (non-LLG)
 
 ### Parameters (system)
-max_x = 16.4 # 16.4
+max_x = 16.0 
 disc = np.array([0.04, 0.04, 0.04])
                             # Not used
-
 dt = 1e-10
-
-T = 5e-7
+T = 3e-7 ## Final time
 T = np.round(T,14)
 
 ## Making sure we have an odd-number for global nodes, otherwise
 ## the grid will not be uniform for Yee scheme
-if np.round(max_x/disc[0])%2 <= 1E-10:
-    print('Warning. Grid could fail, untested')
-    gnx = round(max_x/disc[0]-1)
+if np.round(max_x/disc[0])%2 == 0:
+    print('Warning. Even grid. Extending spatial domain to','\n',\
+          'have an odd-number of grid points in all direction')
+    gnx = round((max_x+disc[0])/disc[0])
     
 elif np.round(max_x/disc[0])%2 == 1:
     gnx = round(max_x/disc[0])
     
-else:
-    print('That domain and disc not available',
-          '\n','Attempting closest available disc.')
-    max_x = max_x - (max_x/disc[0])%2
-    gnx = round(max_x/disc[0])
-    
+# else:
+#     print('That domain and disc not available',
+#           '\n','Attempting closest available disc.')
+#     max_x = max_x - (max_x/disc[0])%2
+#     gnx = round(max_x/disc[0])
+
+### System parameters contd    
 gny = gnx
 gnz = 1
 
@@ -86,10 +103,6 @@ def set_up_system(gnx,gny,gnz,disc):
             size_outer_x = np.array([(nx-1)/2, (ny+1)/2, (nz+1)/2])
             size_outer_y = np.array([(nx+1)/2, (ny-1)/2, (nz+1)/2])
             size_outer_z = np.array([(nx+1)/2, (ny+1)/2, (nz-1)/2])
-        
-        #    size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2])
-        #    size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2])
-        #    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2])
             
             size_inner_x = np.array([(nx+1)/2, (ny-1)/2, (nz-1)/2])
             size_inner_y = np.array([(nx-1)/2, (ny+1)/2, (nz-1)/2])
@@ -105,9 +118,6 @@ def set_up_system(gnx,gny,gnz,disc):
             size_outer_y = np.array([(nx+1)/2, (ny-1)/2, 1])
             size_outer_z = np.array([(nx+1)/2, (ny-1)/2, 1]) # This will not be included in calculations
         
-        #    size_Bx = np.array([(nx-3)/2, (nx-1)/2, (nx-1)/2])
-        #    size_By = np.array([(nx-1)/2, (nx-3)/2, (nx-1)/2])
-        #    size_Bz = np.array([(nx-1)/2, (nx-1)/2, (nx-3)/2])
             
             size_inner_x = np.array([(nx-1)/2, (ny-1)/2, 1]) # This will not be included in calculations
             size_inner_y = np.array([(nx-1)/2, (ny-1)/2, 1]) # This will not be included in calculations
@@ -135,7 +145,8 @@ def set_up_system(gnx,gny,gnz,disc):
     
     M0_x = np.zeros(shape = (int(a[3]),1))
     M0_y = np.zeros(shape = (int(a[4]),1))
-    M0_z = 100*np.zeros(shape = (int(a[5]),1)) # Initial conditions for M, free-space => zeros
+
+    M0_z = init_mag*np.ones(shape = (int(a[5]),1))
     M0 = np.concatenate((M0_x, M0_y, M0_z),axis=1).T
     
     H0_x = np.zeros(shape = (int(a[3]),1))
@@ -149,7 +160,17 @@ def set_up_system(gnx,gny,gnz,disc):
     H_s = np.concatenate((H_s_x, H_s_y, H_s_z),axis=1).T
     
     R_sys = Ferro_sys(node_count,disc,E0,H0,M0,H_s)
+    
+    ####################################################
+    ################# Run parameters ##################
+    ####################################################
     R_sys.dt = dt
+    R_sys.mu0 = mu0
+    R_sys.eps = eps
+    R_sys.gamma = gamma
+    R_sys.K = K
+    R_sys.alpha = alpha
+    R_sys.H_s_val = H_s_val
     
     return R_sys
     
@@ -205,22 +226,6 @@ def f_z(x,y,z,t):
     '''
     return 0
 
-def mkdir_p(mypath):
-    '''Creates a directory. equivalent to using mkdir -p on the command line'''
-
-    from errno import EEXIST
-    from os import makedirs,path
-
-    try:
-        makedirs(mypath)
-    except OSError as exc: 
-        if exc.errno == EEXIST and path.isdir(mypath):
-            pass
-        else: raise
-
-mkdir_p(today)
-name ='Refined_grid_free_space' 
-
 #################################################
 ########### Actually running system #############
 
@@ -233,24 +238,23 @@ R_sys.fz = f_z
 ticker = 0
 
 for t in np.arange(dt,T,dt):
+    ### re-initializing the system
     R_sys.set_up()
     ticker += 1
     if cont == True:
         pass
     else:
         break
-    
-    ### re-initializing the system
-
-
+    ## For output
     print('Current Time: ',np.round(t,12),' and Ticker: ',ticker)
 
     ### Running the system
+    R_sys.T = t
     R_sys.single_run(t)
     
     ## Plotting stuff to demo
 
-    if abs(ticker%ho) < 1E-12:
+    if ticker%ho < 1E-12:
         # fig_Mz = R_sys.plot_slice('M','z',0)
         # fig_Ez = R_sys.plot_slice('E','x',0)
         # fig_Ey = R_sys.plot_slice('E','y',0)
@@ -276,9 +280,9 @@ for t in np.arange(dt,T,dt):
 ######### Only works for in Spyder running
         
         if save_time_steps == True:
-            name2 = 'time:'+str(round(t,14))
-            mkdir_p(today+'/'+name2) #Creates sub-directory for this specific time
-            R_sys.save_data(today+'/'+name2+'/'+name) #Saves data 
+            name_time = 'time:'+str(round(t,14))
+            mkdir_p(name_date+'/'+name_time) #Creates sub-directory for this specific time
+            R_sys.save_data(name_date+'/'+name_time+'/'+name_data) #Saves data 
             data = OrderedDict()
             data['mu0'] = mu0
             data['eps'] = eps 
@@ -295,11 +299,11 @@ for t in np.arange(dt,T,dt):
             data['gnx'] = gnx
             data['gny'] = gny
             data['gnz'] = gnz
-            data['T'] = T
+            data['T'] = t
             data['dt'] = dt
             
             df = pd.DataFrame([data])
-            df.to_csv(today+'/'+name2+'/'+name+'_param.csv')
+            df.to_csv(name_date+'/'+name_time+'/'+name_data+'_param.csv')
         
     
     ## Updating old fields
@@ -323,7 +327,7 @@ for t in np.arange(dt,T,dt):
 
 ## Saving data
 
-R_sys.save_data(today+'/'+name+'/'+'time:'+str(round(T-dt,14))) ## Name defined above for loop
+R_sys.save_data(name_date+'/'+'time:'+str(round(T-dt,14))+'/'+name_data) ## Names defined above
 
     # Run parameters
         #Global Parameters
@@ -347,7 +351,7 @@ data['T'] = T
 data['dt'] = dt
 
 df = pd.DataFrame([data])
-df.to_csv(today+'/'+name+'/'+'time:'+str(round(T-dt,14))+'_param.csv')
+df.to_csv(name_date+'/'+'time:'+str(round(T-dt,14))+'/'+name_data+'_param.csv')
 
 #fig_Mz.savefig(today+'/'+name+'Mz')
 #fig_Ey.savefig(today+'/'+name+'Ey')

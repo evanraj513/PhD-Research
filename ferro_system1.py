@@ -589,7 +589,7 @@ class Ferro_sys(object):
         y1 = y1.reshape(pc.ny, pc.nx)
         z1 = z1.reshape(pc.ny, pc.nx)
         ax.plot_surface(x1,y1,z1)
-        title = 'Plot of: '+F+'_'+comp+'\n'+ 'slice number: '+str(s)
+        title = 'Plot of: '+F+'_'+comp+' at time: '+str(self.T)+'\n'+ 'slice: '+str(s)
 #        print(title)
         ax.set_title(title)
         
@@ -694,7 +694,8 @@ class Ferro_sys(object):
 #            title = 'Plot of: '+F+'_'+comp+'\n'+ 'slice number: '+str(s)+\
 #                    '\n'+'cross_section: '+str(cs)
             title = 'Plot of: '+F+'_'+comp+'\n'+\
-                    '\n'+'cross_section: '+str(cs)
+                    '\n'+'cross_section: '+str(cs)+'\n'+\
+                    'Time: '+str(self.T)
             ax.set_xlabel('x')
             ax.set_ylabel(F+comp)
         #        print(title)
@@ -728,9 +729,12 @@ class Ferro_sys(object):
                       #   (num rows, num cols)
             ax.plot(x1,y1)
             title = 'Plot of: '+F+'_'+comp+'\n'+ 'slice number: '+str(s)+\
-                    '\n'+'cross_section: '+str(cs)
+                    '\n'+'cross_section: '+str(cs)+'\n'+\
+                    'Time: '+str(self.T)
         #        print(title)
             ax.set_title(title)
+            ax.set_xlabel('x')
+            ax.set_ylabel(F+comp)
             
         elif comp == 'z':
             '''
@@ -748,11 +752,12 @@ class Ferro_sys(object):
                 
                       #   (num rows, num cols)
             ax.plot(x1,y1)
-            title = 'Plot of: '+F+'_'+comp+'\n'+ 'slice number: '+str(s)+\
-                    '\n'+'cross_section: '+str(cs)
+            title = 'Plot of: '+F+'_'+comp+' at time: '+str(self.T)+'\n'\
+                    +'slice: ' + str(s)+ 'cross_section: ' + str(cs)
         #        print(title)
             ax.set_title(title)
-            
+            ax.set_xlabel('x')
+            ax.set_ylabel(F+comp)
             
         return fig
                        
@@ -854,45 +859,26 @@ class Ferro_sys(object):
         nx = self.E_old.x.nx
         ny = self.E_old.x.ny
         nz = self.E_old.x.nz
-        if nz != 1:
-            for ll in np.arange(0,nz):
-                for kk in np.arange(0,ny):
-                    for jj in np.arange(0,nx):
-                        x = jj*2*dx
-                        y = (kk+1/2)*2*dy
-                        z = ll*2*dz
-    #                    print('jj',jj,'\n',
-    #                          'kk',kk,'\n',
-    #                          'll',ll,'\n',
-    #                          'x: ',x,'\n',
-    #                          'y: ',y,'\n',
-    #                          'z: ',z,'\n')
-    #                    if jj == nx-2:
-    #                        wait = input('Press ENTER to continue')
-                            
-                        F_x[jj + nx*kk + nx*ny*ll] = self.fx(x,y,z,t)
-        else:
-            for ll in np.arange(0,1):
-                for kk in np.arange(0,ny):
-                    for jj in np.arange(0,nx):
-                        x = jj*2*dx
-                        y = (kk+1/2)*2*dy
-                        z = ll*2*dz
-    #                    print('jj',jj,'\n',
-    #                          'kk',kk,'\n',
-    #                          'll',ll,'\n',
-    #                          'x: ',x,'\n',
-    #                          'y: ',y,'\n',
-    #                          'z: ',z,'\n',
-    #                          'f: ',R_sys.fy(x,y,z,t),'\n')
-    #                    if jj == nx-2:
-    #                        wait = input('Press ENTER to continue')
-    
-                        F_x[jj + nx*kk + nx*ny*ll] = self.fx(x,y,z,t) 
+        for ll in np.arange(0,nz):
+            for kk in np.arange(0,ny):
+                for jj in np.arange(0,nx):
+                    x = (jj+1/2)*2*dx
+                    y = kk*2*dy
+                    z = ll*2*dz
+                    # print('jj',jj,'\n',
+                    #       'kk',kk,'\n',
+                    #       'll',ll,'\n',
+                    #       'x: ',x,'\n',
+                    #       'y: ',y,'\n',
+                    #       'z: ',z,'\n')
+                    # if jj == nx-2:
+                    #     wait = input('Press ENTER to continue')
+                        
+                    F_x[jj + nx*kk + nx*ny*ll] = self.fx(x,y,z,t)
                     
         return F_x
-        
-    def Fy(self,t):
+
+    def Fy(self, t):
         F_y = np.zeros(shape=(self.E_old.y.value.shape[0],1))
         dx = self.disc[0]
         dy = self.disc[1]
@@ -902,39 +888,25 @@ class Ferro_sys(object):
         ny = self.E_old.y.ny
         nz = self.E_old.y.nz
         
-        if nz != 1:
-            for ll in np.arange(0,nz):
-                for kk in np.arange(0,ny):
-                    for jj in np.arange(0,nx):
-                        x = jj*2*dx
-                        y = (kk+1/2)*2*dy
-                        z = ll*2*dz
-    #                    print('jj',jj,'\n',
-    #                          'kk',kk,'\n',
-    #                          'll',ll,'\n',
-    #                          'x: ',x,'\n',
-    #                          'y: ',y,'\n',
-    #                          'z: ',z,'\n')
-    #                    if jj == nx-2:
-    #                        wait = input('Press ENTER to continue')
-                            
-                        F_y[jj + nx*kk + nx*ny*ll] = self.fy(x,y,z,t)
-        else:
-            for ll in np.arange(0,1):
-                for kk in np.arange(0,ny):
-                    for jj in np.arange(0,nx):
-                        x = jj*2*dx
-                        y = (kk+1/2)*2*dy
-                        z = ll*2*dz
-    #                    print('jj',jj,'\n',
-    #                          'kk',kk,'\n',
-    #                          'll',ll,'\n',
-    #                          'x: ',x,'\n',
-    #                          'y: ',y,'\n',
-    #                          'z: ',z,'\n',
-    #                          'f: ',R_sys.fy(x,y,z,t),'\n')
-    #                    if jj == nx-2:
-    #                        wait = input('Press ENTER to continue')
+        for ll in np.arange(0,nz):
+            for kk in np.arange(0,ny):
+                for jj in np.arange(0,nx):
+                    x = jj*2*dx
+                    y = (kk+1/2)*2*dy
+                    z = ll*2*dz
+#                    print('jj',jj,'\n',
+#                          'kk',kk,'\n',
+#                          'll',ll,'\n',
+#                          'x: ',x,'\n',
+#                          'y: ',y,'\n',
+#                          'z: ',z,'\n')
+#                    if jj == nx-2:
+#                        wait = input('Press ENTER to continue')
+                        
+                    F_y[jj + nx*kk + nx*ny*ll] = self.fy(x,y,z,t)
+
+    
+        return F_y
     
                         F_y[jj + nx*kk + nx*ny*ll] = self.fy(x,y,z,t) 
             
@@ -954,7 +926,7 @@ class Ferro_sys(object):
             for kk in np.arange(0,ny):
                 for jj in np.arange(0,nx):
                     x = jj*2*dx
-                    y = (kk+1/2)*2*dy
+                    y = kk*2*dy
                     z = ll*2*dz
                     
                     F_z[jj + nx*kk + nx*ny*ll] = self.fz(x,y,z,t)
@@ -1062,10 +1034,6 @@ class Ferro_sys(object):
             ind_Bx = np.unique(ind_Bx)
             ind_By = np.unique(ind_By)
             ind_Bz = np.unique(ind_Bz)
-        
-        
-        
-        
         
         
         ### Indexing for Odd node count
@@ -1192,7 +1160,7 @@ class Ferro_sys(object):
           
         with associated variables M,H matching the B spots
         
-        T: at what time step is this?
+        t: at what time step is this?
             
         '''
         ## Set-up field parameters

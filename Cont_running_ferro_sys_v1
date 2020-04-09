@@ -42,11 +42,11 @@ from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
 ### Names to unpack stored data from
+T1 = 4e-08 #Initial time
 name_date = '08_04_20'
-name_time = 'time_4e-08'
+name_time = 'time:'+str(T1)
 name_data = 'Refined_grid_free_space'
 name = name_date+'/'+name_time+'/'+name_data
-T1 = 4e-08 #Initial time
 
 ## Run settings
 cont = 1 ## Continue with time-run. Else, just set up system.

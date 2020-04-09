@@ -40,9 +40,15 @@ Vector = field_class.Vector
 from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
+### Name of things to unpack
 #name = today+'/'+'test1'
-name = '08_04_20/Refined_grid_LLG'
+name_date = '08_04_20'
+name_data = 'Refined_grid_LLG'
+
 def set_up_ferro_system(name):
+    '''
+    Sets up R_sys, given the name
+    '''
     try: 
         df_inner = pd.read_csv(name+'_inner.csv')
         df_outer = pd.read_csv(name+'_outer.csv')
@@ -54,9 +60,9 @@ def set_up_ferro_system(name):
     E0 = np.concatenate((np.array([df_outer['E.x'].values]), 
                          np.array([df_outer['E.y'].values]),
                          np.array([df_outer['E.z'].values])),axis=0)
-    B0 = np.concatenate((np.array([df_inner['B.x'].values]), 
-                         np.array([df_inner['B.y'].values]), 
-                         np.array([df_inner['B.z'].values])),axis=0)
+    # B0 = np.concatenate((np.array([df_inner['B.x'].values]), 
+    #                      np.array([df_inner['B.y'].values]), 
+    #                      np.array([df_inner['B.z'].values])),axis=0)
     M0 = np.concatenate((np.array([df_inner['M.x'].values]),
                          np.array([df_inner['M.y'].values]),
                          np.array([df_inner['M.z'].values])),axis=0)
@@ -88,15 +94,18 @@ def set_up_ferro_system(name):
     R_sys.T = df_param['T']
     
     return R_sys
+
+### For unpacking a bunch of saved runs
 l1 = np.zeros(shape = (20))
 ticker = 0
 for k in l1:
     print(ticker)
     try:
         ticker+=1
-        name = '08_04_20/time:'+str(ticker*.5e-8)+'/Unrefined_grid_free_space'
+        # name = '08_04_20/time:'+str(ticker*.5e-8)+'/Unrefined_grid_free_space'
+        name = name_date + '/time:'+str(ticker*.5e-8)+name_data
         R_sys = set_up_ferro_system(name) 
-        R_sys.plot_slice('E')
+        # R_sys.plot_slice('E')
 
     except:
         pass
