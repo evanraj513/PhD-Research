@@ -902,7 +902,6 @@ class Ferro_sys(object):
 #                          'z: ',z,'\n')
 #                    if jj == nx-2:
 #                        wait = input('Press ENTER to continue')
-                        
                     F_y[jj + nx*kk + nx*ny*ll] = self.fy(x,y,z,t)
 
     

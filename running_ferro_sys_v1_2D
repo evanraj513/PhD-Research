@@ -66,7 +66,7 @@ H_s_val = 10**5 ## H_s value
 init_mag = 0 ## Magnetization initialization constant for M_z, 0 => free-space (non-LLG)
 
 ### Parameters (system)
-max_x = 16.0 
+max_x = 16.04 
 disc = np.array([0.04, 0.04, 0.04])
                             # Not used
 dt = 1e-10
