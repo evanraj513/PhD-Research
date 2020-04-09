@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "running_ferro_sys_v1_2D", line 46, in <module>
+    from Research import ferro_system1
+  File "/home/rajbhane/Git/Research/ferro_system1.py", line 911
+    F_y[jj + nx*kk + nx*ny*ll] = self.fy(x,y,z,t) 
+    ^
+IndentationError: unexpected indent
