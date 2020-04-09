@@ -41,7 +41,7 @@ from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
 #name = today+'/'+'test1'
-name = '08_04_20/Unrefined_grid_LLG'
+name = '08_04_20/Refined_grid_LLG'
 def set_up_ferro_system(name):
     try: 
         df_inner = pd.read_csv(name+'_inner.csv')
@@ -76,6 +76,16 @@ def set_up_ferro_system(name):
     disc[2] = df_param['disc_z'][0]
     
     R_sys = Ferro_sys(node_count,disc,E0,H0,M0,H_s)
+    
+    R_sys.mu0 = df_param['mu0'][0]
+    R_sys.eps = df_param['eps'][0]
+    R_sys.gamma = df_param['gamma'][0]
+    R_sys.K = df_param['K'][0]
+    R_sys.alpha = df_param['alpha'][0] 
+    R_sys.H_s = df_param['H_s'][0]
+    
+    R_sys.dt = df_param['dt']
+    R_sys.T = df_param['T']
     
     return R_sys
 l1 = np.zeros(shape = (20))

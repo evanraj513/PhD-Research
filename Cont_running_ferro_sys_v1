@@ -1,0 +1,313 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Apr  8 21:49:36 2020
+
+@author: evanraj
+"""
+
+'''
+Will be identical to running_ferro_sys_v1_2D
+but initial conditions can be done at any time step. Name for data to unpack
+is given by "name"
+'''
+
+import os
+import sys
+from datetime import date
+today1 = date.today()
+today = today1.strftime("%d_%m_%y")
+
+import numpy as np
+from mpl_toolkits import mplot3d
+import matplotlib.pyplot as plt
+from matplotlib import cm
+plt.rcParams['backend'] = "Qt4Agg"
+from collections import OrderedDict
+import pandas as pd
+
+l_path = '..'
+m_path = os.path.abspath(l_path)
+if not os.path.exists(m_path):
+    print('Error importing modules. Need to specify new path')
+    raise Exception
+else:
+    sys.path.append(m_path)
+
+#import numpy as np
+#import scipy as sp
+#from scipy.sparse import csr_matrix
+
+from Research import ferro_system1
+Ferro_sys = ferro_system1.Ferro_sys
+
+### Names to unpack stored data from
+name_date = '08_04_20'
+name_time = 'time_4e-08'
+name_data = 'Refined_grid_free_space'
+name = name_date+'/'+name_time+'/'+name_data
+T1 = 4e-08 #Initial time
+
+## Run settings
+cont = 1 ## Continue with time-run. Else, just set up system.
+save_time_steps = True ## Turn on to ho time steps from run
+ho = 50 #How often to save or display
+
+dt = 1e-10 #Time step (necessary to be same as df_param?)
+T2 = 1.5e-7+dt #Final time. Initial time given above
+T2 = np.round(T2,14)
+
+def set_up_ferro_system(name):
+    try: 
+        df_inner = pd.read_csv(name+'_inner.csv')
+        df_outer = pd.read_csv(name+'_outer.csv')
+        df_param = pd.read_csv(name+'_param.csv')
+    except FileNotFoundError:
+        print('Error importing csv. Abort')
+        raise Exception
+    
+    E0 = np.concatenate((np.array([df_outer['E.x'].values]), 
+                         np.array([df_outer['E.y'].values]),
+                         np.array([df_outer['E.z'].values])),axis=0)
+    B0 = np.concatenate((np.array([df_inner['B.x'].values]), 
+                         np.array([df_inner['B.y'].values]), 
+                         np.array([df_inner['B.z'].values])),axis=0)
+    M0 = np.concatenate((np.array([df_inner['M.x'].values]),
+                         np.array([df_inner['M.y'].values]),
+                         np.array([df_inner['M.z'].values])),axis=0)
+    H0 = np.concatenate((np.array([df_inner['H.x'].values]), 
+                         np.array([df_inner['H.y'].values]),
+                         np.array([df_inner['H.z'].values])),axis=0)
+    
+    H_s_val = df_param['H_s'][0]
+    H_s = H_s_val * np.ones(shape = H0.shape)
+    node_count = np.ones(shape = (3,1))
+    node_count[0] = df_param['gnx'][0]
+    node_count[1] = df_param['gny'][0]
+    node_count[2] = df_param['gnz'][0]
+    disc = np.ones(shape = (3,1))
+    disc[0] = df_param['disc_x'][0]
+    disc[1] = df_param['disc_y'][0]
+    disc[2] = df_param['disc_z'][0]
+    
+    R_sys = Ferro_sys(node_count,disc,E0,H0,M0,H_s)
+    
+    R_sys.mu0 = df_param['mu0'][0]
+    R_sys.eps = df_param['eps'][0]
+    R_sys.gamma = df_param['gamma'][0]
+    R_sys.K = df_param['K'][0]
+    R_sys.alpha = df_param['alpha'][0] 
+    R_sys.H_s = df_param['H_s'][0]
+    
+    R_sys.dt = dt # df_param['dt']
+    R_sys.T = df_param['T']
+    
+    return R_sys
+
+#########################################################
+##################### Set-up system #####################
+#########################################################
+
+R_sys = set_up_ferro_system(name)    
+    
+    ###################################################
+    ### Boundary conditions, and Forcing terms ########
+    ###################################################
+
+### Ricker Pulse
+    
+## Ricker Pulse parameters
+beta0 = 4E4
+f = 4E7
+a = 1.34
+b = 3.4
+k = (np.pi/a)**2
+c = 3E8
+
+disc = R_sys.disc
+
+def g(x):
+    '''
+    Actual Ricker pulse function
+    '''
+    if x < b:
+        pa = 2*k/11*(2*k*(x-a)**2-1)
+        pb = (np.e**(-k*(x-a)**2))
+        
+        return pa*pb
+    else:
+        return 0
+    
+### Ricker Pulse forcing conditions at x = 0, applied to E_y 
+### 'Normal' boundary conditions else
+        
+
+def f_x(x,y,z,t):
+    '''
+    Ricker Pulse for x
+    '''
+    return 0
+    
+def f_y(x,y,z,t):
+    '''
+    Ricker Pulse for y
+    '''
+    if abs(x) < disc[0]/4: #approx 0
+        d = beta0*g(f*t)
+        return d
+    else:
+        return 0
+       
+def f_z(x,y,z,t):
+    '''
+    Ricker Pulse for z
+    '''
+    return 0
+
+def mkdir_p(mypath):
+    '''Creates a directory. equivalent to using mkdir -p on the command line'''
+
+    from errno import EEXIST
+    from os import makedirs,path
+
+    try:
+        makedirs(mypath)
+    except OSError as exc: 
+        if exc.errno == EEXIST and path.isdir(mypath):
+            pass
+        else: raise
+
+mkdir_p(today)
+
+R_sys.fx = f_x
+R_sys.fy = f_y
+R_sys.fz = f_z
+
+#################################################
+########### Actually running system #############
+
+ticker = 0
+
+for t in np.arange(T1,T2,dt):
+    R_sys.set_up()
+    ticker += 1
+    if cont == True:
+        pass
+    else:
+        break
+    
+    ### re-initializing the system
+
+
+    print('Current Time: ',np.round(t,12),' and Ticker: ',ticker)
+
+    ### Running the system
+    R_sys.single_run(t)
+    
+    ## Plotting stuff to demo
+
+    if abs(ticker%ho) < 1E-12:
+        # fig_Mz = R_sys.plot_slice('M','z',0)
+        # fig_Ez = R_sys.plot_slice('E','x',0)
+        # fig_Ey = R_sys.plot_slice('E','y',0)
+        
+        # fig_Ey0 = R_sys.plot_line('E','y',0,0)
+        # fig_Ey1 = R_sys.plot_line('E','y',1,0)
+        # fig_Ey2 = R_sys.plot_line('E','y',2,0)
+        # fig_Ey3 = R_sys.plot_line('E','y',3,0)
+        
+        # fig = plt.figure()
+        # t_val = np.arange(0,T,dt)
+        # Ricker_vec = np.vectorize(f_y)
+        # ax = fig.add_subplot(111)
+        # ax.plot(t_val,Ricker_vec(0,0,0,t_val))
+        # ax.axvline(x=t)
+        # Title = 'Current Boundary value: '+str(round(f_y(0,0,0,t),2))
+        # ax.set_title(Title)
+        # plt.show()
+        
+        # wait = input('Press Enter to continue')
+        
+######### Turn on above to plot as you run
+######### Only works for in Spyder running
+        
+        if save_time_steps == True:
+            name2 = 'time:'+str(round(t,14))
+            mkdir_p(today+'/'+name2) #Creates sub-directory for this specific time
+            R_sys.save_data(today+'/'+name2+'/'+name_data) #Saves data 
+            data = OrderedDict()
+            data['mu0'] = R_sys.mu0
+            data['eps'] = R_sys.eps 
+            data['gamma'] = R_sys.gamma
+            data['K'] = R_sys.K
+            data['alpha'] = R_sys.alpha
+            data['H_s'] = R_sys.H_s_val
+            
+                    # Parameters (system)
+            data['disc_x'] = R_sys.disc[0]
+            data['disc_y'] = R_sys.disc[1]
+            data['disc_z'] = R_sys.disc[2]
+            data['gnx'] = R_sys.gnx
+            data['gny'] = R_sys.gny
+            data['gnz'] = R_sys.gnz
+            data['T'] = R_sys.T
+            data['dt'] = R_sys.dt
+            
+            df = pd.DataFrame([data])
+            df.to_csv(today+'/'+name2+'/'+name+'_param.csv')
+        
+    
+    ## Updating old fields
+    R_sys.E_old2 = R_sys.E_old.values
+    R_sys.B_old2 = R_sys.B_old.values
+    R_sys.M_old2 = R_sys.M_old.values
+    R_sys.H_old2 = R_sys.H_old.values
+    
+    R_sys.E_old = R_sys.E_new.values
+    R_sys.H_old = R_sys.H_new.values
+    R_sys.M_old = R_sys.M_new.values
+    R_sys.B_old = R_sys.B_new.values
+
+## Plotting stuff
+
+#fig_Mz = R_sys.plot_slice('M','z',10)
+#fig_Bz = R_sys.plot_slice('B','z',10)
+#fig_Ey = R_sys.plot_slice('E','y',10)
+#fig_Hz = R_sys.plot_slice('H','z',10)
+
+
+## Saving data
+
+R_sys.save_data(today+'/'+'time:'+str(round(T2,14))+'/'+name_data+'_param.csv') ## Name defined above for loop
+
+    # Run parameters
+        #Global Parameters
+data = OrderedDict()
+data['mu0'] = R_sys.mu0
+data['eps'] = R_sys.eps 
+data['gamma'] = R_sys.gamma
+data['K'] = R_sys.K
+data['alpha'] = R_sys.alpha
+data['H_s'] = R_sys.H_s
+
+        # Parameters (system)
+# data['max_x'] = max_x
+data['disc_x'] = disc[0]
+data['disc_y'] = disc[1]
+data['disc_z'] = disc[2]
+data['gnx'] = R_sys.gnx
+data['gny'] = R_sys.gny
+data['gnz'] = R_sys.gnz
+data['T'] = T2
+data['dt'] = R_sys.dt
+
+df = pd.DataFrame([data])
+df.to_csv(today+'/'+'time:'+str(round(T2,14))+'/'+name_data+'_param.csv')
+
+
+
+
+    
+
+
+

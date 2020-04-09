@@ -89,6 +89,13 @@ class Ferro_sys(object):
         # Parameter Set-up
         self.dt = 0.1 
         self.T = 1.0
+                        ### Ferrosystem parameters
+        self.mu0 = mu0 #Permeability of free space
+        self.eps = eps #Permoittivity of free space
+        self.gamma = gamma #From Puttha's paper
+        self.K = K
+        self.alpha = alpha
+        self.H_s_guess = H_s_guess
 
         self.disc = disc
         self.node_count = global_node_count
@@ -138,7 +145,7 @@ class Ferro_sys(object):
         
         self.H_old = H0
         self.M_old = M0
-        self.B0 = mu0*H0 + M0 
+        self.B0 = self.mu0*H0 + M0 
         self.B_old = self.B0
         self.H_s = H_s
         
@@ -1200,6 +1207,11 @@ class Ferro_sys(object):
         dt = self.dt
         b_ind = self.bound_ind
         bdp = self.better_dot_pdt
+        mu0 = self.mu0
+        eps = self.eps
+        gamma = self.gamma
+        K = self.K
+        alpha = self.alpha
         
         ## Actual computation of time stepping
         F = np.concatenate((self.Fx(t), self.Fy(t), self.Fz(t)),axis=1)
@@ -1297,6 +1309,11 @@ class Ferro_sys(object):
         dt = self.dt
         b_ind = self.bound_ind
         bdp = self.better_dot_pdt
+        mu0 = self.mu0
+        eps = self.eps
+        gamma = self.gamma
+        K = self.K
+        alpha = self.alpha
         
         ## Actual computation of time stepping
         F = np.concatenate((self.Fx(t), self.Fy(t), self.Fz(t)),axis=1)
@@ -1409,6 +1426,10 @@ class Ferro_sys(object):
         
         M_old, B_old, B_new, H_s = self.M_old, self.B_old, self.B_new, self.H_s
         dt = self.dt
+        mu0 = self.mu0
+        gamma = self.gamma
+        K = self.K
+        alpha = self.alpha
         
         M_new_values = val
         
@@ -1482,7 +1503,7 @@ class Ferro_sys(object):
         
         
         
-    def secant_method(self,func, x0, x1, alpha=1.0, tol=1E-9, maxit=200):
+    def secant_method(self,func, x0, x1, alpha1=1.0, tol=1E-9, maxit=200):
         """
         Uses the secant method to find f(x)=0.  
         
@@ -1491,7 +1512,7 @@ class Ferro_sys(object):
             * f     : function f(x)
             * x0    : initial guess for root
             * x1    : second guess for root
-            * alpha : relaxation coefficient: modifies Secant step size
+            * alpha1 : relaxation coefficient: modifies Secant step size
             * tol   : convergence tolerance
             * maxit : maximum number of iteration, default=200        
         """
@@ -1509,7 +1530,7 @@ class Ferro_sys(object):
             dx = -f/(f - fprev)*(x - xprev)
             
             # Update `xprev` and `x` simultaneously
-            xprev, x = x, x + alpha*dx
+            xprev, x = x, x + alpha1*dx
             
             # Update `fprev` and `f`:
             fprev, f = f, func(x)
