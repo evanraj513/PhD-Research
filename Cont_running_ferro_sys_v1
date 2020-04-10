@@ -42,8 +42,8 @@ from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
 ### Names to unpack stored data from
-T1 = 4e-08 #Initial time
-name_date = '08_04_20'
+T1 = 2.95e-07 #Initial time
+name_date = '10_04_20'
 name_time = 'time:'+str(T1)
 name_data = 'Refined_grid_free_space'
 name = name_date+'/'+name_time+'/'+name_data
@@ -54,7 +54,7 @@ save_time_steps = True ## Turn on to ho time steps from run
 ho = 50 #How often to save or display
 
 dt = 1e-10 #Time step (necessary to be same as df_param?)
-T2 = 1.5e-7+dt #Final time. Initial time given above
+T2 = 4e-07 #Final time. Initial time given above
 T2 = np.round(T2,14)
 
 def set_up_ferro_system(name):
