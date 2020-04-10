@@ -177,7 +177,7 @@ def mkdir_p(mypath):
             pass
         else: raise
 
-mkdir_p(today)
+mkdir_p(name_date)
 
 R_sys.fx = f_x
 R_sys.fy = f_y
@@ -199,7 +199,7 @@ for t in np.arange(T1,T2,dt):
     ### re-initializing the system
 
 
-    print('Current Time: ',np.round(t,12),' and Ticker: ',ticker)
+    print('Current Time: ',np.round(t,9),' and Ticker: ',ticker)
 
     ### Running the system
     R_sys.single_run(t)
@@ -232,8 +232,8 @@ for t in np.arange(T1,T2,dt):
 ######### Only works for in Spyder running
         
         if save_time_steps == True:
-            name2 = 'time:'+str(round(t,14))
-            mkdir_p(today+'/'+name2) #Creates sub-directory for this specific time
+            name2 = 'time:'+str(round(t,9))
+            mkdir_p(name_date+'/'+name2) #Creates sub-directory for this specific time
             R_sys.save_data(today+'/'+name2+'/'+name_data) #Saves data 
             data = OrderedDict()
             data['mu0'] = R_sys.mu0
