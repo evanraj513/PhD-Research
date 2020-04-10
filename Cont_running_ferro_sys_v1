@@ -241,7 +241,7 @@ for t in np.arange(T1,T2,dt):
             data['gamma'] = R_sys.gamma
             data['K'] = R_sys.K
             data['alpha'] = R_sys.alpha
-            data['H_s'] = R_sys.H_s_val
+            data['H_s'] = R_sys.H_s_guess
             
                     # Parameters (system)
             data['disc_x'] = R_sys.disc[0]
