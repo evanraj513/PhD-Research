@@ -330,7 +330,7 @@ for t in np.arange(dt,T,dt):
 
 ## Saving data
 if save_final_time == True:
-    R_sys.save_data(name_date+'/'+'time:'+str(round(T-dt,14))+'/'+name_data) ## Names defined above
+    R_sys.save_data(name_date+'/'+'time:'+str(round(T-dt,9))+'/'+name_data) ## Names defined above
     
         # Run parameters
             #Global Parameters
