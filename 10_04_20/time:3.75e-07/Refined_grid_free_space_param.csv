@@ -1,0 +1,3 @@
+,mu0,eps,gamma,K,alpha,H_s,disc_x,disc_y,disc_z,gnx,gny,gnz,T,dt
+0,1.25667e-06,8.5422e-12,220000.0,0,0.2,100000,[0.04],[0.04],[0.04],[75.],[75.],[1.],"0    2.950000e-07
+Name: T, dtype: float64",1e-10

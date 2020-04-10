@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "Cont_running_ferro_sys_v1", line 244, in <module>
+    data['H_s'] = R_sys.H_s_val
+AttributeError: 'Ferro_sys' object has no attribute 'H_s_val'
