@@ -234,7 +234,7 @@ for t in np.arange(T1,T2,dt):
         if save_time_steps == True:
             name2 = 'time:'+str(round(t,9))
             mkdir_p(name_date+'/'+name2) #Creates sub-directory for this specific time
-            R_sys.save_data(today+'/'+name2+'/'+name_data) #Saves data 
+            R_sys.save_data(name_date+'/'+name2+'/'+name_data) #Saves data 
             data = OrderedDict()
             data['mu0'] = R_sys.mu0
             data['eps'] = R_sys.eps 
@@ -254,7 +254,7 @@ for t in np.arange(T1,T2,dt):
             data['dt'] = R_sys.dt
             
             df = pd.DataFrame([data])
-            df.to_csv(today+'/'+name2+'/'+name+'_param.csv')
+            df.to_csv(name_date+'/'+name2+'/'+name_data+'_param.csv')
         
     
     ## Updating old fields
@@ -278,7 +278,7 @@ for t in np.arange(T1,T2,dt):
 
 ## Saving data
 
-R_sys.save_data(today+'/'+'time:'+str(round(T2,14))+'/'+name_data+'_param.csv') ## Name defined above for loop
+R_sys.save_data(name_date+'/'+'time:'+str(round(T2,9))+'/'+name_data+'_param.csv') ## Name defined above for loop
 
     # Run parameters
         #Global Parameters
@@ -302,7 +302,7 @@ data['T'] = T2
 data['dt'] = R_sys.dt
 
 df = pd.DataFrame([data])
-df.to_csv(today+'/'+'time:'+str(round(T2,14))+'/'+name_data+'_param.csv')
+df.to_csv(name_date+'/'+'time:'+str(round(T2,9))+'/'+name_data+'_param.csv')
 
 
 
