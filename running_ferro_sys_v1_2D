@@ -49,6 +49,7 @@ Ferro_sys = ferro_system1.Ferro_sys
 ### Saving parameters
 cont = 1 ## Continue with time-run. Else, just set up system.
 save_time_steps = True ## Turn on to ho time steps from run
+save_final_time = True ## Save where the run ends
 ho = 50 ## How often to save data
 
 today1 = date.today()
@@ -59,6 +60,7 @@ name_data ='Refined_grid_free_space'
 ### Parameters (global)
 mu0 = 1.25667e-6
 eps = 8.5422e-12
+c = 1/(mu0*eps)**(1/2) ## Speed of light
 gamma = 2.2e5
 K = 0
 alpha = 0.2
@@ -66,7 +68,7 @@ H_s_val = 10**5 ## H_s value
 init_mag = 0 ## Magnetization initialization constant for M_z, 0 => free-space (non-LLG)
 
 ### Parameters (system)
-max_x = 16.04 
+max_x = 3.0
 disc = np.array([0.04, 0.04, 0.04])
                             # Not used
 dt = 1e-10
@@ -259,10 +261,10 @@ for t in np.arange(dt,T,dt):
         # fig_Ez = R_sys.plot_slice('E','x',0)
         # fig_Ey = R_sys.plot_slice('E','y',0)
         
-        # fig_Ey0 = R_sys.plot_line('E','y',0,0)
-        # fig_Ey1 = R_sys.plot_line('E','y',1,0)
-        # fig_Ey2 = R_sys.plot_line('E','y',2,0)
-        # fig_Ey3 = R_sys.plot_line('E','y',3,0)
+        # # fig_Ey0 = R_sys.plot_line('E','y',0,0)
+        # # fig_Ey1 = R_sys.plot_line('E','y',1,0)
+        # # fig_Ey2 = R_sys.plot_line('E','y',2,0)
+        # # fig_Ey3 = R_sys.plot_line('E','y',3,0)
         
         # fig = plt.figure()
         # t_val = np.arange(0,T,dt)
@@ -280,7 +282,7 @@ for t in np.arange(dt,T,dt):
 ######### Only works for in Spyder running
         
         if save_time_steps == True:
-            name_time = 'time:'+str(round(t,14))
+            name_time = 'time:'+str(round(t,16))
             mkdir_p(name_date+'/'+name_time) #Creates sub-directory for this specific time
             R_sys.save_data(name_date+'/'+name_time+'/'+name_data) #Saves data 
             data = OrderedDict()
@@ -301,6 +303,7 @@ for t in np.arange(dt,T,dt):
             data['gnz'] = gnz
             data['T'] = t
             data['dt'] = dt
+            data['CFL'] = c*dt/disc[0]
             
             df = pd.DataFrame([data])
             df.to_csv(name_date+'/'+name_time+'/'+name_data+'_param.csv')
@@ -326,35 +329,38 @@ for t in np.arange(dt,T,dt):
 
 
 ## Saving data
-
-R_sys.save_data(name_date+'/'+'time:'+str(round(T-dt,14))+'/'+name_data) ## Names defined above
-
-    # Run parameters
-        #Global Parameters
-data = OrderedDict()
-data['mu0'] = mu0
-data['eps'] = eps 
-data['gamma'] = gamma
-data['K'] = K
-data['alpha'] = alpha
-data['H_s'] = H_s_val
-
-        # Parameters (system)
-data['max_x'] = max_x
-data['disc_x'] = disc[0]
-data['disc_y'] = disc[1]
-data['disc_z'] = disc[2]
-data['gnx'] = gnx
-data['gny'] = gny
-data['gnz'] = gnz
-data['T'] = T
-data['dt'] = dt
-
-df = pd.DataFrame([data])
-df.to_csv(name_date+'/'+'time:'+str(round(T-dt,14))+'/'+name_data+'_param.csv')
+if save_final_time == True:
+    R_sys.save_data(name_date+'/'+'time:'+str(round(T-dt,14))+'/'+name_data) ## Names defined above
+    
+        # Run parameters
+            #Global Parameters
+    data = OrderedDict()
+    data['mu0'] = mu0
+    data['eps'] = eps 
+    data['gamma'] = gamma
+    data['K'] = K
+    data['alpha'] = alpha
+    data['H_s'] = H_s_val
+    
+            # Parameters (system)
+    data['max_x'] = max_x
+    data['disc_x'] = disc[0]
+    data['disc_y'] = disc[1]
+    data['disc_z'] = disc[2]
+    data['gnx'] = gnx
+    data['gny'] = gny
+    data['gnz'] = gnz
+    data['T'] = T
+    data['dt'] = dt
+    data['CFL'] = c*dt/disc[0]
+    
+    df = pd.DataFrame([data])
+    df.to_csv(name_date+'/'+'time:'+str(round(T-dt,14))+'/'+name_data+'_param.csv')
 
 #fig_Mz.savefig(today+'/'+name+'Mz')
 #fig_Ey.savefig(today+'/'+name+'Ey')
+
+######################### Old Code ##################################
 
 def make_1D_plot(Field = 'E', comp = 'y', cs = 0, s = 0):
     '''
