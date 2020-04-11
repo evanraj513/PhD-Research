@@ -55,13 +55,13 @@ ho = 50 ## How often to save data
 today1 = date.today()
 name_date = today1.strftime("%d_%m_%y")
 mkdir_p(name_date)
-name_data ='No_alpha_free_space' 
+name_data ='No_alpha_gamma_free_space' 
 
 ### Parameters (global)
 mu0 = 1.25667e-6
 eps = 8.5422e-12
 c = 1/(mu0*eps)**(1/2) ## Speed of light
-gamma = 2.2e5
+gamma = 0#2.2e5
 K = 0
 alpha = 0.
 H_s_val = 10**5 ## H_s value
