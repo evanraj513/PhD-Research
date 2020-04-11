@@ -43,7 +43,8 @@ Ferro_sys = ferro_system1.Ferro_sys
 ### Name of things to unpack
 #name = today+'/'+'test1'
 name_date = '10_04_20'
-name_data = 'Refined_grid_free_space'
+name_data1 = 'Refined_grid_free_space'
+name_data2 = 'No_alpha_free_space'
 
 def set_up_ferro_system(name):
     '''
@@ -96,20 +97,32 @@ def set_up_ferro_system(name):
     return R_sys
 
 ### For unpacking a bunch of saved runs
-l1 = np.zeros(shape = (100))
+l1 = np.zeros(shape = (20))
 ticker = 0
 for k in l1:
     print(ticker)
-    name = name_date + '/time:'+str(round(ticker*.5e-08,14))+'/'+name_data
-    print(name)
+    # name = name_date + '/time:'+str(round(ticker*.5e-08,14))+'/'+name_data
+    name1 = name_date + '/time:'+str(round(ticker*.5e-08,14))+'/'+name_data1
+    name2 = name_date + '/time:'+str(round(ticker*.5e-08,14))+'/'+name_data2
+    # print(name)
     try:
         ticker+=1
         # name = '08_04_20/time:'+str(ticker*.5e-8)+'/Unrefined_grid_free_space'
 
-        R_sys = set_up_ferro_system(name) 
-        R_sys.plot_slice('E')
+        # R_sys = set_up_ferro_system(name) 
+        # R_sys.plot_slice('E')
+        print(name1)
+
+        
+        R_sys1 = set_up_ferro_system(name1)
+        R_sys2 = set_up_ferro_system(name2)
+        print(name2)
 
     except:
         print('Error importing, try again')
         pass
     
+    try:
+        l1[k] = np.linalg.norm(R_sys1.E_old.y.value - R_sys2.E_old.y.value,2)
+    except:
+        print('Error is in assignment')
