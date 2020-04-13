@@ -89,7 +89,7 @@ class Ferro_sys(object):
         # Parameter Set-up
         self.dt = 0.1 
         self.T = 1.0
-                        ### Ferrosystem parameters
+        ### Ferrosystem parameters
         self.mu0 = mu0 #Permeability of free space
         self.eps = eps #Permoittivity of free space
         self.gamma = gamma #From Puttha's paper
@@ -759,7 +759,7 @@ class Ferro_sys(object):
             ax.set_xlabel('x')
             ax.set_ylabel(F+comp)
             
-        return fig
+        return fig, ax
                        
     def set_up(self):
         '''
@@ -1169,6 +1169,8 @@ class Ferro_sys(object):
         dt = self.dt
         b_ind = self.bound_ind
         bdp = self.better_dot_pdt
+        
+        ## Parameters
         mu0 = self.mu0
         eps = self.eps
         gamma = self.gamma
