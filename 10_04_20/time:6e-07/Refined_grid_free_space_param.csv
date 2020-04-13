@@ -1,0 +1,2 @@
+,mu0,eps,gamma,K,alpha,H_s,disc_x,disc_y,disc_z,gnx,gny,gnz,T,dt
+0,1.25667e-06,8.5422e-12,220000.0,0,0.2,<Research.field_class.Field_2 object at 0x7f1b8f6649e8>,[0.04],[0.04],[0.04],[75.],[75.],[1.],6e-07,1e-10

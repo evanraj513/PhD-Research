@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "Cont_running_ferro_sys_v1", line 117, in <module>
+    R_sys = set_up_ferro_system(name)    
+  File "Cont_running_ferro_sys_v1", line 89, in set_up_ferro_system
+    H_s = H_s_val * np.ones(shape = H0.shape)
+TypeError: ufunc 'multiply' did not contain a loop with signature matching types dtype('<U55') dtype('<U55') dtype('<U55')
