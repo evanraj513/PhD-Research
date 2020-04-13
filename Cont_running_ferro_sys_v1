@@ -42,7 +42,7 @@ from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
 ### Names to unpack stored data from
-T1 = 2.95e-07 #Initial time
+T1 = 4e-07 #Initial time
 name_date = '10_04_20'
 name_time = 'time:'+str(T1)
 name_data = 'Refined_grid_free_space'
@@ -50,12 +50,18 @@ name = name_date+'/'+name_time+'/'+name_data
 
 ## Run settings
 cont = 1 ## Continue with time-run. Else, just set up system.
+
+disp = 0 ## Display a run
+ho_disp = 0 ## How often to display the run
+
+hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
+
 save_time_steps = True ## Turn on to ho time steps from run
-ho = 50 #How often to save or display
+ho_save = 50 #How often to save
 
 dt = 1e-10 #Time step (necessary to be same as df_param?)
-T2 = 4e-07 #Final time. Initial time given above
-T2 = np.round(T2,14)
+T2 = 6e-07 #Final time. Initial time given above
+T2 = np.round(T2,9)
 
 def set_up_ferro_system(name):
     try: 
@@ -189,15 +195,13 @@ R_sys.fz = f_z
 ticker = 0
 
 for t in np.arange(T1,T2,dt):
+    ### re-initializing the system
     R_sys.set_up()
     ticker += 1
     if cont == True:
         pass
     else:
         break
-    
-    ### re-initializing the system
-
 
     print('Current Time: ',np.round(t,9),' and Ticker: ',ticker)
 
@@ -206,55 +210,57 @@ for t in np.arange(T1,T2,dt):
     
     ## Plotting stuff to demo
 
-    if abs(ticker%ho) < 1E-12:
-        # fig_Mz = R_sys.plot_slice('M','z',0)
-        # fig_Ez = R_sys.plot_slice('E','x',0)
-        # fig_Ey = R_sys.plot_slice('E','y',0)
-        
-        # fig_Ey0 = R_sys.plot_line('E','y',0,0)
-        # fig_Ey1 = R_sys.plot_line('E','y',1,0)
-        # fig_Ey2 = R_sys.plot_line('E','y',2,0)
-        # fig_Ey3 = R_sys.plot_line('E','y',3,0)
-        
-        # fig = plt.figure()
-        # t_val = np.arange(0,T,dt)
-        # Ricker_vec = np.vectorize(f_y)
-        # ax = fig.add_subplot(111)
-        # ax.plot(t_val,Ricker_vec(0,0,0,t_val))
-        # ax.axvline(x=t)
-        # Title = 'Current Boundary value: '+str(round(f_y(0,0,0,t),2))
-        # ax.set_title(Title)
-        # plt.show()
-        
-        # wait = input('Press Enter to continue')
+    
+    if disp == True:
+        if abs(ticker%ho_disp) < 1E-12:
+            fig_Mz = R_sys.plot_slice('M','z',0)
+            fig_Ez = R_sys.plot_slice('E','x',0)
+            fig_Ey = R_sys.plot_slice('E','y',0)
+            
+            fig_Ey0 = R_sys.plot_line('E','y',0,0)
+            fig_Ey1 = R_sys.plot_line('E','y',1,0)
+            fig_Ey2 = R_sys.plot_line('E','y',2,0)
+            fig_Ey3 = R_sys.plot_line('E','y',3,0)
+            
+            fig = plt.figure()
+            t_val = np.arange(T1,T2,dt)
+            Ricker_vec = np.vectorize(f_y)
+            ax = fig.add_subplot(111)
+            ax.plot(t_val,Ricker_vec(0,0,0,t_val))
+            ax.axvline(x=t)
+            Title = 'Current Boundary value: '+str(round(f_y(0,0,0,t),2))
+            ax.set_title(Title)
+            plt.show()
+        if hold_on == True:
+            wait = input('Press Enter to continue')
         
 ######### Turn on above to plot as you run
 ######### Only works for in Spyder running
         
-        if save_time_steps == True:
-            name2 = 'time:'+str(round(t,9))
-            mkdir_p(name_date+'/'+name2) #Creates sub-directory for this specific time
-            R_sys.save_data(name_date+'/'+name2+'/'+name_data) #Saves data 
-            data = OrderedDict()
-            data['mu0'] = R_sys.mu0
-            data['eps'] = R_sys.eps 
-            data['gamma'] = R_sys.gamma
-            data['K'] = R_sys.K
-            data['alpha'] = R_sys.alpha
-            data['H_s'] = R_sys.H_s_guess
-            
-                    # Parameters (system)
-            data['disc_x'] = R_sys.disc[0]
-            data['disc_y'] = R_sys.disc[1]
-            data['disc_z'] = R_sys.disc[2]
-            data['gnx'] = R_sys.gnx
-            data['gny'] = R_sys.gny
-            data['gnz'] = R_sys.gnz
-            data['T'] = R_sys.T
-            data['dt'] = R_sys.dt
-            
-            df = pd.DataFrame([data])
-            df.to_csv(name_date+'/'+name2+'/'+name_data+'_param.csv')
+    if save_time_steps == True:
+        name2 = 'time:'+str(round(t,9))
+        mkdir_p(name_date+'/'+name2) #Creates sub-directory for this specific time
+        R_sys.save_data(name_date+'/'+name2+'/'+name_data) #Saves data 
+        data = OrderedDict()
+        data['mu0'] = R_sys.mu0
+        data['eps'] = R_sys.eps 
+        data['gamma'] = R_sys.gamma
+        data['K'] = R_sys.K
+        data['alpha'] = R_sys.alpha
+        data['H_s'] = R_sys.H_s_guess
+        
+                # Parameters (system)
+        data['disc_x'] = R_sys.disc[0]
+        data['disc_y'] = R_sys.disc[1]
+        data['disc_z'] = R_sys.disc[2]
+        data['gnx'] = R_sys.gnx
+        data['gny'] = R_sys.gny
+        data['gnz'] = R_sys.gnz
+        data['T'] = R_sys.T
+        data['dt'] = R_sys.dt
+        
+        df = pd.DataFrame([data])
+        df.to_csv(name_date+'/'+name2+'/'+name_data+'_param.csv')
         
     
     ## Updating old fields
