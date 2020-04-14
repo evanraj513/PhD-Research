@@ -47,15 +47,22 @@ from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
 ### Saving parameters
+## Run settings
 cont = 1 ## Continue with time-run. Else, just set up system.
+
+disp = 0 ## Display a run
+ho_disp = 0 ## How often to display the run
+
+hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
+
 save_time_steps = True ## Turn on to ho time steps from run
-save_final_time = True ## Save where the run ends
-ho = 50 ## How often to save data
+save_final_time = True
+ho_save = 50 #How often to save
 
 today1 = date.today()
 name_date = today1.strftime("%d_%m_%y")
 mkdir_p(name_date)
-name_data ='No_alpha_gamma_free_space_v2' 
+name_data ='Non-Ricker_free_space' 
 
 ### Parameters (global)
 mu0 = 1.25667e-6
@@ -72,8 +79,8 @@ max_x = 3.0
 disc = np.array([0.04, 0.04, 0.04])
                             # Not used
 dt = 1e-10
-T = 1e-8 ## Final time
-T = np.round(T,14)
+T = 3e-7 ## Final time
+T = np.round(T,10)
 
 ## Making sure we have an odd-number for global nodes, otherwise
 ## the grid will not be uniform for Yee scheme
@@ -202,6 +209,10 @@ def g(x):
     else:
         return 0
     
+## Non-ricker pulse function
+def g2(x):
+    return np.exp(-(x)**2)
+    
 ### Ricker Pulse forcing conditions at x = 0, applied to E_y 
 ### 'Normal' boundary conditions else
         
@@ -217,7 +228,7 @@ def f_y(x,y,z,t):
     Ricker Pulse for y
     '''
     if abs(x) < disc[0]/4: #approx 0
-        d = beta0*g(f*t)
+        d =  beta0*g2(f*(t-1e-07))  ##beta0*g(f*t)
         return d
     else:
         return 0
@@ -253,35 +264,48 @@ for t in np.arange(dt,T,dt):
     ### Running the system
     R_sys.T = t
     R_sys.single_run(t)
+    ## Updating old fields
+    R_sys.E_old2 = R_sys.E_old.values
+    R_sys.B_old2 = R_sys.B_old.values
+    R_sys.M_old2 = R_sys.M_old.values
+    R_sys.H_old2 = R_sys.H_old.values
+    
+    R_sys.E_old = R_sys.E_new.values
+    R_sys.H_old = R_sys.H_new.values
+    R_sys.M_old = R_sys.M_new.values
+    R_sys.B_old = R_sys.B_new.values
     
     ## Plotting stuff to demo
-
-    if ticker%ho < 1E-12:
-        # fig_Mz = R_sys.plot_slice('M','z',0)
-        # fig_Ez = R_sys.plot_slice('E','x',0)
-        # fig_Ey = R_sys.plot_slice('E','y',0)
-        
-        # # fig_Ey0 = R_sys.plot_line('E','y',0,0)
-        # # fig_Ey1 = R_sys.plot_line('E','y',1,0)
-        # # fig_Ey2 = R_sys.plot_line('E','y',2,0)
-        # # fig_Ey3 = R_sys.plot_line('E','y',3,0)
-        
-        # fig = plt.figure()
-        # t_val = np.arange(0,T,dt)
-        # Ricker_vec = np.vectorize(f_y)
-        # ax = fig.add_subplot(111)
-        # ax.plot(t_val,Ricker_vec(0,0,0,t_val))
-        # ax.axvline(x=t)
-        # Title = 'Current Boundary value: '+str(round(f_y(0,0,0,t),2))
-        # ax.set_title(Title)
-        # plt.show()
-        
-        # wait = input('Press Enter to continue')
+    if disp == True:
+        if ticker%ho_disp < 1E-12:
+            # fig_Mz = R_sys.plot_slice('M','z',0)
+            # fig_Ez = R_sys.plot_slice('E','x',0)
+            # fig_Ey = R_sys.plot_slice('E','y',0)
+            
+            fig_Ey0 = R_sys.plot_line('E','y',0,0)
+            fig_Mz0 = R_sys.plot_line('M','z',0,0)
+            # fig_Ey1 = R_sys.plot_line('E','y',1,0)
+            # fig_Ey2 = R_sys.plot_line('E','y',2,0)
+            # fig_Ey3 = R_sys.plot_line('E','y',3,0)
+            
+            fig = plt.figure()
+            t_val = np.arange(0,T,dt)
+            Ricker_vec = np.vectorize(f_y)
+            ax = fig.add_subplot(111)
+            ax.plot(t_val,Ricker_vec(0,0,0,t_val))
+            ax.axvline(x=t)
+            Title = 'Current Boundary value: '+str(round(f_y(0,0,0,t),2))
+            ax.set_title(Title)
+            plt.show()
+      
+    if hold_on == True:
+        wait = input('Press Enter to continue')
         
 ######### Turn on above to plot as you run
 ######### Only works for in Spyder running
         
-        if save_time_steps == True:
+    if save_time_steps == True:
+        if ticker%ho_save < 1E-12:
             name_time = 'time:'+str(round(t,16))
             mkdir_p(name_date+'/'+name_time) #Creates sub-directory for this specific time
             R_sys.save_data(name_date+'/'+name_time+'/'+name_data) #Saves data 
@@ -308,17 +332,6 @@ for t in np.arange(dt,T,dt):
             df = pd.DataFrame([data])
             df.to_csv(name_date+'/'+name_time+'/'+name_data+'_param.csv')
         
-    
-    ## Updating old fields
-    R_sys.E_old2 = R_sys.E_old.values
-    R_sys.B_old2 = R_sys.B_old.values
-    R_sys.M_old2 = R_sys.M_old.values
-    R_sys.H_old2 = R_sys.H_old.values
-    
-    R_sys.E_old = R_sys.E_new.values
-    R_sys.H_old = R_sys.H_new.values
-    R_sys.M_old = R_sys.M_new.values
-    R_sys.B_old = R_sys.B_new.values
 
 ## Plotting stuff
 
@@ -330,6 +343,7 @@ for t in np.arange(dt,T,dt):
 
 ## Saving data
 if save_final_time == True:
+    mkdir_p(name_date+'/'+'time:'+str(round(T-dt,9)))
     R_sys.save_data(name_date+'/'+'time:'+str(round(T-dt,9))+'/'+name_data) ## Names defined above
     
         # Run parameters

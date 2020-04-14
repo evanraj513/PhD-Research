@@ -42,10 +42,10 @@ Ferro_sys = ferro_system1.Ferro_sys
 
 ### Name of things to unpack
 #name = today+'/'+'test1'
-name_date = '11_04_20'
+name_date = '10_04_20'
 # name_data1 = 'Refined_grid_free_space'
-name_data = 'No_alpha_gamma_free_space'
-l1 = np.zeros(shape = 5) ## How many nodes to check (better name?)
+name_data = 'Refined_grid_free_space'
+l1 = np.zeros(shape = 120) ## How many nodes to check (better name?)
 
 def set_up_ferro_system(name):
     '''
@@ -54,7 +54,8 @@ def set_up_ferro_system(name):
     try: 
         df_inner = pd.read_csv(name+'_inner.csv')
         df_outer = pd.read_csv(name+'_outer.csv')
-        df_param = pd.read_csv(name+'_param.csv')
+        # df_param = pd.read_csv(name+'_param.csv')
+        df_param = pd.read_csv('10_04_20/time:2.95e-07/Refined_grid_free_space_param.csv')
     except FileNotFoundError:
         print('Error importing csv. Abort')
         raise Exception
@@ -102,14 +103,15 @@ def set_up_ferro_system(name):
 ticker = 0
 for k in l1:
     print(ticker)
-    name = name_date + '/time:'+str(round(ticker*.5e-08,14))+'/'+name_data
+    name = name_date + '/time:'+str(round(ticker*.5e-08,10))+'/'+name_data
+    print(name)
     # name1 = name_date + '/time:'+str(round(ticker*.5e-08,14))+'/'+name_data1
     # name2 = name_date + '/time:'+str(round(ticker*.5e-08,14))+'/'+name_data2
     # print(name)
     try:
         ticker+=1
         R_sys = set_up_ferro_system(name) 
-        R_sys.plot_line('M','z')
+        R_sys.plot_line('E','y')
         
         # print(name1)        
         # R_sys1 = set_up_ferro_system(name1)
@@ -118,6 +120,7 @@ for k in l1:
 
     except:
         print('Error importing, try again')
+        print(name)
         pass
     
     # try:
