@@ -63,7 +63,7 @@ ho_save = 50 #How often to save
 today1 = date.today()
 name_date = today1.strftime("%d_%m_%y")
 mkdir_p(name_date)
-name_data ='Non-Ricker_free_space' 
+name_data ='Refinedd_grid_free_space' 
 
 ### Parameters (global)
 mu0 = 1.25667e-6
@@ -229,7 +229,8 @@ def f_y(x,y,z,t):
     Ricker Pulse for y
     '''
     if abs(x) < disc[0]/4: #approx 0
-        d =  beta0*g2(f*(t-1e-07))  ##beta0*g(f*t)
+        d = beta0*g(f*t)
+        # d =  beta0*g2(f*(t-1e-07))  
         return d
     else:
         return 0

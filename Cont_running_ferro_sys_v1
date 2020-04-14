@@ -250,9 +250,9 @@ for t in np.arange(T1,T2,dt):
         data['H_s'] = R_sys.H_s_guess
         
                 # Parameters (system)
-        data['disc_x'] = R_sys.disc[0]
-        data['disc_y'] = R_sys.disc[1]
-        data['disc_z'] = R_sys.disc[2]
+        data['disc_x'] = R_sys.disc[0][0]
+        data['disc_y'] = R_sys.disc[1][0]
+        data['disc_z'] = R_sys.disc[2][0]
         data['gnx'] = R_sys.gnx[0]
         data['gny'] = R_sys.gny[0]
         data['gnz'] = R_sys.gnz[0]
