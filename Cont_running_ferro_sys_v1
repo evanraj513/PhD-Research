@@ -45,7 +45,7 @@ Ferro_sys = ferro_system1.Ferro_sys
 T1 = 3e-07 #Initial time
 name_date = '13_04_20'
 name_time = 'time:'+str(T1)
-name_data = 'Refined_grid_free_space'
+name_data = 'Non-Ricker_free_space'
 name = name_date+'/'+name_time+'/'+name_data
 
 ## Run settings
