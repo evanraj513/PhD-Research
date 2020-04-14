@@ -327,7 +327,7 @@ for t in np.arange(dt,T,dt):
             data['gnz'] = gnz
             data['T'] = t
             data['dt'] = dt
-            data['CFL'] = c*dt/disc[0]
+            data['CFL'] = c*dt/(2*disc[0])
             
             df = pd.DataFrame([data])
             df.to_csv(name_date+'/'+name_time+'/'+name_data+'_param.csv')
