@@ -646,13 +646,13 @@ class Ferro_sys(object):
                 
         elif F == 'M':
             if comp == 'x':
-                pc = self.B_old.x
+                pc = self.M_old.x
                 ind = self.ind_rev_x_inn
             elif comp == 'y':
-                pc = self.B_old.y
+                pc = self.M_old.y
                 ind = self.ind_rev_y_inn
             elif comp == 'z':
-                pc = self.B_old.z
+                pc = self.M_old.z
                 ind = self.ind_rev_z_inn
             else:
                 print('Error, not "x", "y", "z". No comprendo, start over')
@@ -660,13 +660,13 @@ class Ferro_sys(object):
                 
         elif F == 'H':
             if comp == 'x':
-                pc = self.B_old.x
+                pc = self.H_old.x
                 ind = self.ind_rev_x_inn
             elif comp == 'y':
-                pc = self.B_old.y
+                pc = self.H_old.y
                 ind = self.ind_rev_y_inn
             elif comp == 'z':
-                pc = self.B_old.z
+                pc = self.H_old.z
                 ind = self.ind_rev_z_inn
             else:
                 print('Error, not "x", "y", "z". No comprendo, start over')
@@ -1211,7 +1211,7 @@ class Ferro_sys(object):
         p_z = np.ones(shape = (M_old.values.shape[1],1))
         p = np.concatenate((p_x, p_y, p_z), axis = 1).T
         
-        if K == 0 or t == dt:
+        if K == 0 or abs(t-dt) < 1e-12:
             x_new_num = f + (a_dot_f)*a - np.cross(a.T,f.T).T
             x_new_den = np.array(1+np.linalg.norm(a,axis=0)**2).T
             

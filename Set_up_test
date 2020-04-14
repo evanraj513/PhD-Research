@@ -748,39 +748,39 @@ Want to know why the forcing term is not dispersing across Ey.
 '''
 
 #################################
-#R_sys.set_up()
-#E_old = R_sys.E_old
-#B_old = R_sys.B_old
-#H_old = R_sys.H_old
-#M_old = R_sys.M_old
-#b_ind = R_sys.bound_ind
-#
-## Actual computation of time stepping
-#F = np.concatenate((R_sys.Fx(t), R_sys.Fy(t), R_sys.Fz(t)),axis=1)
-#E_new_values = E_old.values + dt/eps*H_old.curl()
-#
-##Setting all E boundaries to 0
-#for j in b_ind[0]:
-#    E_new_values[0][j] = 0 #x_bound(j)
-#for k in b_ind[1]:
-#    E_new_values[1][k] = 0
-#for l in b_ind[2]:
-#    E_new_values[2][l] = 0
-#
-#### Forcing term and boundary conditions inside F
-#E_new_values = E_new_values+F.T
-#R_sys.E_new = E_new_values
-#
-#B_new_values = B_old.values - dt*R_sys.E_new.curl()
-#R_sys.B_new = B_new_values
-#
-#B_on = (B_old.values + B_new_values)/2
-#
-#f = 2*M_old.values
-#a = -(abs(gamma)*dt/2)*(B_on/mu0 + R_sys.H_s.values) - alpha*M_old.values
-#lam = -K*abs(gamma)*R_sys.dt/4
-#
-#a_dot_f =  bdp(a.T,f.T).T
+# R_sys.set_up()
+# E_old = R_sys.E_old
+# B_old = R_sys.B_old
+# H_old = R_sys.H_old
+# M_old = R_sys.M_old
+# b_ind = R_sys.bound_ind
+# bdp = R_sys.better_dot_product
+# # Actual computation of time stepping
+# F = np.concatenate((R_sys.Fx(t), R_sys.Fy(t), R_sys.Fz(t)),axis=1)
+# E_new_values = E_old.values + dt/eps*H_old.curl()
+
+# #Setting all E boundaries to 0
+# for j in b_ind[0]:
+#     E_new_values[0][j] = 0 #x_bound(j)
+# for k in b_ind[1]:
+#     E_new_values[1][k] = 0
+# for l in b_ind[2]:
+#     E_new_values[2][l] = 0
+
+# ### Forcing term and boundary conditions inside F
+# E_new_values = E_new_values+F.T
+# R_sys.E_new = E_new_values
+
+# B_new_values = B_old.values - dt*R_sys.E_new.curl()
+# R_sys.B_new = B_new_values
+
+# B_on = (B_old.values + B_new_values)/2
+
+# f = 2*M_old.values
+# a = -(abs(gamma)*dt/2)*(B_on/mu0 + R_sys.H_s.values) - alpha*M_old.values
+# lam = -K*abs(gamma)*R_sys.dt/4
+
+# a_dot_f =  bdp(a.T,f.T).T
 #
 #p_x = np.zeros(shape = (M_old.values.shape[1],1))
 #p_y = np.copy(p_x)
