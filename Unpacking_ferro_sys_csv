@@ -45,7 +45,7 @@ Ferro_sys = ferro_system1.Ferro_sys
 name_date = '13_04_20'
 # name_data1 = 'Refined_grid_free_space'
 name_data = 'Non-Ricker_free_space'
-l1 = np.zeros(shape = 120) ## How many nodes to check (better name?)
+l1 = np.zeros(shape = 30) ## How many nodes to check (better name?)
 
 def set_up_ferro_system(name):
     '''
@@ -54,8 +54,10 @@ def set_up_ferro_system(name):
     try: 
         df_inner = pd.read_csv(name+'_inner.csv')
         df_outer = pd.read_csv(name+'_outer.csv')
-        df_param = pd.read_csv(name+'_param.csv')
+        # df_param = pd.read_csv(name+'_param.csv')
         # df_param = pd.read_csv('10_04_20/time:2.95e-07/Refined_grid_free_space_param.csv')
+        df_param = pd.read_csv('13_04_20/time:2.95e-07/Non-Ricker_free_space_param.csv')
+
     except FileNotFoundError:
         print('Error importing csv. Abort')
         raise Exception
@@ -100,7 +102,7 @@ def set_up_ferro_system(name):
 
 ### For unpacking a bunch of saved runs
 
-ticker = 0
+ticker = 70
 for k in l1:
     print(ticker)
     name = name_date + '/time:'+str(round(ticker*.5e-08,10))+'/'+name_data

@@ -56,7 +56,8 @@ ho_disp = 0 ## How often to display the run
 hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
 
 save_time_steps = True ## Turn on to ho time steps from run
-save_final_time = True
+save_final_time = True ## Turn on to save final time step
+save_param = False # Save 
 ho_save = 50 #How often to save
 
 today1 = date.today()
@@ -76,10 +77,10 @@ init_mag = 0 ## Magnetization initialization constant for M_z, 0 => free-space (
 
 ### Parameters (system)
 max_x = 3.0
-disc = np.array([0.04, 0.04, 0.04])
+disc = np.array([0.02, 0.02, 0.02])
                             # Not used
 dt = 1e-10
-T = 3e-7 ## Final time
+T = 2e-7 ## Final time
 T = np.round(T,10)
 
 ## Making sure we have an odd-number for global nodes, otherwise
