@@ -63,25 +63,26 @@ ho_save = 50 #How often to save
 today1 = date.today()
 name_date = today1.strftime("%d_%m_%y")
 mkdir_p(name_date)
-name_data ='Refinedd_grid_free_space' 
+name_data ='Gaussian_source_free_space' 
 
 ### Parameters (global)
 mu0 = 1.25667e-6
 eps = 8.5422e-12
 c = 1/(mu0*eps)**(1/2) ## Speed of light
-gamma = 0 #2.2e5
+gamma = 2.2e5 #2.2e5
 K = 0
-alpha = 0.
+alpha = 0.2
 H_s_val = 10**5 ## H_s value
 init_mag = 0 ## Magnetization initialization constant for M_z, 0 => free-space (non-LLG)
 
 ### Parameters (system)
-max_x = 3.0
-disc = np.array([0.02, 0.02, 0.02])
-                            # Not used
-dt = 1e-10
-T = 2e-7 ## Final time
-T = np.round(T,10)
+max_x = 200*1e-6
+disc = np.array([1e-6, 1e-6, 1e-6])
+         
+CFL = 1/(2**(1/2))                   # Not used
+dt = CFL*disc[0]/c
+T = 350*dt ## Final time
+T = np.round(T,12)
 
 ## Making sure we have an odd-number for global nodes, otherwise
 ## the grid will not be uniform for Yee scheme
@@ -241,14 +242,37 @@ def f_z(x,y,z,t):
     '''
     return 0
 
+def f_y2(x,y,z,t):
+    '''
+    Gaussian source for z  
+    '''
+    return 0
+
+def f_z2(x,y,z,t):
+    '''
+    Gaussian Source as seen in 
+    https://www.mathworks.com/matlabcentral/fileexchange/
+    35576-2d-fdtd-of-a-region-with-perfect-electric-conductor-boundary
+    '''
+    frequency=1.5e+13
+    impulse=0
+    N_lambda=c/(frequency*disc[0])
+    if t < 42:
+        x_mp = int((gnx+1)/2)
+        y_mp = int((gny+1)/2)
+        tstart = 0
+        if x_mp-disc[0]/4 < x < x_mp + disc[0]/4 and y_mp-disc[0]/4 < y < y_mp + disc[0]/4:
+            # return np.sin(((2*np.pi*(c/(disc[0]*N_lambda))*(t-tstart)*dt)))
+            return (10-15*np.cos(t*np.pi/20)+6*np.cos(2*t*np.pi/20)-np.cos(3*t*np.pi/20))/32;
+
 #################################################
 ########### Actually running system #############
 
 R_sys = set_up_system(gnx,gny,gnz,disc)
 
 R_sys.fx = f_x
-R_sys.fy = f_y
-R_sys.fz = f_z
+R_sys.fy = f_y2
+R_sys.fz = f_z2
 
 ticker = 0
 
