@@ -48,7 +48,7 @@ Ferro_sys = ferro_system1.Ferro_sys
 
 ### Saving parameters
 ## Run settings
-cont = 1 ## Continue with time-run. Else, just set up system.
+cont = 0 ## Continue with time-run. Else, just set up system.
 
 disp = 0 ## Display a run
 ho_disp = 0 ## How often to display the run
@@ -58,7 +58,7 @@ hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
 save_time_steps = True ## Turn on to ho time steps from run
 save_final_time = True ## Turn on to save final time step
 save_param = False # Save 
-ho_save = 50 #How often to save
+ho_save = 10 #How often to save
 
 today1 = date.today()
 name_date = today1.strftime("%d_%m_%y")
@@ -257,13 +257,20 @@ def f_z2(x,y,z,t):
     frequency=1.5e+13
     impulse=0
     N_lambda=c/(frequency*disc[0])
-    if t < 42:
-        x_mp = int((gnx+1)/2)
-        y_mp = int((gny+1)/2)
+    if t/dt < 42:
+        x_mp = int((gnx+1)/2)+1
+        y_mp = int((gny+1)/2)+1
+        
+        x_mp_val = x_mp*disc[0]
+        y_mp_val = y_mp*disc[0]
+        
         tstart = 0
-        if x_mp-disc[0]/4 < x < x_mp + disc[0]/4 and y_mp-disc[0]/4 < y < y_mp + disc[0]/4:
+        
+        if x_mp_val-disc[0] < x < x_mp_val + disc[0] and y_mp_val-disc[0] < y < y_mp_val + disc[0]:
             # return np.sin(((2*np.pi*(c/(disc[0]*N_lambda))*(t-tstart)*dt)))
-            return (10-15*np.cos(t*np.pi/20)+6*np.cos(2*t*np.pi/20)-np.cos(3*t*np.pi/20))/32;
+            return (10-15*np.cos(t/dt*np.pi/20)+6*np.cos(2*t/dt*np.pi/20)-np.cos(3*t/dt*np.pi/20))/32
+        else:
+            return 0
 
 #################################################
 ########### Actually running system #############

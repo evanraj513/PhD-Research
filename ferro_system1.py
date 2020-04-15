@@ -923,6 +923,8 @@ class Ferro_sys(object):
                     y = kk*2*dy
                     z = ll*2*dz
                     
+                    # print(x/dx,y/dy,z/dz)
+                    
                     F_z[jj + nx*kk + nx*ny*ll] = self.fz(x,y,z,t)
 
         return F_z
