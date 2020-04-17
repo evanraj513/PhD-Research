@@ -51,7 +51,7 @@ t0 = time.time()
 
 ### Saving parameters
 ## Run settings
-cont = 0 ## Continue with time-run. Else, just set up system.
+cont = 1 ## Continue with time-run. Else, just set up system.
 
 disp = 0 ## Display a run
 ho_disp = 50 ## How often to display the run

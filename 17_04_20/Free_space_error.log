@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "running_ferro_sys_v1_2D", line 415, in <module>
+    df.to_csv(name_date+'/'+'time:'+str(round(T-dt,14))+'/'+name_data+'_param.csv')
+  File "/usr/share/anaconda3/lib/python3.7/site-packages/pandas/core/generic.py", line 3020, in to_csv
+    formatter.save()
+  File "/usr/share/anaconda3/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 157, in save
+    compression=self.compression)
+  File "/usr/share/anaconda3/lib/python3.7/site-packages/pandas/io/common.py", line 424, in _get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '17_04_20/time:2.9990733e-07/Free_space_param.csv'
