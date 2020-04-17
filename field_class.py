@@ -308,9 +308,10 @@ class Vector(object):
         return np.int(np.round(val))
     
     
-    def Dx_E(self):
+    def Dx_E_mat(self):
         '''
-        Approximates derivative of E w.r.t. x, based on the following scheme
+        Gives matrix operator to compute derivative of E w.r.t. x, 
+        based on the following scheme
                 
             .   x      ...
           E_nx+1
@@ -363,7 +364,15 @@ class Vector(object):
                    
         A1 = Al.tocsr()
         
+        return A1
+    
+    def Dx_E(self):
+        '''
+        Returns derivative of E w.r.t. x
+        '''
+        A1 = self.Dx_E_mat()
         return A1*self.value
+        
 
     def ind_dy(self,x,y,z):
         '''
@@ -389,9 +398,10 @@ class Vector(object):
         val = j + k*nx + l*nx*(ny-1)
         return np.int(np.round(val))
                    
-    def Dy_E(self):
+    def Dy_E_mat(self):
         '''
-        Approximates derivative of E w.r.t. y, based on the following scheme
+        Gives matrix operator to approximates derivative of E w.r.t. y, 
+        based on the following scheme
                 
             .   x      ...
             1
@@ -445,6 +455,13 @@ class Vector(object):
                     
         A1 = Al.tocsr()
         
+        return A1
+    
+    def Dy_E(self):
+        '''
+        Returns derivative w.r.t. y of E_x, E_z
+        '''
+        A1 = self.Dy_E_mat()
         return A1*self.value
     
     
@@ -472,10 +489,10 @@ class Vector(object):
         val = j + k*nx + l*nx*ny
         return np.int(np.round(val))
     
-    def Dz_E(self):
+    def Dz_E_mat(self):
         '''
-        Approximates derivative of E w.r.t. z, based on the similar scheme to 
-        above
+        Gives matrix operator that approximates derivative of E w.r.t. z,
+        based on the similar scheme to above
                
         Note: This is to be used for only Ex, Ez. Will not work for Ey
         '''
@@ -520,8 +537,14 @@ class Vector(object):
                     
         A1 = Al.tocsr()
         
-        return A1*self.value
+        return A1
         
+    def Dz_E(self):
+        '''
+        Returns derivative w.r.t. to z of E_x, E_y
+        '''
+        A1 = self.Dy_E_mat()
+        return A1*self.value
     
     def Dx_B_v1(self):
         '''
@@ -591,7 +614,7 @@ class Vector(object):
     
     
     #### Correction as done in Dx_E but reverse?
-    def Dx_B(self):
+    def Dx_B_mat(self):
         '''
         Gives vector approximation to derivative w.r.t. x for By, Bz
         but includes the boundary nodes of E
@@ -640,9 +663,15 @@ class Vector(object):
                     
         A1 = Al.tocsr()
         
+        return A1
+    
+    def Dx_B(self):
+        '''
+        you know
+        '''
+    
+        A1 = self.Dx_B_mat()
         return A1*self.value
-    
-    
     
     def Dy_B_v1(self):
         '''
@@ -712,7 +741,7 @@ class Vector(object):
         return np.int(np.round(val))
     
     ### Correction in progress
-    def Dy_B(self):
+    def Dy_B_mat(self):
         '''
         Gives vector approximation to derivative w.r.t. y for Bx, Bz
         but includes the boundary nodes of E              
@@ -747,6 +776,10 @@ class Vector(object):
                         
         A1 = Al.tocsr()
         
+        return A1
+    
+    def Dy_B(self):
+        A1 = self.Dy_B_mat()
         return A1*self.value
     
     def Dz_B_v1(self):
@@ -819,7 +852,7 @@ class Vector(object):
         val = j + k*nx + l*nx*ny
         return np.int(np.round(val))
     
-    def Dz_B(self):
+    def Dz_B_mat(self):
         '''
         Gives vector approximation to derivative w.r.t. z for Bx, By
         but includes the boundary nodes of E          
@@ -858,6 +891,12 @@ class Vector(object):
                  
         A1 = Al.tocsr()
             
+        return A1
+    
+    def Dz_B(self):
+        
+        A1 = self.Dz_B_mat()
+        
         return A1*self.value
     
         

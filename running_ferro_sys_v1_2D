@@ -9,6 +9,7 @@ Created on Tue Feb  4 18:30:34 2020
 import os
 import sys
 from datetime import date
+import time
 
 def mkdir_p(mypath):
     '''Creates a directory. equivalent to using mkdir -p on the command line'''
@@ -46,24 +47,27 @@ else:
 from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
+t0 = time.time()
+
 ### Saving parameters
 ## Run settings
-cont = 0 ## Continue with time-run. Else, just set up system.
+cont = 1 ## Continue with time-run. Else, just set up system.
 
 disp = 0 ## Display a run
-ho_disp = 0 ## How often to display the run
+ho_disp = 50 ## How often to display the run
 
 hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
+ho_hold = -1
 
 save_time_steps = True ## Turn on to ho time steps from run
 save_final_time = True ## Turn on to save final time step
 save_param = False # Save 
-ho_save = 10 #How often to save
+ho_save = 50 #How often to save
 
 today1 = date.today()
 name_date = today1.strftime("%d_%m_%y")
 mkdir_p(name_date)
-name_data ='Gaussian_source_free_space' 
+name_data ='Testing_new_matrix_method' 
 
 ### Parameters (global)
 mu0 = 1.25667e-6
@@ -76,12 +80,12 @@ H_s_val = 10**5 ## H_s value
 init_mag = 0 ## Magnetization initialization constant for M_z, 0 => free-space (non-LLG)
 
 ### Parameters (system)
-max_x = 200*1e-6
-disc = np.array([1e-6, 1e-6, 1e-6])
+max_x = 3 ##200*1e-6
+disc = np.array([0.04,0.04,0.04])##np.array([1e-6, 1e-6, 1e-6])
          
 CFL = 1/(2**(1/2))                   # Not used
 dt = CFL*disc[0]/c
-T = 350*dt ## Final time
+T = 3e-7 ## Final time
 T = np.round(T,12)
 
 ## Making sure we have an odd-number for global nodes, otherwise
@@ -230,8 +234,8 @@ def f_y(x,y,z,t):
     Ricker Pulse for y
     '''
     if abs(x) < disc[0]/4: #approx 0
-        d = beta0*g(f*t)
-        # d =  beta0*g2(f*(t-1e-07))  
+        # d = beta0*g(f*t)
+        d =  beta0*g2(f*(t-1e-07))  
         return d
     else:
         return 0
@@ -245,14 +249,6 @@ def f_z(x,y,z,t):
 def f_y2(x,y,z,t):
     '''
     Gaussian source for z  
-    '''
-    return 0
-
-def f_z2(x,y,z,t):
-    '''
-    Gaussian Source as seen in 
-    https://www.mathworks.com/matlabcentral/fileexchange/
-    35576-2d-fdtd-of-a-region-with-perfect-electric-conductor-boundary
     '''
     frequency=1.5e+13
     impulse=0
@@ -272,16 +268,28 @@ def f_z2(x,y,z,t):
         else:
             return 0
 
+def f_z2(x,y,z,t):
+    '''
+    Gaussian Source as seen in 
+    https://www.mathworks.com/matlabcentral/fileexchange/
+    35576-2d-fdtd-of-a-region-with-perfect-electric-conductor-boundary
+    '''
+    return 0
+
 #################################################
 ########### Actually running system #############
 
 R_sys = set_up_system(gnx,gny,gnz,disc)
 
 R_sys.fx = f_x
-R_sys.fy = f_y2
-R_sys.fz = f_z2
+R_sys.fy = f_y
+R_sys.fz = f_z
 
 ticker = 0
+
+### If running version 2 of single_run, this sets up derivative matrices
+### so that they don't need to be computed over and over
+R_sys.set_up_der_matrices()
 
 for t in np.arange(dt,T,dt):
     ### re-initializing the system
@@ -296,17 +304,17 @@ for t in np.arange(dt,T,dt):
 
     ### Running the system
     R_sys.T = t
-    R_sys.single_run(t)
+    R_sys.single_run_v2(t)
     ## Updating old fields
-    R_sys.E_old2 = R_sys.E_old.values
-    R_sys.B_old2 = R_sys.B_old.values
-    R_sys.M_old2 = R_sys.M_old.values
-    R_sys.H_old2 = R_sys.H_old.values
+    R_sys.E_old2.values = R_sys.E_old.values
+    R_sys.B_old2.values = R_sys.B_old.values
+    R_sys.M_old2.values = R_sys.M_old.values
+    R_sys.H_old2.values = R_sys.H_old.values
     
-    R_sys.E_old = R_sys.E_new.values
-    R_sys.H_old = R_sys.H_new.values
-    R_sys.M_old = R_sys.M_new.values
-    R_sys.B_old = R_sys.B_new.values
+    R_sys.E_old.values = R_sys.E_new.values
+    R_sys.H_old.values = R_sys.H_new.values
+    R_sys.M_old.values = R_sys.M_new.values
+    R_sys.B_old.values = R_sys.B_new.values
     
     ## Plotting stuff to demo
     if disp == True:
@@ -315,9 +323,9 @@ for t in np.arange(dt,T,dt):
             # fig_Ez = R_sys.plot_slice('E','x',0)
             # fig_Ey = R_sys.plot_slice('E','y',0)
             
-            fig_Ey0 = R_sys.plot_line('E','y',0,0)
-            fig_Mz0 = R_sys.plot_line('M','z',0,0)
-            # fig_Ey1 = R_sys.plot_line('E','y',1,0)
+            # fig_Ey0 = R_sys.plot_line('E','y',0,0)
+            # fig_Mz0 = R_sys.plot_line('M','z',0,0)
+            fig_Ey1 = R_sys.plot_slice('E','y',0)
             # fig_Ey2 = R_sys.plot_line('E','y',2,0)
             # fig_Ey3 = R_sys.plot_line('E','y',3,0)
             
@@ -332,7 +340,8 @@ for t in np.arange(dt,T,dt):
             plt.show()
       
     if hold_on == True:
-        wait = input('Press Enter to continue')
+        if ticker%ho_hold < 1e-12:
+            wait = input('Press Enter to continue')
         
 ######### Turn on above to plot as you run
 ######### Only works for in Spyder running
@@ -372,7 +381,8 @@ for t in np.arange(dt,T,dt):
 #fig_Bz = R_sys.plot_slice('B','z',10)
 #fig_Ey = R_sys.plot_slice('E','y',10)
 #fig_Hz = R_sys.plot_slice('H','z',10)
-
+t1 = time.time()
+print('Time taken:', t1-t0)
 
 ## Saving data
 if save_final_time == True:
