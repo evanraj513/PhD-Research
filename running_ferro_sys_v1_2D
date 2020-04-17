@@ -300,7 +300,7 @@ for t in np.arange(dt,T,dt):
     else:
         break
     ## For output
-    print('Current Time: ',np.round(t,12),' and Ticker: ',ticker)
+    print('Current Time: ',np.round(t,9),' and Ticker: ',ticker)
 
     ### Running the system
     R_sys.T = t
@@ -348,7 +348,7 @@ for t in np.arange(dt,T,dt):
         
     if save_time_steps == True:
         if ticker%ho_save < 1E-12:
-            name_time = 'time:'+str(round(t,16))
+            name_time = 'time:'+str(round(t,9))
             mkdir_p(name_date+'/'+name_time) #Creates sub-directory for this specific time
             R_sys.save_data(name_date+'/'+name_time+'/'+name_data) #Saves data 
             data = OrderedDict()
