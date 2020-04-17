@@ -355,8 +355,8 @@ class Vector(object):
                    #abs(Ey.ny*Ey.nx - Bz.nx*Bz.ny) = abs(Ey.ny*Ey.nx - Ey.ny*(Ey.nx-1))
                    diff = ny ## Adjust for each slice number discrepancy. 
                    diff2 = 1 #(Ey.nx - Bz.nx), adjust for each row wrapping
-                   Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)+ll*diff+kk*diff2] = -1/2*dx
-                   Al[ind(jj*dx,kk*dy,ll*dz),ind((jj+1)*dx,kk*dy,ll*dz)+ll*diff+kk*diff2] = 1/2*dx
+                   Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)+ll*diff+kk*diff2] = -1/(2*dx)
+                   Al[ind(jj*dx,kk*dy,ll*dz),ind((jj+1)*dx,kk*dy,ll*dz)+ll*diff+kk*diff2] = 1/(2*dx)
 #                   print(jj,kk,ll,\
 #                            ind_y3(jj*dx,kk*dy,ll*dz),\
 #                            ind_y3(jj*dx,kk*dy,ll*dz)+ll*diff+kk*diff2,\
@@ -450,8 +450,8 @@ class Vector(object):
 #                    wait = input('Press Enter to continue')
                     
                     diff = nx 
-                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)+ll*diff] = -1/2*dy
-                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk+1)*dy,ll*dz)+ll*diff] = 1/2*dy
+                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)+ll*diff] = -1/(2*dy)
+                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk+1)*dy,ll*dz)+ll*diff] = 1/(2*dy)
                     
         A1 = Al.tocsr()
         
@@ -532,8 +532,8 @@ class Vector(object):
 #                    ind(jj*dx,(kk+1)*dy,ll*dz))
 #                    
 #                    wait = input('Press Enter to continue')
-                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)] = -1/2*dz
-                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)] = 1/2*dz
+                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)] = -1/(2*dz)
+                    Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)] = 1/(2*dz)
                     
         A1 = Al.tocsr()
         
