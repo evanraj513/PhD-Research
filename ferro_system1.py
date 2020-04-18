@@ -898,12 +898,12 @@ class Ferro_sys(object):
                     x = jj*2*dx
                     y = (kk+1/2)*2*dy
                     z = ll*2*dz
-#                    print('jj',jj,'\n',
-#                          'kk',kk,'\n',
-#                          'll',ll,'\n',
-#                          'x: ',x,'\n',
-#                          'y: ',y,'\n',
-#                          'z: ',z,'\n')
+                    # print('jj',jj,'\n',
+                    #       'kk',kk,'\n',
+                    #       'll',ll,'\n',
+                    #       'x: ',x,'\n',
+                    #       'y: ',y,'\n',
+                    #       'z: ',z,'\n')
 #                    if jj == nx-2:
 #                        wait = input('Press ENTER to continue')
                     F_y[jj + nx*kk + nx*ny*ll] = self.fy(x,y,z,t)

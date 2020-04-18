@@ -51,7 +51,7 @@ l1 = np.zeros(shape = 100) ## How many nodes to check (better name?)
 mu0 = 1.25667e-6
 eps = 8.5422e-12
 c = 1/(mu0*eps)**(1/2)
-dx = 0.04
+dx = 0.4
 CFL = 1/(2**(1/2))
 dt = CFL*dx/c
 
