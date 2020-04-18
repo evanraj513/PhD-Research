@@ -53,11 +53,11 @@ t0 = time.time()
 ## Run settings
 cont = 1 ## Continue with time-run. Else, just set up system.
 
-disp = 0 ## Display a run
-ho_disp = 1 ## How often to display the run
+disp = 1 ## Display a run
+ho_disp = 5 ## How often to display the run
 
 hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
-ho_hold = -1
+ho_hold = 5
 
 save_time_steps = True ## Turn on to ho time steps from run
 save_final_time = True ## Turn on to save final time step
@@ -85,7 +85,7 @@ disc = np.array([1e-3, 1e-3, 1e-3])
          
 CFL = 1/(2**(1/2))                   # Not used
 dt = CFL*disc[0]/c
-T = 500*dt ## Final time
+T = 1000*dt ## Final time
 T = np.round(T,12)
 
 ## Making sure we have an odd-number for global nodes, otherwise
@@ -246,6 +246,12 @@ def f_z(x,y,z,t):
     '''
     return 0
 
+def g2(t):
+    '''
+    Gaussian source
+    '''
+    return (10-15*np.cos(t/dt*np.pi/20)+6*np.cos(2*t/dt*np.pi/20)-np.cos(3*t/dt*np.pi/20))/32
+
 def f_y2(x,y,z,t):
     '''
     Gaussian source for z  
@@ -264,9 +270,12 @@ def f_y2(x,y,z,t):
         
         if x_mp_val-2*disc[0] < x < x_mp_val + 2*disc[0] and y_mp_val-2*disc[0] < y < y_mp_val + 2*disc[0]:
             # return np.sin(((2*np.pi*(c/(disc[0]*N_lambda))*(t-tstart)*dt)))
-            return (10-15*np.cos(t/dt*np.pi/20)+6*np.cos(2*t/dt*np.pi/20)-np.cos(3*t/dt*np.pi/20))/32
+            return g2(t)
         else:
             return 0
+        
+    else:
+        return 0
 
 def f_z2(x,y,z,t):
     '''
@@ -325,19 +334,19 @@ for t in np.arange(dt,T,dt):
             
             # fig_Ey0 = R_sys.plot_line('E','y',0,0)
             # fig_Mz0 = R_sys.plot_line('M','z',0,0)
-            fig_Ey1 = R_sys.plot_slice('E','y',0)
-            # fig_Ey2 = R_sys.plot_line('E','y',2,0)
+            # fig_Ey1 = R_sys.plot_slice('E','y',0)
+            fig_Ey2 = R_sys.plot_line('E','y',50,0)
             # fig_Ey3 = R_sys.plot_line('E','y',3,0)
             
-            fig = plt.figure()
-            t_val = np.arange(0,T,dt)
-            Ricker_vec = np.vectorize(f_y)
-            ax = fig.add_subplot(111)
-            ax.plot(t_val,Ricker_vec(0,0,0,t_val))
-            ax.axvline(x=t)
-            Title = 'Current Boundary value: '+str(round(f_y(0,0,0,t),2))
-            ax.set_title(Title)
-            plt.show()
+            # fig = plt.figure()
+            # t_val = np.arange(0,T,dt)
+            # Ricker_vec = np.vectorize(f_y)
+            # ax = fig.add_subplot(111)
+            # ax.plot(t_val,Ricker_vec(0,0,0,t_val))
+            # ax.axvline(x=t)
+            # Title = 'Current Boundary value: '+str(round(f_y(0,0,0,t),2))
+            # ax.set_title(Title)
+            # plt.show()
       
     if hold_on == True:
         if ticker%ho_hold < 1e-12:
@@ -349,6 +358,7 @@ for t in np.arange(dt,T,dt):
     if save_time_steps == True:
         if ticker%ho_save < 1E-12:
             name_time = 'time:'+str(round(t,12))
+            print('Saving current conditions at time:',name_time)
             mkdir_p(name_date+'/'+name_time) #Creates sub-directory for this specific time
             R_sys.save_data(name_date+'/'+name_time+'/'+name_data) #Saves data 
             data = OrderedDict()

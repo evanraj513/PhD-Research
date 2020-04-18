@@ -42,16 +42,16 @@ Ferro_sys = ferro_system1.Ferro_sys
 
 ### Name of things to unpack
 #name = today+'/'+'test1'
-name_date = '17_04_20'
+name_date = '18_04_20'
 # name_data1 = 'Refined_grid_free_space'
 name_data = 'Centered-Gaussian_free_space'
-l1 = np.zeros(shape = 1) ## How many nodes to check (better name?)
+l1 = np.zeros(shape = 25) ## How many nodes to check (better name?)
 
 ## For time name
 mu0 = 1.25667e-6
 eps = 8.5422e-12
 c = 1/(mu0*eps)**(1/2)
-dx = 0.4
+dx = 1e-3
 CFL = 1/(2**(1/2))
 dt = CFL*dx/c
 
@@ -64,9 +64,9 @@ def set_up_ferro_system(name):
     try: 
         df_inner = pd.read_csv(name+'_inner.csv')
         df_outer = pd.read_csv(name+'_outer.csv')
-        # df_param = pd.read_csv(name+'_param.csv')
+        df_param = pd.read_csv(name+'_param.csv')
         # df_param = pd.read_csv('10_04_20/time:2.95e-07/Refined_grid_free_space_param.csv')
-        df_param = pd.read_csv('13_04_20/time:2.95e-07/Non-Ricker_free_space_param.csv')
+        # df_param = pd.read_csv('13_04_20/time:2.95e-07/Non-Ricker_free_space_param.csv')
 
     except FileNotFoundError:
         print('Error importing csv. Abort')
