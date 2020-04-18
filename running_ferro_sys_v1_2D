@@ -80,13 +80,13 @@ H_s_val = 10**5 ## H_s value
 init_mag = 0 ## Magnetization initialization constant for M_z, 0 => free-space (non-LLG)
 
 ### Parameters (system)
-max_x = 200*1e-6
+max_x = 201*1e-6
 disc = np.array([1e-6, 1e-6, 1e-6])
          
 CFL = 1/(2**(1/2))                   # Not used
 dt = CFL*disc[0]/c
-T = 3e-7 ## Final time
-T = np.round(T,9)
+T = 500*dt ## Final time
+T = np.round(T,10)
 
 ## Making sure we have an odd-number for global nodes, otherwise
 ## the grid will not be uniform for Yee scheme
@@ -282,8 +282,8 @@ def f_z2(x,y,z,t):
 R_sys = set_up_system(gnx,gny,gnz,disc)
 
 R_sys.fx = f_x
-R_sys.fy = f_y
-R_sys.fz = f_z
+R_sys.fy = f_y2
+R_sys.fz = f_z2
 
 ticker = 0
 
