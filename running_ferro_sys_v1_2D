@@ -53,7 +53,7 @@ t0 = time.time()
 ## Run settings
 cont = 1 ## Continue with time-run. Else, just set up system.
 
-disp = 1 ## Display a run
+disp = 0 ## Display a run
 ho_disp = 5 ## How often to display the run
 
 hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
@@ -62,12 +62,12 @@ ho_hold = 5
 save_time_steps = True ## Turn on to ho time steps from run
 save_final_time = True ## Turn on to save final time step
 save_param = False # Save 
-ho_save = 25 #How often to save
+ho_save = 50 #How often to save
 
 today1 = date.today()
 name_date = today1.strftime("%d_%m_%y")
 mkdir_p(name_date)
-name_data ='Centered-Gaussian_free_space' 
+name_data ='Ricker_left_free_space' 
 
 ### Parameters (global)
 mu0 = 1.25667e-6
@@ -80,13 +80,13 @@ H_s_val = 10**5 ## H_s value
 init_mag = 0 ## Magnetization initialization constant for M_z, 0 => free-space (non-LLG)
 
 ### Parameters (system)
-max_x = 201*(1e-3)
-disc = np.array([1e-3, 1e-3, 1e-3])
+max_x = 15
+disc = np.array([0.04, 0.04, 0.04])
          
 CFL = 1/(2**(1/2))                   # Not used
 dt = CFL*disc[0]/c
-T = 1000*dt ## Final time
-T = np.round(T,12)
+T = 500*dt ## Final time
+T = np.round(T,9)
 
 ## Making sure we have an odd-number for global nodes, otherwise
 ## the grid will not be uniform for Yee scheme
@@ -291,8 +291,8 @@ def f_z2(x,y,z,t):
 R_sys = set_up_system(gnx,gny,gnz,disc)
 
 R_sys.fx = f_x
-R_sys.fy = f_y2
-R_sys.fz = f_z2
+R_sys.fy = f_y
+R_sys.fz = f_z
 
 ticker = 0
 

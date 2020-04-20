@@ -26,6 +26,7 @@ import numpy as np
 from scipy.sparse import lil_matrix
 from mpl_toolkits import mplot3d # Needed even though 'unused' variable
 import matplotlib.pyplot as plt
+from matplotlib import cm ## For adding colorbars
 #from matplotlib import cm
 plt.rcParams['backend'] = "Qt4Agg"
 
@@ -572,7 +573,8 @@ class Ferro_sys(object):
                 raise Exception
             
         fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
+        # ax = fig.add_subplot(111, projection='3d')
+        ax = fig.gca(projection='3d')
         
         m_s = s*pc.nx*pc.ny
         if s >= pc.nz:
@@ -592,12 +594,12 @@ class Ferro_sys(object):
         x1 = x1.reshape(pc.ny, pc.nx)
         y1 = y1.reshape(pc.ny, pc.nx)
         z1 = z1.reshape(pc.ny, pc.nx)
-        ax.plot_surface(x1,y1,z1)
+        ax.plot_surface(x1,y1,z1,cmap=cm.coolwarm)
         title = 'Plot of: '+F+'_'+comp+' at time: '+str(self.T)+'\n'+ 'slice: '+str(s)
 #        print(title)
         ax.set_title(title)
         
-        return fig
+        return fig,ax
     
     def plot_line(self,Field = 'E', comp = 'y', cs = 0, s = 0):
         '''
