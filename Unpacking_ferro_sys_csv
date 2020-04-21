@@ -8,10 +8,6 @@ Created on Wed Feb 12 10:39:35 2020
 
 import os
 import sys
-from datetime import date
-
-today1 = date.today()
-today = today1.strftime("%d_%m_%y")
 
 l_path = '..'
 m_path = os.path.abspath(l_path)
@@ -42,9 +38,9 @@ Ferro_sys = ferro_system1.Ferro_sys
 
 ### Name of things to unpack
 #name = today+'/'+'test1'
-name_date = '16_04_20'
+name_date = '20_04_20'
 # name_data1 = 'Refined_grid_free_space'
-name_data = 'Gaussian_source_free_space'
+name_data = 'Ricker_left_free_space'
 l1 = np.zeros(shape = 25) ## How many nodes to check (better name?)
 ticker_start = 0 ## Where do you want to start your unpacking
 
@@ -52,7 +48,7 @@ ticker_start = 0 ## Where do you want to start your unpacking
 mu0 = 1.25667e-6
 eps = 8.5422e-12
 c = 1/(mu0*eps)**(1/2)
-dx = 0.4
+dx = 0.04
 CFL = 1/(2**(1/2))
 dt = CFL*dx/c
 
@@ -117,7 +113,7 @@ ticker = ticker_start
 for k in l1:
     print(ticker)
     # name = name_date + '/time:'+str(round(ticker*.5e-08,10))+'/'+name_data
-    name = name_date + '/time:'+str(round(dt_name*ticker,16))+'/'+name_data
+    name = name_date + '/time:'+str(round(dt_name*ticker,12))+'/'+name_data
     print(name)
     # name1 = name_date + '/time:'+str(round(ticker*.5e-08,14))+'/'+name_data1
     # name2 = name_date + '/time:'+str(round(ticker*.5e-08,14))+'/'+name_data2

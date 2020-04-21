@@ -42,10 +42,10 @@ from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
 ### Names to unpack stored data from
-T1 = 3e-07 #Initial time
-name_date = '13_04_20'
+T1 = 3.7608e-08 #Initial time
+name_date = '20_04_20'
 name_time = 'time:'+str(T1)
-name_data = 'Non-Ricker_free_space'
+name_data = 'Ricker_left_free_space'
 name = name_date+'/'+name_time+'/'+name_data
 
 ## Run settings
@@ -59,9 +59,15 @@ hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
 save_time_steps = True ## Turn on to ho time steps from run
 ho_save = 50 #How often to save
 
-dt = 1e-10 #Time step (necessary to be same as df_param?)
-T2 = 4e-07 #Final time. Initial time given above
-T2 = np.round(T2,9)
+### Parameters for the run
+dx = 0.04
+mu0 = 1.25667e-6
+eps = 8.5422e-12
+c = 1/(mu0*eps)**(1/2)
+CFL = 1/(2**(1/2))                   # Not used
+dt = CFL*dx/c #Time step (necessary to be same as df_param?)
+T2 = T1+1000*dt #Final time. Initial time given above
+T2 = np.round(T2,12)
 
 def set_up_ferro_system(name):
     try: 
@@ -203,7 +209,7 @@ for t in np.arange(T1,T2,dt):
     else:
         break
 
-    print('Current Time: ',np.round(t,9),' and Ticker: ',ticker)
+    print('Current Time: ',np.round(t,12),' and Ticker: ',ticker)
 
     ### Running the system
     R_sys.single_run(t)
@@ -238,7 +244,7 @@ for t in np.arange(T1,T2,dt):
 ######### Only works for in Spyder running
         
     if save_time_steps == True:
-        name2 = 'time:'+str(round(t,9))
+        name2 = 'time:'+str(round(t,12))
         mkdir_p(name_date+'/'+name2) #Creates sub-directory for this specific time
         R_sys.save_data(name_date+'/'+name2+'/'+name_data) #Saves data 
         data = OrderedDict()
@@ -285,31 +291,31 @@ for t in np.arange(T1,T2,dt):
 
 ## Saving data
 
-R_sys.save_data(name_date+'/'+'time:'+str(round(T2,9))+'/'+name_data+'_param.csv') ## Name defined above for loop
+# R_sys.save_data(name_date+'/'+'time:'+str(round(T2,9))+'/'+name_data+'_param.csv') ## Name defined above for loop
 
     # Run parameters
         #Global Parameters
-data = OrderedDict()
-data['mu0'] = R_sys.mu0
-data['eps'] = R_sys.eps 
-data['gamma'] = R_sys.gamma
-data['K'] = R_sys.K
-data['alpha'] = R_sys.alpha
-data['H_s'] = R_sys.H_s
+# data = OrderedDict()
+# data['mu0'] = R_sys.mu0
+# data['eps'] = R_sys.eps 
+# data['gamma'] = R_sys.gamma
+# data['K'] = R_sys.K
+# data['alpha'] = R_sys.alpha
+# data['H_s'] = R_sys.H_s
 
-        # Parameters (system)
-# data['max_x'] = max_x
-data['disc_x'] = disc[0]
-data['disc_y'] = disc[1]
-data['disc_z'] = disc[2]
-data['gnx'] = R_sys.gnx
-data['gny'] = R_sys.gny
-data['gnz'] = R_sys.gnz
-data['T'] = T2
-data['dt'] = R_sys.dt
+#         # Parameters (system)
+# # data['max_x'] = max_x
+# data['disc_x'] = disc[0]
+# data['disc_y'] = disc[1]
+# data['disc_z'] = disc[2]
+# data['gnx'] = R_sys.gnx
+# data['gny'] = R_sys.gny
+# data['gnz'] = R_sys.gnz
+# data['T'] = T2
+# data['dt'] = R_sys.dt
 
-df = pd.DataFrame([data])
-df.to_csv(name_date+'/'+'time:'+str(round(T2,9))+'/'+name_data+'_param.csv')
+# df = pd.DataFrame([data])
+# df.to_csv(name_date+'/'+'time:'+str(round(T2,9))+'/'+name_data+'_param.csv')
 
 
 
