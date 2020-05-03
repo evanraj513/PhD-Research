@@ -87,8 +87,8 @@ def disp():
 hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
 ho_hold = 1 ## How often to hold
 
-save_time_steps = False ## Turn on to ho time steps from run
-save_final_time = False ## Turn on to save final time step
+save_time_steps = True ## Turn on to ho time steps from run
+save_final_time = True ## Turn on to save final time step
 save_param = False # Save 
 ho_save = 50 #How often to save
 
