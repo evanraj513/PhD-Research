@@ -42,7 +42,7 @@ from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
 ### Names to unpack stored data from
-T1 = 3.7608e-08 #Initial time
+T1 = 3.7068e-08 #Initial time
 name_date = '20_04_20'
 name_time = 'time:'+str(T1)
 name_data = 'Ricker_left_free_space'
