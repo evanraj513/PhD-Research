@@ -38,9 +38,9 @@ Ferro_sys = ferro_system1.Ferro_sys
 
 ### Name of things to unpack
 #name = today+'/'+'test1'
-name_date = '20_04_20'
+name_date = '18_04_20'
 # name_data1 = 'Refined_grid_free_space'
-name_data = 'Ricker_left_free_space'
+name_data = 'Centered-Gaussian_free_space'
 l1 = np.zeros(shape = 25) ## How many nodes to check (better name?)
 ticker_start = 0 ## Where do you want to start your unpacking
 
@@ -48,11 +48,11 @@ ticker_start = 0 ## Where do you want to start your unpacking
 mu0 = 1.25667e-6
 eps = 8.5422e-12
 c = 1/(mu0*eps)**(1/2)
-dx = 0.04
+dx = 1E-3
 CFL = 1/(2**(1/2))
 dt = CFL*dx/c
 
-dt_name = dt*50 ## (step_size in time)(how often saved) probably 10,25, or 50
+dt_name = dt*25 ## (step_size in time)(how often saved) probably 10,25, or 50
 
 def set_up_ferro_system(name):
     '''
@@ -121,7 +121,7 @@ for k in l1:
     try:
         ticker+=1
         R_sys = set_up_ferro_system(name) 
-        fig,ax = R_sys.plot_slice('E','y',0)
+        fig,ax = R_sys.plot_slice('H','z',0)
         # ax.view_init(elev = 90,azim = 90)
         # fig
         

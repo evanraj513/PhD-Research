@@ -23,7 +23,7 @@ else:
 
 import numpy as np
 #import scipy as sp
-from scipy.sparse import lil_matrix
+from scipy.sparse import lil_matrix, csr_matrix, linalg
 from mpl_toolkits import mplot3d # Needed even though 'unused' variable
 import matplotlib.pyplot as plt
 from matplotlib import cm ## For adding colorbars
@@ -97,6 +97,7 @@ class Ferro_sys(object):
         self.K = K
         self.alpha = alpha
         self.H_s_guess = H_s_guess
+        self.sigma = 0.0
 
         self.disc = disc
         self.node_count = global_node_count
@@ -1318,6 +1319,187 @@ class Ferro_sys(object):
         
         self.E_new_curl = np.array([Ec1,Ec2,Ec3])
         
+    def curl_L(self,values,Field = ''):
+        '''
+        Sets up the left side of the curl for ADI method
+        
+        values is the (3 x n) np.array that is the Fields values
+        of which we are taking the curl_L of
+        
+        Field states whether this is in inner or outer field
+        
+        i signifies inner (standard for Yee scheme M,H,B)
+        o signifies outer (standard for Yee scheme E)
+        
+        '''
+        
+        F = Field
+        
+        if F == 'Outer' or F == 'o':
+            Ec1 = self.Ez_Dy_mat*values[2]
+            Ec2 = self.Ex_Dz_mat*values[0]
+            Ec3 = self.Ey_Dx_mat*values[1]
+            
+        elif F == 'Inner' or F == 'i':
+            Ec1 = self.Hz_Dy_mat*values[2]
+            Ec2 = self.Hx_Dz_mat*values[0]
+            Ec3 = self.Hy_Dx_mat*values[1]
+            
+        else:
+            print('Warning. Input not valid. Break and reconfigure')
+            raise Exception
+        
+        return np.array([Ec1,Ec2,Ec3])
+        
+    def curl_R(self, values, Field = ''):
+        '''
+        Sets up the right side of the curl for ADI method
+        
+        values is the (3 x n) np.array that is the Fields values
+        of which we are taking the curl_L of
+        
+        Field states whether this is in inner or outer field
+        
+        i signifies inner (standard for Yee scheme M,H,B)
+        o signifies outer (standard for Yee scheme E)
+        '''
+
+        F = Field
+        
+        if F == 'Outer' or F == 'o':
+            Ec1 = self.Ey_Dz_mat*values[1]
+            Ec2 = self.Ez_Dx_mat*values[2]
+            Ec3 = self.Ex_Dy_mat*values[0]
+            
+        elif F == 'Inner' or F == 'i':
+            Ec1 = self.Hy_Dz_mat*values[1]
+            Ec2 = self.Hz_Dx_mat*values[2]
+            Ec3 = self.Hx_Dy_mat*values[0]
+            
+        else:
+            print('Warning. nput not valid. Break and reconfigure')
+            raise Exception
+            
+        return np.array([Ec1,Ec2,Ec3])
+    
+    def curl_LL(self, values):
+        '''
+        Returns the two-time left-side curl operator applied to the values. 
+        '''
+        
+        Ec1 = self.Hy_Dz_mat.dot(self.Ez_Dx_mat.dot(values[2]))
+        Ec2 = self.Hz_Dx_mat.dot(self.Ex_Dy_mat.dot(values[0]))
+        Ec3 = self.Hx_Dy_mat.dot(self.Ey_Dz_mat.dot(values[1]))
+        
+        return np.array([Ec1, Ec2, Ec3])
+    
+    def curl_RR(self, values):
+        '''
+        Returns the two-time right-side curl operator applied to values
+        '''
+        
+        Ec1 = self.Hz_Dy_mat.dot(self.Ey_Dx_mat.dot(values[1]))
+        Ec2 = self.Hx_Dz_mat.dot(self.Ez_Dy_mat.dot(values[2]))
+        Ec3 = self.Hy_Dx_mat.dot(self.Ex_Dz_mat.dot(values[0]))
+        
+        return np.array([Ec1, Ec2, Ec3])
+    
+    def curl_LR(self, values):
+        
+        Ec1 = self.Hz_Dy_mat.dot(self.Ex_Dy_mat.dot(values[0]))
+        Ec2 = self.Hx_Dz_mat.dot(self.Ey_Dz_mat.dot(values[1]))
+        Ec3 = self.Hy_Dx_mat.dot(self.Ez_Dx_mat.dot(values[2]))
+        
+        return np.array([Ec1, Ec2, Ec3])
+    
+    def curl_RL(self, values):
+        
+        Ec1 = self.Hy_Dz_mat.dot(self.Ex_Dz_mat.dot(values[0]))
+        Ec2 = self.Hz_Dx_mat.dot(self.Ey_Dx_mat.dot(values[1]))
+        Ec3 = self.Hx_Dy_mat.dot(self.Ez_Dy_mat.dot(values[2]))
+        
+        return np.array([Ec1, Ec2, Ec3])
+    
+    def set_up_step_1a_inv(self):
+        '''
+        Sets up step_1a (as in huang 2018) to compute E^n+1/2
+        '''
+        ## Parameters
+        dt = self.dt
+        eps = self.eps
+        mu0 = self.mu0
+        
+        ## Double operator set-up (curl_L)*(curl_R)
+        Ec1 = self.Hz_Dy_mat.dot(self.Ex_Dy_mat)
+        Ec2 = self.Hx_Dz_mat.dot(self.Ey_Dz_mat)
+        Ec3 = self.Hy_Dx_mat.dot(self.Ez_Dx_mat)
+        
+                            ## 1 - dt^2/(4*eps*mu0)*(curl_L)*(curl_R)
+        self.a1_1 = csr_matrix(np.identity(Ec1.shape[0])) - (dt**2)/(4*eps*mu0)*Ec1
+        self.a1_2 = csr_matrix(np.identity(Ec2.shape[0])) - (dt**2)/(4*eps*mu0)*Ec2
+        self.a1_3 = csr_matrix(np.identity(Ec3.shape[0])) - (dt**2)/(4*eps*mu0)*Ec3
+        
+        self.a1_1lu = linalg.splu(self.a1_1)
+        self.a1_2lu = linalg.splu(self.a1_2)
+        self.a1_3lu = linalg.splu(self.a1_3)
+        
+    def step_1a_inv(self,values):
+        '''
+        Completes up step_1a (as in huang 2018) to compute E^n+1/2
+        '''
+        
+        Ret_1 = self.a1_1lu.solve(values[0])
+        Ret_2 = self.a1_2lu.solve(values[1])
+        Ret_3 = self.a1_3lu.solve(values[2])
+        
+        return np.array([Ret_1, Ret_2, Ret_3])
+    
+    def set_up_step_2a_inv(self):
+        '''
+        Sets up step_1a (as in huang 2018) to compute E^n+1/2
+        '''
+        ## Parameters
+        dt = self.dt
+        eps = self.eps
+        mu0 = self.mu0
+        
+        ## Double operator set-up (curl_R)*(curl_L)
+        Ec1 = self.Hy_Dz_mat.dot(self.Ex_Dz_mat)
+        Ec2 = self.Hz_Dx_mat.dot(self.Ey_Dx_mat)
+        Ec3 = self.Hx_Dy_mat.dot(self.Ez_Dy_mat)
+        
+                            ## 1 - dt^2/(4*eps*mu0)*(curl_R)*(curl_L)
+        self.a2_1 = csr_matrix(np.identity(Ec1.shape[0])) - (dt**2)/(4*eps*mu0)*Ec1
+        self.a2_2 = csr_matrix(np.identity(Ec2.shape[0])) - (dt**2)/(4*eps*mu0)*Ec2
+        self.a2_3 = csr_matrix(np.identity(Ec3.shape[0])) - (dt**2)/(4*eps*mu0)*Ec3
+        
+        
+        
+        ## Setting up lu factorization
+        self.a2_1lu = linalg.splu(self.a1_1)
+        self.a2_2lu = linalg.splu(self.a1_2)
+        self.a2_3lu = linalg.splu(self.a1_3)
+        
+    def step_2a_inv(self,values):
+        '''
+        Completes up step_1a (as in huang 2018) to compute E^n+1/2
+        '''
+        
+        Ret_1 = self.a2_1lu.solve(values[0])
+        Ret_2 = self.a2_2lu.solve(values[1])
+        Ret_3 = self.a2_3lu.solve(values[2])
+        
+        return np.array([Ret_1, Ret_2, Ret_3])
+        
+    def initialize_set_up_ADI(self):
+        '''
+        Runs all the set-ups above for the ADI method
+        '''
+        self.set_up_der_matrices()
+        self.set_up_step_1a_inv()
+        self.set_up_step_2a_inv()
+        
+        
     def single_run_v2(self,t):
         '''
         An update to the above run. Main difference is that derivative matrices 
@@ -1395,10 +1577,10 @@ class Ferro_sys(object):
             
             a1 = lam**2
             b1 = 2*lam*(bdp(a.T, p.T) + lam*(bdp(p.T, f.T)))
-            c1 = 1+np.linalg.norm(a) - lam*(bdp(a.T, f.T)) + 3*lam*\
+            c1 = 1+np.linalg.norm(a)**2 - lam*(bdp(a.T, f.T)) + 3*lam*\
             (bdp(a.T, p.T)) * (bdp(p.T, f.T)) + \
             lam**2*(bdp(p.T, f.T))
-            d1 = -lam*(bdp(a.T, p.T)*(bdp(p.T,f.T))) - (bdp(a.T, p.T)*(bdp(p.T,f.T)))\
+            d1 = -lam*(bdp(a.T, f.T)*(bdp(p.T,f.T))) - (bdp(a.T, p.T)*(bdp(p.T,f.T))**2)\
             + lam*((bdp(a.T, p.T)*(bdp(p.T,f.T))**2))\
             +np.linalg.norm(a)**2*(bdp(p.T, f.T))
             -bdp(np.cross(a.T, p.T),f.T)
@@ -1417,13 +1599,13 @@ class Ferro_sys(object):
             
             x_new_values = 1/np.linalg.norm(np.cross(a.T,p.T).T)**2*\
             ((X - (bdp(a.T,p.T))*Y).T*a\
-              + (((np.linalg.norm(a))**2*Y) - (bdp(a.T,p.T))).T*p\
+              + (((np.linalg.norm(a))**2*Y) - (bdp(a.T,p.T))).T*X\
               + (Z*np.cross(a.T, p.T)).T)
             
             
-        self.M_new = x_new_values.T - M_old.values
+        self.M_new.values = x_new_values.T - M_old.values
         
-        self.H_new = B_new_values/mu0 - self.M_new.values        
+        self.H_new.values = B_new_values/mu0 - self.M_new.values        
         
     def single_run_FD(self, t):
         '''
@@ -1495,10 +1677,10 @@ class Ferro_sys(object):
             
             a1 = lam**2
             b1 = 2*lam*(bdp(a.T, p.T) + lam*(bdp(p.T, f.T)))
-            c1 = 1+np.linalg.norm(a) - lam*(bdp(a.T, f.T)) + 3*lam*\
+            c1 = 1+np.linalg.norm(a)**2 - lam*(bdp(a.T, f.T)) + 3*lam*\
             (bdp(a.T, p.T)) * (bdp(p.T, f.T)) + \
             lam**2*(bdp(p.T, f.T))
-            d1 = -lam*(bdp(a.T, p.T)*(bdp(p.T,f.T))) - (bdp(a.T, p.T)*(bdp(p.T,f.T)))\
+            d1 = -lam*(bdp(a.T, f.T)*(bdp(p.T,f.T))) - (bdp(a.T, p.T)*(bdp(p.T,f.T))**2)\
             + lam*((bdp(a.T, p.T)*(bdp(p.T,f.T))**2))\
             +np.linalg.norm(a)**2*(bdp(p.T, f.T))
             -bdp(np.cross(a.T, p.T),f.T)
@@ -1517,13 +1699,199 @@ class Ferro_sys(object):
             
             x_new_values = 1/np.linalg.norm(np.cross(a.T,p.T).T)**2*\
             ((X - (bdp(a.T,p.T))*Y).T*a\
-              + (((np.linalg.norm(a))**2*Y) - (bdp(a.T,p.T))).T*p\
+              + (((np.linalg.norm(a))**2*Y) - (bdp(a.T,p.T))).T*X\
               + (Z*np.cross(a.T, p.T)).T)
             
             
         self.M_new = x_new_values.T - M_old.values
         
         self.H_new = B_new_values/mu0 - self.M_new.values
+        
+    def single_run_ADI(self,t):
+        '''
+        A single time-step for ADI scheme implemented. 
+        
+        Main idea and algebraic steps outlined in Huang_2018 and Yao 2017
+        
+        M will be computed at each half step using Joly
+        Then ADI method for full maxwells equations with non-zero M
+            will be implemented to update remaining fields
+        
+        '''
+        
+        ### Parameters
+        E_old2 = self.E_old2
+        H_old2 = self.H_old2
+        M_old2 = self.M_old2
+        B_old2 = self.B_old2
+        
+        E_old = self.E_old
+        B_old = self.B_old
+        M_old = self.M_old
+        H_old = self.H_old
+        
+        E_new = self.E_new
+        B_new = self.B_new
+        M_new = self.M_new
+        H_new = self.H_new
+        
+        dt = self.dt
+        b_ind = self.bound_ind
+        bdp = self.better_dot_pdt
+        
+        ## Parameter choices given in system
+        mu0 = self.mu0
+        eps = self.eps
+        gamma = self.gamma
+        K = self.K
+        alpha = self.alpha
+        sigma = self.sigma 
+
+        ################ Solving for Mn+1 ##################
+        f = 2*M_old2.values
+        a = -(abs(gamma)*dt/2)*(B_old2.values/mu0 + self.H_s.values) - alpha*M_old2.values
+        lam = -K*abs(gamma)*dt/4
+        
+        a_dot_f =  bdp(a.T,f.T).T
+        
+        ## Projection of 'easy' axis
+        p_x = np.zeros(shape = (M_old2.values.shape[1],1))
+        p_y = np.copy(p_x)
+        p_z = np.ones(shape = (M_old2.values.shape[1],1))
+        p = np.concatenate((p_x, p_y, p_z), axis = 1).T
+        
+        if K == 0 or t == dt:
+            x_new_num = f + (a_dot_f)*a - np.cross(a.T,f.T).T
+            x_new_den = np.array(1+np.linalg.norm(a,axis=0)**2).T
+            
+            x_new_values = np.divide(x_new_num.T, np.array([x_new_den]).T)
+                
+        else:
+            
+            cubic_solver = self.cubic_solver
+            
+            a1 = lam**2
+            b1 = 2*lam*(bdp(a.T, p.T) + lam*(bdp(p.T, f.T)))
+            c1 = 1+np.linalg.norm(a)**2 - lam*(bdp(a.T, f.T)) + 3*lam*\
+            (bdp(a.T, p.T)) * (bdp(p.T, f.T)) + \
+            lam**2*(bdp(p.T, f.T))
+            d1 = -lam*(bdp(a.T, f.T)*(bdp(p.T,f.T))) - (bdp(a.T, p.T)*(bdp(p.T,f.T))**2)\
+            + lam*((bdp(a.T, p.T)*(bdp(p.T,f.T))**2))\
+            +np.linalg.norm(a)**2*(bdp(p.T, f.T))
+            -bdp(np.cross(a.T, p.T),f.T)
+            Z = np.zeros(shape = b1.shape)
+            X = np.copy(Z)
+            Y = np.copy(Z)
+            x_new_values = np.copy(Z)
+            for k in np.arange(0,x_new_values.shape[1]):
+                if k%100 == 1:
+                    Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k],disp = 'Yes')
+                else:
+                    Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k],disp = 'no')
+            
+            X = (bdp(a.T,f.T)) - lam*Z*(Z+bdp(p.T,f.T))
+            Y = Z+bdp(p.T,f.T)
+            
+            x_new_values = 1/np.linalg.norm(np.cross(a.T,p.T).T)**2*\
+            ((X - (bdp(a.T,p.T))*Y).T*a\
+              + (((np.linalg.norm(a))**2*Y) - (bdp(a.T,p.T))).T*X\
+              + (Z*np.cross(a.T, p.T)).T)
+            
+            
+        self.M_new.values = x_new_values.T - M_old2.values
+        
+        ### Setting M_n+1/2 values to be numerical average between old2 and new
+        
+        self.M_old.values = (self.M_old2.values + self.M_new.values)/2
+        
+        ######################################################
+        #################### ADI Scheme ######################
+        ######################################################
+        
+        ################ First Half step ###################
+        
+        ##### Solving for E_n+1/2
+        s_a = 1/mu0*self.curl_L(B_old2.values,'Inner')
+        s_b = dt/(2*mu0)*self.curl_LL(E_old2.values)
+        s_c = self.curl_L(M_old.values,'Inner')
+        s_d = self.curl_R(H_old2.values,'Inner')
+        
+        s_main = (s_a - s_b - s_c - s_d)
+        E_old_RHS = E_old2.values + dt/(2*eps)*s_main - (dt/2)*sigma*E_old2.values
+        
+        ### Add in forcing terms at the half-step
+        F_old = np.concatenate((self.Fx(t-dt/2), self.Fy(t-dt/2), self.Fz(t-dt/2)),axis=1)
+        
+        E_old_RHS += dt/2*F_old.T
+        
+        ### Using back-solve for new values
+        E_old_values = self.step_1a_inv(E_old_RHS)
+        
+        #Setting all E boundaries to 0
+        b_ind = self.bound_ind
+
+        for j in b_ind[0]:
+            E_old_values[0][j] = 0 #x_bound(j)
+        for k in b_ind[1]:
+            E_old_values[1][k] = 0
+        for l in b_ind[2]:
+            E_old_values[2][l] = 0
+        
+        self.E_old.values = E_old_values
+        
+        ###### Solving for B_n+1/2
+        B_old_values = B_old2.values + dt/2*(\
+            self.curl_R(E_old_values, 'o') - \
+                self.curl_L(E_old2.values, 'o'))
+            
+        self.B_old.values = B_old_values
+        
+        ###### Solving for H_n+1/2
+        H_old_values = 1/mu0*B_old_values - M_old.values
+        self.H_old.values = H_old_values
+        
+        ################ Second Half step ###################
+        ### Solving for E_n+1
+        
+        s2_a = self.curl_L(H_old.values, 'i')
+        s2_b = 1/mu0*self.curl_R(B_old.values, 'i')
+        s2_c = dt/(2*mu0)*self.curl_RR(E_old.values)
+        s2_d = self.curl_R(M_new.values,'i')
+        
+        s2_main = s2_a - s2_b - s2_c + s2_d
+        
+        F_new = np.concatenate((self.Fx(t), self.Fy(t), self.Fz(t)),axis=1)
+        
+        E_new_RHS = E_old.values + dt/(2*eps)*s2_main - dt/2*sigma*E_old.values
+        
+        E_new_RHS += F_new.T
+        
+        # Backsolve
+        
+        E_new_values = self.step_2a_inv(E_new_RHS)
+        
+        #Setting all E boundaries to 0
+        for j in b_ind[0]:
+            E_new_values[0][j] = 0 #x_bound(j)
+        for k in b_ind[1]:
+            E_new_values[1][k] = 0
+        for l in b_ind[2]:
+            E_new_values[2][l] = 0
+        
+        self.E_new.values = E_new_values
+        
+        ### Solving for B_n+1
+        self.B_new.values = B_old.values + dt/2*(\
+                        self.curl_R(E_old.values,'o') - 
+                        self.curl_L(E_new_values, 'o'))
+        
+        ### Solving H_n+1
+        self.H_new_values = 1/mu0*B_new.values - M_new.values
+            
+        
+        
+        
+        
         
     def cubic_solver(self,a,b,c,d,x0,disp = 'no'):
         '''
@@ -1720,42 +2088,3 @@ class Ferro_sys(object):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        

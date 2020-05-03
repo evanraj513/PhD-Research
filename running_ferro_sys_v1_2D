@@ -53,14 +53,14 @@ t0 = time.time()
 ## Run settings
 cont = 1 ## Continue with time-run. Else, just set up system.
 
-disp = 0 ## Display a run
-ho_disp = 5 ## How often to display the run
+disp = 1 ## Display a run
+ho_disp = 1 ## How often to display the run
 
 hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
-ho_hold = 5
+ho_hold = 1
 
-save_time_steps = True ## Turn on to ho time steps from run
-save_final_time = True ## Turn on to save final time step
+save_time_steps = False ## Turn on to ho time steps from run
+save_final_time = False ## Turn on to save final time step
 save_param = False # Save 
 ho_save = 50 #How often to save
 
@@ -80,13 +80,13 @@ H_s_val = 10**5 ## H_s value
 init_mag = 0 ## Magnetization initialization constant for M_z, 0 => free-space (non-LLG)
 
 ### Parameters (system)
-max_x = 15
-disc = np.array([0.04, 0.04, 0.04])
+max_x = 201*1E-3
+disc = np.array([1E-3, 1E-3, 1E-3])
          
 CFL = 1/(2**(1/2))                   # Not used
 dt = CFL*disc[0]/c
-T = 500*dt ## Final time
-T = np.round(T,9)
+T = 50*dt ## Final time
+T = np.round(T,14)
 
 ## Making sure we have an odd-number for global nodes, otherwise
 ## the grid will not be uniform for Yee scheme
@@ -260,16 +260,17 @@ def f_y2(x,y,z,t):
     impulse=0
     N_lambda=c/(frequency*disc[0])
     if t/dt < 42:
-        x_mp = int((gnx+1)/2)
-        y_mp = int((gny+1)/2)
+        x_mp = int((gnx-1)/2)
+        y_mp = int((gny-1)/2)
         
         x_mp_val = x_mp*disc[0]
         y_mp_val = y_mp*disc[0]
         
         tstart = 0
         
-        if x_mp_val-2*disc[0] < x < x_mp_val + 2*disc[0] and y_mp_val-2*disc[0] < y < y_mp_val + 2*disc[0]:
+        if x_mp_val-2*disc[0] < x < x_mp_val + disc[0] and y_mp_val-2*disc[0] < y < y_mp_val + disc[0]:
             # return np.sin(((2*np.pi*(c/(disc[0]*N_lambda))*(t-tstart)*dt)))
+            print(x,y)
             return g2(t)
         else:
             return 0
@@ -291,8 +292,8 @@ def f_z2(x,y,z,t):
 R_sys = set_up_system(gnx,gny,gnz,disc)
 
 R_sys.fx = f_x
-R_sys.fy = f_y
-R_sys.fz = f_z
+R_sys.fy = f_y2
+R_sys.fz = f_z2
 
 ticker = 0
 
@@ -335,7 +336,7 @@ for t in np.arange(dt,T,dt):
             # fig_Ey0 = R_sys.plot_line('E','y',0,0)
             # fig_Mz0 = R_sys.plot_line('M','z',0,0)
             # fig_Ey1 = R_sys.plot_slice('E','y',0)
-            fig_Ey2 = R_sys.plot_line('E','y',50,0)
+            # fig_Ey2 = R_sys.plot_line('E','y',100,0)
             # fig_Ey3 = R_sys.plot_line('E','y',3,0)
             
             # fig = plt.figure()
@@ -347,6 +348,10 @@ for t in np.arange(dt,T,dt):
             # Title = 'Current Boundary value: '+str(round(f_y(0,0,0,t),2))
             # ax.set_title(Title)
             # plt.show()
+            
+            print(g2(t))
+            
+            
       
     if hold_on == True:
         if ticker%ho_hold < 1e-12:
