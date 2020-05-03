@@ -108,8 +108,11 @@ H_s_val = 10**5 ## H_s value
 init_mag = 0 ## Magnetization initialization constant for M_z, 0 => free-space (non-LLG)
 
 ################## Parameters (system) ########################
-max_x = 201*1E-3
-disc = np.array([1E-3, 1E-3, 1E-3]) ### (dx, dy, dz)
+max_x = 15
+dx = 0.1
+dy = dx
+dz = dx
+disc = np.array([dx, dy, dz]) ### (dx, dy, dz)
          
 CFL = 1/(2**(1/2)) ### Testing. Soon this will be increased                  
 dt = CFL*disc[0]/c 

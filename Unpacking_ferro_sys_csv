@@ -38,10 +38,10 @@ Ferro_sys = ferro_system1.Ferro_sys
 
 ### Name of things to unpack
 #name = today+'/'+'test1'
-name_date = '18_04_20'
+name_date = '03_05_20'
 # name_data1 = 'Refined_grid_free_space'
-name_data = 'Centered-Gaussian_free_space'
-l1 = np.zeros(shape = 25) ## How many nodes to check (better name?)
+name_data = 'Ricker_left_ADI_free_space'
+l1 = np.zeros(shape = 10) ## How many nodes to check (better name?)
 ticker_start = 0 ## Where do you want to start your unpacking
 
 ## For time name
@@ -52,7 +52,8 @@ dx = 1E-3
 CFL = 1/(2**(1/2))
 dt = CFL*dx/c
 
-dt_name = dt*25 ## (step_size in time)(how often saved) probably 10,25, or 50
+# dt_name = dt*25 ## (step_size in time)(how often saved) probably 10,25, or 50
+dt_name = 50 ## How often saved. Works with new saving style. 
 
 def set_up_ferro_system(name):
     '''
@@ -61,7 +62,8 @@ def set_up_ferro_system(name):
     try: 
         df_inner = pd.read_csv(name+'_inner.csv')
         df_outer = pd.read_csv(name+'_outer.csv')
-        df_param = pd.read_csv(name+'_param.csv')
+        # df_param = pd.read_csv(name+'_param.csv')
+        df_param = pd.read_csv(name_date+'/'+name_data+'_param.csv') ## Parameters now saved only once
         # df_param = pd.read_csv('10_04_20/time:2.95e-07/Refined_grid_free_space_param.csv')
         # df_param = pd.read_csv('13_04_20/time:2.95e-07/Non-Ricker_free_space_param.csv')
 
@@ -113,7 +115,9 @@ ticker = ticker_start
 for k in l1:
     print(ticker)
     # name = name_date + '/time:'+str(round(ticker*.5e-08,10))+'/'+name_data
-    name = name_date + '/time:'+str(round(dt_name*ticker,12))+'/'+name_data
+    # name = name_date + '/time:'+str(round(dt_name*ticker,12))+'/'+name_data
+    name = name_date + '/ticker:'+str(dt_name*ticker)+'/'+name_data
+
     print(name)
     # name1 = name_date + '/time:'+str(round(ticker*.5e-08,14))+'/'+name_data1
     # name2 = name_date + '/time:'+str(round(ticker*.5e-08,14))+'/'+name_data2
@@ -121,7 +125,7 @@ for k in l1:
     try:
         ticker+=1
         R_sys = set_up_ferro_system(name) 
-        fig,ax = R_sys.plot_slice('H','z',0)
+        fig,ax = R_sys.plot_slice('E','y',0)
         # ax.view_init(elev = 90,azim = 90)
         # fig
         
