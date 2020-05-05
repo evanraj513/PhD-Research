@@ -55,7 +55,7 @@ t0 = time.time()
 
 cont = 1 ## Continue with time-run. Else, just set up system.
 
-disp = 1 ## Display a run
+disp = 0 ## Display a run
 ho_disp = 1 ## How often to display the run
 
 def disp():
@@ -116,7 +116,7 @@ max_x = 201*dx
 
 CFL = 1/(2**(1/2)) ### Testing. Soon this will be increased                  
 dt = CFL*disc[0]/c 
-T = 500*dt ## Final time
+T = 5*dt ## Final time
 T = np.round(T,np.int(abs(np.log(dt)/np.log(10))))
 
 ## Making sure we have an odd-number for global nodes, otherwise
@@ -166,8 +166,11 @@ def f_x(x,y,z,t):
 def f_y(x,y,z,t):
     
     if t < 42*dt:
-        if max_x/2 - 1.5*dx < x < max_x/2 - .5*dx: #approx 0
+        # if max_x/2 - 2*dx < x < max_x/2 and max_x/2 - dy < y < max_x/2 + dy:
+            # print(x,y)
+        if max_x/2 - 2*dx < x < max_x/2 and max_x/2 - dy < y < max_x/2 + dy: #approx in the middle
             val = Gaussian_source(dt,t)
+            # print(val)
             return val
         else:
             return 0

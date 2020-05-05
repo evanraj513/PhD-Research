@@ -38,9 +38,9 @@ Ferro_sys = ferro_system1.Ferro_sys
 
 ### Name of things to unpack
 #name = today+'/'+'test1'
-name_date = '03_05_20'
+name_date = '04_05_20'
 # name_data1 = 'Refined_grid_free_space'
-name_data = 'Ricker_left_ADI_free_space'
+name_data = 'Gaussian_center_ADI_free_space'
 l1 = np.zeros(shape = 10) ## How many nodes to check (better name?)
 ticker_start = 0 ## Where do you want to start your unpacking
 
