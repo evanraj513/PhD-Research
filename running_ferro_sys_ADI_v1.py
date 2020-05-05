@@ -116,7 +116,7 @@ max_x = 201*dx
 
 CFL = 1/(2**(1/2)) ### Testing. Soon this will be increased                  
 dt = CFL*disc[0]/c 
-T = 5*dt ## Final time
+T = 500*dt ## Final time
 T = np.round(T,np.int(abs(np.log(dt)/np.log(10))))
 
 ## Making sure we have an odd-number for global nodes, otherwise
