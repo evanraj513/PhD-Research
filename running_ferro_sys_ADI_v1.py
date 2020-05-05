@@ -45,7 +45,7 @@ else:
 from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
-from Research.Ferro_sys_functions import sizing, Ricker_pulse
+from Research.Ferro_sys_functions import sizing, Ricker_pulse, Gaussian_source
 
 t0 = time.time()
 
@@ -68,34 +68,34 @@ def disp():
     
     # fig_Ey0 = R_sys.plot_line('E','y',0,0)
     # fig_Mz0 = R_sys.plot_line('M','z',0,0)
-    # fig_Ey1 = R_sys.plot_slice('E','y',0)
+    fig_Ey1 = R_sys.plot_slice('E','y',0)
     # fig_Ey2 = R_sys.plot_line('E','y',100,0)
     # fig_Ey3 = R_sys.plot_line('E','y',3,0)
     
-    # fig = plt.figure()
-    # t_val = np.arange(0,T,dt)
-    # Ricker_vec = np.vectorize(f_y)
-    # ax = fig.add_subplot(111)
-    # ax.plot(t_val,Ricker_vec(0,0,0,t_val))
-    # ax.axvline(x=t)
-    # Title = 'Current Boundary value: '+str(round(f_y(0,0,0,t),2))
-    # ax.set_title(Title)
-    # plt.show()
+    fig = plt.figure()
+    t_val = np.arange(0,T,dt)
+    Ricker_vec = np.vectorize(f_y)
+    ax = fig.add_subplot(111)
+    ax.plot(t_val,Ricker_vec(0,0,0,t_val))
+    ax.axvline(x=t)
+    Title = 'Current Boundary value: '+str(round(f_y(0,0,0,t),2))
+    ax.set_title(Title)
+    plt.show()
     
     # print(Ricker_pulse(t))
 
 hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
 ho_hold = 1 ## How often to hold
 
-save_time_steps = True ## Turn on to ho time steps from run
-save_final_time = True ## Turn on to save final time step
+save_time_steps = False ## Turn on to ho time steps from run
+save_final_time = False ## Turn on to save final time step
 save_param = False # Save 
 ho_save = 50 #How often to save
 
 today1 = date.today()
 name_date = today1.strftime("%d_%m_%y")
 mkdir_p(name_date)
-name_data ='Ricker_left_ADI_free_space'
+name_data ='Gaussian_center_ADI_free_space'
 
 ######################## Parameters (global) ########################
 mu0 = 1.25667e-6
@@ -108,12 +108,12 @@ H_s_val = 10**5 ## H_s value
 init_mag = 0 ## Magnetization initialization constant for M_z, 0 => free-space (non-LLG)
 
 ################## Parameters (system) ########################
-max_x = 15
-dx = 0.1
+dx = 1e-3
 dy = dx
 dz = dx
 disc = np.array([dx, dy, dz]) ### (dx, dy, dz)
-         
+max_x = 201*dx
+
 CFL = 1/(2**(1/2)) ### Testing. Soon this will be increased                  
 dt = CFL*disc[0]/c 
 T = 500*dt ## Final time
@@ -142,15 +142,35 @@ gnz = 1 ### 2D Implementation
 ###################################################
 ### Boundary conditions, and Forcing terms ########
 ###################################################
+
+### Left Ricker Pulse forcing functions
+# def f_x(x,y,z,t):
+#     return 0
+    
+# def f_y(x,y,z,t):
+#     f = 4E7
+#     beta0 = 4E4
+#     if abs(x) < disc[0]/4: #approx 0
+#         d = beta0*Ricker_pulse(f*t)
+#         return d
+#     else:
+#         return 0
+       
+# def f_z(x,y,z,t):
+#     return 0
+
+### Centered Gaussian source
 def f_x(x,y,z,t):
     return 0
     
 def f_y(x,y,z,t):
-    f = 4E7
-    beta0 = 4E4
-    if abs(x) < disc[0]/4: #approx 0
-        d = beta0*Ricker_pulse(f*t)
-        return d
+    
+    if t < 42*dt:
+        if max_x/2 - 1.5*dx < x < max_x/2 - .5*dx: #approx 0
+            val = Gaussian_source(dt,t)
+            return val
+        else:
+            return 0
     else:
         return 0
        
@@ -228,7 +248,7 @@ for t in np.arange(dt,T,dt):
     else:
         break
     ## For output
-    print('Current Time: ',np.round(t,np.int(abs(np.log(dt)/np.log(10)))),' and Ticker: ',ticker)
+    print('Current Time: ',np.round(t,np.int(abs(np.log(dt)/np.log(10)))+2),' and Ticker: ',ticker)
 
     ### Running the system
     R_sys.T = t
