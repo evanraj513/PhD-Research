@@ -49,6 +49,7 @@ Current Time:  1.089e-10  and Ticker:  47
 Current Time:  1.112e-10  and Ticker:  48
 Current Time:  1.135e-10  and Ticker:  49
 Current Time:  1.158e-10  and Ticker:  50
+Saving current conditions at time: ticker:50
 Current Time:  1.182e-10  and Ticker:  51
 Current Time:  1.205e-10  and Ticker:  52
 Current Time:  1.228e-10  and Ticker:  53
@@ -99,6 +100,7 @@ Current Time:  2.247e-10  and Ticker:  97
 Current Time:  2.27e-10  and Ticker:  98
 Current Time:  2.294e-10  and Ticker:  99
 Current Time:  2.317e-10  and Ticker:  100
+Saving current conditions at time: ticker:100
 Current Time:  2.34e-10  and Ticker:  101
 Current Time:  2.363e-10  and Ticker:  102
 Current Time:  2.386e-10  and Ticker:  103
@@ -149,6 +151,7 @@ Current Time:  3.406e-10  and Ticker:  147
 Current Time:  3.429e-10  and Ticker:  148
 Current Time:  3.452e-10  and Ticker:  149
 Current Time:  3.475e-10  and Ticker:  150
+Saving current conditions at time: ticker:150
 Current Time:  3.498e-10  and Ticker:  151
 Current Time:  3.521e-10  and Ticker:  152
 Current Time:  3.545e-10  and Ticker:  153
@@ -199,6 +202,7 @@ Current Time:  4.564e-10  and Ticker:  197
 Current Time:  4.587e-10  and Ticker:  198
 Current Time:  4.61e-10  and Ticker:  199
 Current Time:  4.634e-10  and Ticker:  200
+Saving current conditions at time: ticker:200
 Current Time:  4.657e-10  and Ticker:  201
 Current Time:  4.68e-10  and Ticker:  202
 Current Time:  4.703e-10  and Ticker:  203
@@ -249,6 +253,7 @@ Current Time:  5.722e-10  and Ticker:  247
 Current Time:  5.746e-10  and Ticker:  248
 Current Time:  5.769e-10  and Ticker:  249
 Current Time:  5.792e-10  and Ticker:  250
+Saving current conditions at time: ticker:250
 Current Time:  5.815e-10  and Ticker:  251
 Current Time:  5.838e-10  and Ticker:  252
 Current Time:  5.861e-10  and Ticker:  253
@@ -299,6 +304,7 @@ Current Time:  6.881e-10  and Ticker:  297
 Current Time:  6.904e-10  and Ticker:  298
 Current Time:  6.927e-10  and Ticker:  299
 Current Time:  6.95e-10  and Ticker:  300
+Saving current conditions at time: ticker:300
 Current Time:  6.973e-10  and Ticker:  301
 Current Time:  6.997e-10  and Ticker:  302
 Current Time:  7.02e-10  and Ticker:  303
@@ -349,6 +355,7 @@ Current Time:  8.039e-10  and Ticker:  347
 Current Time:  8.062e-10  and Ticker:  348
 Current Time:  8.085e-10  and Ticker:  349
 Current Time:  8.109e-10  and Ticker:  350
+Saving current conditions at time: ticker:350
 Current Time:  8.132e-10  and Ticker:  351
 Current Time:  8.155e-10  and Ticker:  352
 Current Time:  8.178e-10  and Ticker:  353
@@ -399,6 +406,7 @@ Current Time:  9.198e-10  and Ticker:  397
 Current Time:  9.221e-10  and Ticker:  398
 Current Time:  9.244e-10  and Ticker:  399
 Current Time:  9.267e-10  and Ticker:  400
+Saving current conditions at time: ticker:400
 Current Time:  9.29e-10  and Ticker:  401
 Current Time:  9.313e-10  and Ticker:  402
 Current Time:  9.337e-10  and Ticker:  403
@@ -449,6 +457,7 @@ Current Time:  1.0356e-09  and Ticker:  447
 Current Time:  1.0379e-09  and Ticker:  448
 Current Time:  1.0402e-09  and Ticker:  449
 Current Time:  1.0425e-09  and Ticker:  450
+Saving current conditions at time: ticker:450
 Current Time:  1.0449e-09  and Ticker:  451
 Current Time:  1.0472e-09  and Ticker:  452
 Current Time:  1.0495e-09  and Ticker:  453
@@ -499,4 +508,5 @@ Current Time:  1.1514e-09  and Ticker:  497
 Current Time:  1.1537e-09  and Ticker:  498
 Current Time:  1.1561e-09  and Ticker:  499
 Current Time:  1.1584e-09  and Ticker:  500
-Time taken: 222.46624183654785
+Saving current conditions at time: ticker:500
+Time taken: 221.63037872314453

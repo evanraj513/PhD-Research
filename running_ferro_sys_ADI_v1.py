@@ -87,8 +87,8 @@ def disp():
 hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
 ho_hold = 1 ## How often to hold
 
-save_time_steps = False ## Turn on to ho time steps from run
-save_final_time = False ## Turn on to save final time step
+save_time_steps = True ## Turn on to ho time steps from run
+save_final_time = True ## Turn on to save final time step
 save_param = False # Save 
 ho_save = 50 #How often to save
 
@@ -319,7 +319,7 @@ print('Time taken:', t1-t0)
 ## Saving data
 if save_final_time == True:
     mkdir_p(name_date+'/'+'time:'+str(round(T-dt,12)))
-    R_sys.save_data(name_date+'/'+'time:'+str(round(T-dt,12))+'/'+name_data) ## Names defined above
+    R_sys.save_data(name_date+'/'+'Final_time'+'/'+name_data) ## Names defined above
     
 # Run parameters
     # Global Parameters
