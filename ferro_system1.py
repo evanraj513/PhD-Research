@@ -2025,11 +2025,6 @@ class Ferro_sys(object):
         s_main = (s_a - s_b - s_c - s_d)
         E_old_RHS = E_old2.values + dt/(2*eps)*s_main - (dt/2)*sigma*E_old2.values
         
-        ### Add in forcing terms at the half-step
-        F_old = np.concatenate((self.Fx(t-dt/2), self.Fy(t-dt/2), self.Fz(t-dt/2)),axis=1)
-        
-        E_old_RHS += dt/2*F_old.T
-        
         ### Using back-solve for new values
         E_old_values = self.step_1a_inv(E_old_RHS)
         
@@ -2042,6 +2037,10 @@ class Ferro_sys(object):
             E_old_values[1][k] = 0
         for l in b_ind[2]:
             E_old_values[2][l] = 0
+            
+        ### Add in forcing terms at the half-step
+        F_old = np.concatenate((self.Fx(t-dt/2), self.Fy(t-dt/2), self.Fz(t-dt/2)),axis=1)
+        E_old_values += F_old.T
         
         E_old.values = E_old_values
         
@@ -2097,11 +2096,7 @@ class Ferro_sys(object):
         
         s2_main = s2_a - s2_b - s2_c + s2_d
         
-        F_new = np.concatenate((self.Fx(t+dt/2), self.Fy(t+dt/2), self.Fz(t+dt/2)),axis=1)
-        
         E_new_RHS = E_old.values + dt/(2*eps)*s2_main - dt/2*sigma*E_old.values
-        
-        E_new_RHS += F_new.T
         
         # Backsolve
         
@@ -2114,6 +2109,11 @@ class Ferro_sys(object):
             E_new_values[1][k] = 0
         for l in b_ind[2]:
             E_new_values[2][l] = 0
+        
+        ### Forcing terms at the half-step
+        
+        F_new = np.concatenate((self.Fx(t+dt/2), self.Fy(t+dt/2), self.Fz(t+dt/2)),axis=1)
+        E_new_values += F_new.T
         
         E_new.values = E_new_values
         
@@ -2146,6 +2146,8 @@ class Ferro_sys(object):
         ####################################################
         ################ First Half step ###################
         ####################################################
+        
+        print('Running the new version')
         
         ## Half-step parameters
         tol = self.tol
