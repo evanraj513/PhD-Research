@@ -55,7 +55,7 @@ t0 = time.time()
 
 cont = 1 ## Continue with time-run. Else, just set up system.
 
-disp = 1 ## Display a run
+disp = 0 ## Display a run
 ho_disp = 1 ## How often to display the run
 
 def disp():
@@ -87,10 +87,10 @@ def disp():
 hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
 ho_hold = 1 ## How often to hold
 
-save_time_steps = False ## Turn on to ho time steps from run
-save_final_time = False ## Turn on to save final time step
+save_time_steps = True ## Turn on to ho time steps from run
+save_final_time = True ## Turn on to save final time step
 save_param = False # Save 
-ho_save = 50 #How often to save
+ho_save = 25 #How often to save
 
 today1 = date.today()
 name_date = today1.strftime("%d_%m_%y")
@@ -116,7 +116,7 @@ max_x = 201*dx
 
 CFL = 1/(2**(1/2)) ### Testing. Soon this will be increased                  
 dt = CFL*disc[0]/c 
-T = 5*dt ## Final time
+T = 50*dt ## Final time
 T = np.round(T,np.int(abs(np.log(dt)/np.log(10))))
 
 ## Making sure we have an odd-number for global nodes, otherwise
