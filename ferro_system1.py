@@ -27,6 +27,7 @@ from scipy.sparse import lil_matrix, csr_matrix, linalg
 from mpl_toolkits import mplot3d # Needed even though 'unused' variable
 import matplotlib.pyplot as plt
 from matplotlib import cm ## For adding colorbars
+from scipy.linalg import norm
 #from matplotlib import cm
 plt.rcParams['backend'] = "Qt4Agg"
 
@@ -161,6 +162,10 @@ class Ferro_sys(object):
         self.E_old2 = E0
         
         self.bound_ind = self.bound_ind()
+        
+        self.tol = 1E-12
+        self.maxiter_half_step = 10
+        self.maxiter_whole_step = 10
         
     @property
     def E_old2(self):
@@ -1887,9 +1892,323 @@ class Ferro_sys(object):
         
         ### Solving H_n+1
         self.H_new_values = 1/mu0*B_new.values - M_new.values
+        
+    def LLG_ADI(self, t, X = 'old'):
+        '''
+        Uses Joly FDTD trick to solve LLG explicitly. 
+        
+        If X = n, uses B_(n-1/2), B_n
+        
+        Old refers to half-step, i.e. n to n+1/2 
+        New refers to whole-step, i.e. n+1/2 to n
+        
+        Updates M_X
+        '''     
+        ## Parameters
+        dt = self.dt/2 ### Half-step for ADI
+        bdp = self.better_dot_pdt
+        gamma = self.gamma
+        K = self.K
+        
+        M_old = self.M_old
+                
+        if X == 'old' or X == 'Old': ## Set-up for half-step
+        ## old2 = n-1/2, old = n+1/2 for Joly legibility
             
+            f = 2*self.M_old2.values
+            B_on = (self.B_old2.values + self.B_old.values)/2
+            
+            a = -( (abs(gamma)*dt/2)*(B_on/mu0 + self.H_s.values) + alpha*self.M_old2.values)
+            lam = -K*abs(gamma)*dt/4
+            
+        elif X == 'new' or X == 'New':
+            f = 2*self.M_old.values
+            B_on = (self.B_old.values + self.B_new.values)/2
+            
+            a = -( (abs(gamma)*dt/2)*(B_on/mu0 + self.H_s.values) + alpha*self.M_old.values)
+            lam = -K*abs(gamma)*dt/4
+            
+        a_dot_f =  bdp(a.T,f.T).T
         
+        ## Projection of 'easy' axis
+        p_x = np.zeros(shape = (self.M_old2.values.shape[1],1))
+        p_y = np.copy(p_x)
+        p_z = np.ones(shape = (self.M_old2.values.shape[1],1))
+        p = np.concatenate((p_x, p_y, p_z), axis = 1).T
         
+        if K == 0 or t == dt:
+            x_new_num = f + (a_dot_f)*a - np.cross(a.T,f.T).T
+            x_new_den = np.array(1+np.linalg.norm(a,axis=0)**2).T
+            
+            x_new_values = np.divide(x_new_num.T, np.array([x_new_den]).T)
+                
+        else:
+            
+            cubic_solver = self.cubic_solver
+            
+            a1 = lam**2
+            b1 = 2*lam*(bdp(a.T, p.T) + lam*(bdp(p.T, f.T)))
+            c1 = 1+np.linalg.norm(a)**2 - lam*(bdp(a.T, f.T)) + 3*lam*\
+            (bdp(a.T, p.T)) * (bdp(p.T, f.T)) + \
+            lam**2*(bdp(p.T, f.T))
+            d1 = -lam*(bdp(a.T, f.T)*(bdp(p.T,f.T))) - (bdp(a.T, p.T)*(bdp(p.T,f.T))**2)\
+            + lam*((bdp(a.T, p.T)*(bdp(p.T,f.T))**2))\
+            +np.linalg.norm(a)**2*(bdp(p.T, f.T))
+            -bdp(np.cross(a.T, p.T),f.T)
+            Z = np.zeros(shape = b1.shape)
+            X = np.copy(Z)
+            Y = np.copy(Z)
+            x_new_values = np.copy(Z)
+            for k in np.arange(0,x_new_values.shape[1]):
+                if k%100 == 1:
+                    Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k],disp = 'Yes')
+                else:
+                    Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k],disp = 'no')
+            
+            X = (bdp(a.T,f.T)) - lam*Z*(Z+bdp(p.T,f.T))
+            Y = Z+bdp(p.T,f.T)
+            
+            x_new_values = 1/np.linalg.norm(np.cross(a.T,p.T).T)**2*\
+            ((X - (bdp(a.T,p.T))*Y).T*a\
+              + (((np.linalg.norm(a))**2*Y) - (bdp(a.T,p.T))).T*X\
+              + (Z*np.cross(a.T, p.T)).T)
+            
+        if X == 'old' or X == 'Old':
+            return x_new_values.T - self.M_old2.values
+        elif X == 'new' or X == 'New':
+            return x_new_values.T - self.M_old.values
+        else:
+            print('Something is wrong in LLG_ADI')
+            raise Exception
+            
+    def ADI_first_half(self,t):
+        '''
+        Runs the first ADI half-step. Uses:
+            
+            En = E_old2
+            Bn = B_old2
+            Hn = H_old2
+            Mn+1/2 = M_old
+        
+        to compute:
+            En+1/2 = E_old
+            Bn+1/2 = B_old
+            Hn+1/2 = H_old
+        
+        '''
+        
+        E_old2 = self.E_old2
+        H_old2 = self.H_old2
+        # M_old2 = self.M_old2
+        B_old2 = self.B_old2
+        
+        E_old = self.E_old
+        B_old = self.B_old
+        M_old = self.M_old
+        H_old = self.H_old
+        
+        dt = self.dt
+        b_ind = self.bound_ind
+        # bdp = self.better_dot_pdt
+        
+        ## Parameter choices given in system
+        mu0 = self.mu0
+        eps = self.eps
+        sigma = self.sigma 
+        
+        ##### Solving for E_n+1/2
+        s_a = 1/mu0*self.curl_L(B_old2.values,'Inner')
+        s_b = dt/(2*mu0)*self.curl_LL(E_old2.values)
+        s_c = self.curl_L(M_old.values,'Inner')
+        s_d = self.curl_R(H_old2.values,'Inner')
+        
+        s_main = (s_a - s_b - s_c - s_d)
+        E_old_RHS = E_old2.values + dt/(2*eps)*s_main - (dt/2)*sigma*E_old2.values
+        
+        ### Add in forcing terms at the half-step
+        F_old = np.concatenate((self.Fx(t-dt/2), self.Fy(t-dt/2), self.Fz(t-dt/2)),axis=1)
+        
+        E_old_RHS += dt/2*F_old.T
+        
+        ### Using back-solve for new values
+        E_old_values = self.step_1a_inv(E_old_RHS)
+        
+        #Setting all E boundaries to 0
+        b_ind = self.bound_ind
+
+        for j in b_ind[0]:
+            E_old_values[0][j] = 0 #x_bound(j)
+        for k in b_ind[1]:
+            E_old_values[1][k] = 0
+        for l in b_ind[2]:
+            E_old_values[2][l] = 0
+        
+        E_old.values = E_old_values
+        
+        ###### Solving for B_n+1/2
+        B_old_values = B_old2.values + dt/2*(\
+            self.curl_R(E_old_values, 'o') - \
+                self.curl_L(E_old2.values, 'o'))
+            
+        B_old.values = B_old_values
+        
+        ###### Solving for H_n+1/2
+        H_old_values = 1/mu0*B_old_values - M_old.values
+        H_old.values = H_old_values
+        
+    def ADI_second_half(self,t):
+        '''
+        Runs the second half of the ADI scheme. Uses:
+            Mn+1 = M_new
+            Hn+1/2 = H_old
+            En+1/2 = E_old
+            Bn+1/2 = B_old
+            
+        to compute
+            En+1 = E_new
+            Bn+1 = B_new
+            Hn+1 = H_new
+            
+        '''
+        
+        E_old = self.E_old
+        B_old = self.B_old
+        # M_old = self.M_old
+        H_old = self.H_old
+        
+        E_new = self.E_new
+        B_new = self.B_new
+        M_new = self.M_new
+        H_new = self.H_new
+        
+        dt = self.dt
+        b_ind = self.bound_ind
+        # bdp = self.better_dot_pdt
+        
+        ## Parameter choices given in system
+        mu0 = self.mu0
+        eps = self.eps
+        sigma = self.sigma 
+        
+        s2_a = self.curl_L(H_old.values, 'i')
+        s2_b = 1/mu0*self.curl_R(B_old.values, 'i')
+        s2_c = dt/(2*mu0)*self.curl_RR(E_old.values)
+        s2_d = self.curl_R(M_new.values,'i')
+        
+        s2_main = s2_a - s2_b - s2_c + s2_d
+        
+        F_new = np.concatenate((self.Fx(t+dt/2), self.Fy(t+dt/2), self.Fz(t+dt/2)),axis=1)
+        
+        E_new_RHS = E_old.values + dt/(2*eps)*s2_main - dt/2*sigma*E_old.values
+        
+        E_new_RHS += F_new.T
+        
+        # Backsolve
+        
+        E_new_values = self.step_2a_inv(E_new_RHS)
+        
+        #Setting all E boundaries to 0
+        for j in b_ind[0]:
+            E_new_values[0][j] = 0 #x_bound(j)
+        for k in b_ind[1]:
+            E_new_values[1][k] = 0
+        for l in b_ind[2]:
+            E_new_values[2][l] = 0
+        
+        E_new.values = E_new_values
+        
+        ### Solving for B_n+1
+        B_new.values = B_old.values + dt/2*(\
+                        self.curl_R(E_old.values,'o') - 
+                        self.curl_L(E_new_values, 'o'))
+        
+        ### Solving H_n+1
+        H_new.values = 1/mu0*B_new.values - M_new.values
+        
+    def single_run_ADI_v2(self,t):
+        '''
+        A single time-step for ADI scheme implemented. 
+        
+        Main idea and algebraic steps outlined in Huang_2018 and Yao 2017
+        
+        Let n be the current time. This is the algorithm that will be implemented
+        
+        1. Mn+1/2(1) computed using **only** Bn and Mn
+        2. En+1/2 computed using ADI half-step described in daily write up Week 5/6
+        3. Bn+1/2 updated with ADI half-step
+        4. Mn+1/2 **recomputed** with Bn, Bn+1/2, Mn
+            while res = Mn+1/2(1) - Mn+1/2(4) < tol and ticker < max_iter
+            4.a. Mn+1/2(1) computed using Bn, Bn+1/2, Mn
+            Steps 2-3 redone, Mn+1/2(4) recomputed
+            
+        5. Repeat steps 1-4 for the next half-step. 
+        '''
+        ####################################################
+        ################ First Half step ###################
+        ####################################################
+        
+        ## Half-step parameters
+        tol = self.tol
+        ticker1 = 0
+        
+        ################ Solving for Mn+1/2 (1) ################
+        self.B_old.values = self.B_old2.values ### Setting up for only forward scheme LLG
+        M_values_1 = self.LLG_ADI('old')
+        
+        self.M_old.values = M_values_1 
+                
+        ############# Updating E,B,H n+1/2 (2-3) ################
+        self.ADI_first_half(t)
+        
+        ########## Computing Mn+1/2(4) using Bn, Bn+1/2 (4) #######
+        M_values_4 = self.LLG_ADI(t, 'old')
+        
+        while ticker1 < self.maxiter_half_step and norm(M_values_1 - M_values_4) > tol:
+            ticker1 += 1
+            M_values_1 = M_values_4
+            self.M_old.values = M_values_1
+            self.ADI_first_half(t)
+            M_values_4 = self.LLG_ADI('old')
+            print('Current iteration for half-step fixed point:', ticker1)
+            print('Current residual for half-step:', norm(M_values_1 - M_values_4))
+        
+        if ticker1 == self.maxiter_half_step:
+            print('**Warning. Convergence in fixed-point not reached in first half step**')
+            
+        self.M_old.values = M_values_4
+        
+        #####################################################
+        ################ Second Half step ###################
+        ##################################################### 
+        
+        ## Full-step parameters
+        ticker2 = 0
+        
+        ################# Solving for M_n+1 (5) #################
+        self.B_new.values = self.B_old.values ### Setting for forward scheme LLG
+        M_new_values_1 = self.LLG_ADI(t, 'new')
+        
+        self.M_new.values = M_new_values_1
+        
+        ############# Updating E,B,H n+1  (6-7) ################
+        self.ADI_second_half(t)
+        
+        ########## Computing Mn+1/2(4) using Bn, Bn+1/2 (8) #######
+        M_new_values_4 = self.LLG_ADI('new')
+        
+        while ticker2 < self.maxiter_whole_step and norm(M_values_1 - M_new_values_4) > tol:
+            ticker2+=1
+            M_new_values_1 = M_new_values_4
+            self.M_new.values = M_new_values_1
+            self.ADI_first_half(t)
+            M_new_values_4 = self.LLG_ADI('new')
+            print('Current iteration for whole-step fixed point:', ticker2)
+            print('Current residual for whole-step:', norm(M_values_1 - M_values_4))
+            
+        self.M_new.values = M_new_values_4
+            
+        if ticker2 == self.maxiter_whole_step:
+            print('**Warning. Convergence in fixed-point not reached in second half step**')
         
         
         
@@ -1920,49 +2239,6 @@ class Ferro_sys(object):
             pass
         
         return root
-        
-    def res_func(self,val):
-        '''
-        Returns the residual for a given guess of M
-        
-        value must be an array of proper size. 
-        '''
-        
-        M_old, B_old, B_new, H_s = self.M_old, self.B_old, self.B_new, self.H_s
-        dt = self.dt
-        mu0 = self.mu0
-        gamma = self.gamma
-        K = self.K
-        alpha = self.alpha
-        
-        M_new_values = val
-        
-        #####
-        P = 0
-        #####
-        
-        M_on = (M_new_values + M_old.values)/2
-        B_on = (B_old.values + B_new.values)/2
-        
-        if type(val) != np.array:
-            print('Error, function cannot be evaluated for this input. Abort')
-            raise Exception
-            
-        elif val.shape != M_old.values.shape:
-            print('Error in input size. Abort')
-            raise Exception
-        
-        a =1/dt*(M_new_values - M_old.values)
-        b = abs(gamma)*( (1/mu0)*B_on - M_on + H_s.values + K*P*M_on)
-        
-        bt = np.cross(b.T,M_on.T).T
-        
-        c = alpha/np.norm(M_on) * M_on
-        ct = np.cross(c.T, a.T).T
-        
-        print('Warning: Still undergoing work. P needs to be further developed')
-        
-        return a-(bt+ct)
         
         
     def better_dot_pdt(self,a,b):

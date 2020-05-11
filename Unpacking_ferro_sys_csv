@@ -113,9 +113,9 @@ for k in l1:
     try:
         ticker+=1
         R_sys = set_up_ferro_system(name) 
-        fig,ax = R_sys.plot_slice('E','y',0)
-        # ax.view_init(elev = 90,azim = 90)
-        # fig
+        fig,ax = R_sys.plot_slice('H','z',0)
+        ax.view_init(elev = 90,azim = 90)
+        fig
         
         # print(name1)        
         # R_sys1 = set_up_ferro_system(name1)

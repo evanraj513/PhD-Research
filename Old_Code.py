@@ -6,6 +6,50 @@ Created on Mon Feb 10 20:16:47 2020
 @author: evanraj
 """
 
+    def res_func(self,val):
+        '''
+        Returns the residual for a given guess of M
+        
+        value must be an array of proper size. 
+        '''
+        
+        M_old, B_old, B_new, H_s = self.M_old, self.B_old, self.B_new, self.H_s
+        dt = self.dt
+        mu0 = self.mu0
+        gamma = self.gamma
+        K = self.K
+        alpha = self.alpha
+        
+        M_new_values = val
+        
+        #####
+        P = 0
+        #####
+        
+        M_on = (M_new_values + M_old.values)/2
+        B_on = (B_old.values + B_new.values)/2
+        
+        if type(val) != np.array:
+            print('Error, function cannot be evaluated for this input. Abort')
+            raise Exception
+            
+        elif val.shape != M_old.values.shape:
+            print('Error in input size. Abort')
+            raise Exception
+        
+        a =1/dt*(M_new_values - M_old.values)
+        b = abs(gamma)*( (1/mu0)*B_on - M_on + H_s.values + K*P*M_on)
+        
+        bt = np.cross(b.T,M_on.T).T
+        
+        c = alpha/np.norm(M_on) * M_on
+        ct = np.cross(c.T, a.T).T
+        
+        print('Warning: Still undergoing work. P needs to be further developed')
+        
+        return a-(bt+ct)
+
+
 class Field(object):
     ''' 
     This class will store the values of a given field, as three vectors

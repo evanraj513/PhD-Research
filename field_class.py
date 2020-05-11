@@ -209,7 +209,7 @@ class Vector(object):
                         Al[ind(jj*dx,kk*dy,ll*dz),ind((jj+1)*dx,kk*dy,ll*dz)] = 1/(2*dx)
                         Al[ind(jj*dx,kk*dy,ll*dz),ind((jj-1)*dx,kk*dy,ll*dz)] = -1/(2*dx)
                         
-        A1 = Al.tocsr()
+        A1 = Al.tocsc()
         
         return A1*self.value
     
@@ -240,7 +240,7 @@ class Vector(object):
                         Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk+1)*dy,ll*dz)] = 1/(2*dy)
                         Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk-1)*dy,ll*dz)] = -1/(2*dy)
                         
-        A1 = Al.tocsr()
+        A1 = Al.tocsc()
         
         return A1*self.value
     
@@ -276,7 +276,7 @@ class Vector(object):
                     for jj in range(0,self.nx-1): #Moving through each node
                         Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll)*dz)+kk] = -1/(2*dz)
                         Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)+kk] = 1/(2*dz)
-        A1 = Al.tocsr()
+        A1 = Al.tocsc()
         
         return A1*self.value
     
@@ -359,7 +359,7 @@ class Vector(object):
 #                            ind_y3(jj*dx,kk*dy,ll*dz)+ll*diff+kk*diff2,\
 #                            ind_y3((jj+1)*dx,kk*dy,ll*dz)+ll*diff+kk*diff2)
                    
-        A1 = Al.tocsr()
+        A1 = Al.tocsc()
         
         return A1
     
@@ -450,7 +450,7 @@ class Vector(object):
                     Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)+ll*diff] = -1/(2*dy)
                     Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk+1)*dy,ll*dz)+ll*diff] = 1/(2*dy)
                     
-        A1 = Al.tocsr()
+        A1 = Al.tocsc()
         
         return A1
     
@@ -532,7 +532,7 @@ class Vector(object):
                     Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)] = -1/(2*dz)
                     Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)] = 1/(2*dz)
                     
-        A1 = Al.tocsr()
+        A1 = Al.tocsc()
         
         return A1
         
@@ -582,7 +582,7 @@ class Vector(object):
                             Al[ind(jj*dx,kk*dy,ll*dz),ind((jj+1)*dx,kk*dy,ll*dz)] = 1/(2*dx)
                             Al[ind(jj*dx,kk*dy,ll*dz),ind((jj-1)*dx,kk*dy,ll*dz)] = -1/(2*dx)
                     
-        A1 = Al.tocsr()
+        A1 = Al.tocsc()
         
         return A1*self.value
     
@@ -658,7 +658,7 @@ class Vector(object):
                         Al[ind(jj*dx,kk*dy,ll*dz),\
                            ind(jj*dx,kk*dy,ll*dz)-ll*diff-kk*diff2] = 1/(2*dx)
                     
-        A1 = Al.tocsr()
+        A1 = Al.tocsc()
         
         return A1
     
@@ -709,7 +709,7 @@ class Vector(object):
                             Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk+1)*dy,ll*dz)] = 1/(2*dy)
                             Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,(kk-1)*dy,ll*dz)] = -1/(2*dy)
                         
-        A1 = Al.tocsr()
+        A1 = Al.tocsc()
         
         return A1*self.value
     
@@ -771,7 +771,7 @@ class Vector(object):
                         Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)-ll*diff] = 1/(2*dy)
         
                         
-        A1 = Al.tocsr()
+        A1 = Al.tocsc()
         
         return A1
     
@@ -821,7 +821,7 @@ class Vector(object):
                             Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll+1)*dz)] = 1/(2*dz)
                             Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll-1)*dz)] = -1/(2*dz)
                         
-        A1 = Al.tocsr()
+        A1 = Al.tocsc()
             
         return A1*self.value
     
@@ -886,7 +886,7 @@ class Vector(object):
                         Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,(ll-1)*dz)] = -1/(2*dz)
                         Al[ind(jj*dx,kk*dy,ll*dz),ind(jj*dx,kk*dy,ll*dz)] = 1/(2*dz)
                  
-        A1 = Al.tocsr()
+        A1 = Al.tocsc()
             
         return A1
     
