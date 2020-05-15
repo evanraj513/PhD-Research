@@ -1,0 +1,230 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue May 12 08:25:19 2020
+
+@author: evanraj
+"""
+
+# #!/usr/bin/env python3
+# # -*- coding: utf-8 -*-
+# """
+# Created on Wed Apr 29 18:41:06 2020
+
+# Script to test new sparse matrix structure and ADI structure 
+# in ferro_system. Code was implemented Spring 2020 Week 3-5
+
+# @author: evanraj
+# """
+# import os
+# import sys
+# import time
+
+# import numpy as np
+# from mpl_toolkits import mplot3d
+# import matplotlib.pyplot as plt
+# from matplotlib import cm
+# plt.rcParams['backend'] = "Qt4Agg"
+
+# l_path = '..'
+# m_path = os.path.abspath(l_path)
+# if not os.path.exists(m_path):
+#     print('Error importing modules. Need to specify new path')
+#     raise Exception
+# else:
+#     sys.path.append(m_path)
+
+# #import scipy as sp
+# #from scipy.sparse import csr_matrix
+
+# from Research import ferro_system1
+# Ferro_sys = ferro_system1.Ferro_sys
+
+# from Research import field_class
+
+# ################ Setting up system ##################
+
+# ##### System Parameters
+# dx = 1 # step size in x-direction
+# dy = 1 # step size in y-direction
+# dz = 1 # step size in z-direction
+# disc = np.array([dx, dy, dz])
+
+# max_x = 7*dx
+# max_y = 7*dx
+# max_z = 1*dz ## 2D
+
+# gnx = max_x/dx
+# gny = max_y/dy
+# gnz = max_z/dz
+
+# init_mag = 0.0 ## Initial magnetization 
+# H_s_val = 0.0 ## Static magnetic field value (uniform in x,y,z assumption)
+
+# c = 3e8
+# CFL = 1/(2**(1/2))
+# dt = CFL*dx/c
+
+# #### Initializing system
+# def set_up_system(gnx,gny,gnz,disc):
+#     '''
+#     Sets up Ferrosystem to be run. 
+#     '''
+#     def sizing(gnx,gny,gnz):
+#         '''
+#         Parameters
+#         ----------
+#         gn_ : int
+#             global node count in _ direction
+            
+        
+#         Returns
+#         -------
+#         list of np.arrays, length 6
+#             Each array gives the local node count [nx,ny,nz]
+#             for the outer (first 3) and inner (last 3) fields
+           
+#         '''
+#         if gnz != 1:
+#             size_outer_x = np.array([(gnx-1)/2, (gny+1)/2, (gnz+1)/2])
+#             size_outer_y = np.array([(gnx+1)/2, (gny-1)/2, (gnz+1)/2])
+#             size_outer_z = np.array([(gnx+1)/2, (gny+1)/2, (gnz-1)/2])
+            
+#             size_inner_x = np.array([(gnx+1)/2, (gny-1)/2, (gnz-1)/2])
+#             size_inner_y = np.array([(gnx-1)/2, (gny+1)/2, (gnz-1)/2])
+#             size_inner_z = np.array([(gnx-1)/2, (gny-1)/2, (gnz+1)/2])
+            
+#         else:
+#             '''
+#             Note that for this case, the not-used will have the amount of 
+#             the field with which they are associated, simply to make concatentation
+#             work properly
+#             '''
+#             size_outer_x = np.array([(gnx-1)/2, (gny+1)/2, 1])
+#             size_outer_y = np.array([(gnx+1)/2, (gny-1)/2, 1])
+#             size_outer_z = np.array([(gnx+1)/2, (gny-1)/2, 1]) # This will not be included in calculations
+        
+            
+#             size_inner_x = np.array([(gnx-1)/2, (gny-1)/2, 1]) # This will not be included in calculations
+#             size_inner_y = np.array([(gnx-1)/2, (gny-1)/2, 1]) # This will not be included in calculations
+#             size_inner_z = np.array([(gnx-1)/2, (gny-1)/2, 1])
+            
+#         return [size_outer_x, size_outer_y, size_outer_z,\
+#                 size_inner_x, size_inner_y, size_inner_z]
+    
+#     ### Initial conditions
+#     a = np.round(np.array(sizing(gnx, gny, gnz)).prod(axis=1))
+    
+#     ####################################################
+#     ########### Initial conditions ################
+#     ####################################################
+#     E0_x = np.zeros(shape = (int(a[0]),1))
+#     E0_y = np.zeros(shape = (int(a[1]),1))
+#     E0_z = np.zeros(shape = (int(a[2]),1))
+#     E0 = np.concatenate((E0_x, E0_y, E0_z),axis=1).T
+    
+#     # B0_x = np.zeros(shape = (int(a[3]),1))
+#     # B0_y = np.zeros(shape = (int(a[4]),1))
+#     # B0_z = np.zeros(shape = (int(a[5]),1))
+#     # B0 = np.concatenate((B0_x, B0_y, B0_z),axis=1).T
+    
+#     M0_x = np.zeros(shape = (int(a[3]),1))
+#     M0_y = np.zeros(shape = (int(a[4]),1))
+#     M0_z = init_mag*np.ones(shape = (int(a[5]),1))
+#     M0 = np.concatenate((M0_x, M0_y, M0_z),axis=1).T
+    
+#     H0_x = np.zeros(shape = (int(a[3]),1))
+#     H0_y = np.zeros(shape = (int(a[4]),1))
+#     H0_z = np.zeros(shape = (int(a[5]),1))
+#     H0 = np.concatenate((H0_x, H0_y, H0_z),axis=1).T
+    
+#     H_s_x = H_s_val*np.ones(shape = (int(a[3]),1))
+#     H_s_y = H_s_val*np.ones(shape = (int(a[4]),1))
+#     H_s_z = H_s_val*np.ones(shape = (int(a[5]),1))
+#     H_s = np.concatenate((H_s_x, H_s_y, H_s_z),axis=1).T
+#     node_count = np.array([gnx,gny,gnz])
+    
+#     R_sys = Ferro_sys(node_count,disc,E0,H0,M0,H_s)
+    
+#     ####################################################
+#     ################# Run parameters ##################
+#     ####################################################
+#     R_sys.dt = dt
+#     R_sys.H_s_val = H_s_val
+    
+#     ## Keeping parameters set in system, so below is not necessary
+#     # R_sys.mu0 = mu0
+#     # R_sys.eps = eps
+#     # R_sys.gamma = gamma
+#     # R_sys.K = K
+#     # R_sys.alpha = alpha
+    
+#     return R_sys
+
+# test_sys = set_up_system(gnx, gny, gnz, disc)
+# test_sys.initialize_set_up_ADI()
+
+
+
+
+# ######### Testing new ADI script v2
+# E_old2 = R_sys.E_old2
+# H_old2 = R_sys.H_old2
+# # M_old2 = R_sys.M_old2
+# B_old2 = R_sys.B_old2
+
+# E_old = R_sys.E_old
+# B_old = R_sys.B_old
+# M_old = R_sys.M_old
+# H_old = R_sys.H_old
+
+# dt = R_sys.dt
+# b_ind = R_sys.bound_ind
+# # bdp = R_sys.better_dot_pdt
+
+# ## Parameter choices given in system
+# mu0 = R_sys.mu0
+# eps = R_sys.eps
+# sigma = R_sys.sigma 
+
+# ##### Solving for E_n+1/2
+# s_a = 1/mu0*R_sys.curl_L(B_old2.values,'Inner')
+# s_b = dt/(2*mu0)*R_sys.curl_LL(E_old2.values)
+# s_c = R_sys.curl_L(M_old.values,'Inner')
+# s_d = R_sys.curl_R(H_old2.values,'Inner')
+
+# s_main = (s_a - s_b - s_c - s_d)
+# E_old_RHS = E_old2.values + dt/(2*eps)*s_main - (dt/2)*sigma*E_old2.values
+
+# ### Add in forcing terms at the half-step
+# F_old = np.concatenate((R_sys.Fx(t-dt/2), R_sys.Fy(t-dt/2), R_sys.Fz(t-dt/2)),axis=1)
+
+# ### Using back-solve for new values
+# E_old_values = R_sys.step_1a_inv(E_old_RHS)
+
+# b_ind = R_sys.bound_ind
+
+# for j in b_ind[0]:
+#     E_old_RHS[0][j] = 0 #x_bound(j)
+# for k in b_ind[1]:
+#     E_old_RHS[1][k] = 0
+# for l in b_ind[2]:
+#     E_old_RHS[2][l] = 0
+    
+# E_old_values += F_old.T
+
+# #Setting all E boundaries to 0
+
+
+# E_old.values = E_old_values
+
+# ###### Solving for B_n+1/2
+# B_old_values = B_old2.values + dt/2*(\
+#     R_sys.curl_R(E_old_values, 'o') - \
+#         R_sys.curl_L(E_old2.values, 'o'))
+    
+# B_old.values = B_old_values
+
+# ###### Solving for H_n+1/2
+# H_old_values = 1/mu0*B_old_values - M_old.values
+# H_old.values = H_old_values

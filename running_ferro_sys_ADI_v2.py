@@ -55,10 +55,10 @@ t0 = time.time()
 
 cont = 1 ## Continue with time-run. Else, just set up system.
 
-disp = 0 ## Display a run
-ho_disp = 1 ## How often to display the run
+disp = True ## Display a run
+ho_disp = 5 ## How often to display the run
 
-def disp():
+def disp_what():
     '''
     What to display if disp == true
     '''
@@ -68,25 +68,27 @@ def disp():
     
     # fig_Ey0 = R_sys.plot_line('E','y',0,0)
     # fig_Mz0 = R_sys.plot_line('M','z',0,0)
-    fig_Ey1 = R_sys.plot_slice('E','y',0)
+    # fig_Ey1,ax_Ey1 = R_sys.plot_slice('E','y',0)
     # fig_Ey2 = R_sys.plot_line('E','y',100,0)
-    # fig_Ey3 = R_sys.plot_line('E','y',3,0)
+    fig_Ey3,ax_Ey3 = R_sys.plot_line('E','y',3,0)
+    fig2 = R_sys2.plot_line()
+    # ax_Ey1.view_init(elev = 90,azim = 90)
     
-    fig = plt.figure()
-    t_val = np.arange(0,T,dt)
-    Ricker_vec = np.vectorize(f_y)
-    ax = fig.add_subplot(111)
-    ax.plot(t_val,Ricker_vec(0,0,0,t_val))
-    ax.axvline(x=t)
-    Title = 'Current Boundary value: '+str(round(f_y(0,0,0,t),2))
-    ax.set_title(Title)
+    # fig = plt.figure()
+    # t_val = np.arange(0,T,dt)
+    # Ricker_vec = np.vectorize(f_y)
+    # ax = fig.add_subplot(111)
+    # ax.plot(t_val,Ricker_vec(0,0,0,t_val))
+    # ax.axvline(x=t)
+    # Title = 'Current Boundary value: '+str(round(f_y(0,0,0,t),2))
+    # ax.set_title(Title)
     
     # print(Ricker_pulse(t))
 
 hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
 ho_hold = 1 ## How often to hold
 
-save_time_steps = True ## Turn on to ho time steps from run
+save_time_steps = False ## Turn on to ho time steps from run
 save_final_time = False ## Turn on to save final time step 
 ho_save = 25 #How often to save
 
@@ -106,16 +108,16 @@ H_s_val = 10**5 ## H_s value
 init_mag = 0 ## Magnetization initialization constant for M_z, 0 => free-space (non-LLG)
 
 ################## Parameters (system) ########################
-dx =0.04 
+dx = 0.04
 dy = dx
 dz = dx
 disc = np.array([dx, dy, dz]) ### (dx, dy, dz)
-max_x = 12 
+max_x = 2
 
 CFL = 1/(2**(1/2)) ### Testing. Soon this will be increased                  
-dt = CFL*disc[0]/c 
-T = 500*dt ## Final time
-T = np.round(T,np.int(abs(np.log(dt)/np.log(10))))
+dt = CFL*disc[0]/c
+T = 20*dt ## Final time
+# T = np.round(T,np.int(abs(np.log(dt)/np.log(10))))
 
 ## Making sure we have an odd-number for global nodes, otherwise
 ## the grid will not be uniform for Yee scheme
@@ -135,6 +137,7 @@ elif np.round(max_x/disc[0])%2 == 1:
 
 ########################### System parameters (contd) ########################   
 gny = gnx
+# gnz = gnx
 gnz = 1 ### 2D Implementation
 
 ###################################################
@@ -156,6 +159,17 @@ def f_y(x,y,z,t):
        
 def f_z(x,y,z,t):
     return 0
+
+### Huang conditions
+# def f_x(x,y,z,t):
+#     return 0
+    
+# def f_y(x,y,z,t):
+    
+#     return 0
+       
+# def f_z(x,y,z,t):
+#     return 0
 
 ### Centered Gaussian source
 # def f_x(x,y,z,t):
@@ -231,14 +245,20 @@ def set_up_system(gnx,gny,gnz,disc):
 ########### Actually running system #############
 
 R_sys = set_up_system(gnx,gny,gnz,disc)
+R_sys2 = set_up_system(gnx,gny,gnz,disc)
 
 R_sys.fx = f_x
 R_sys.fy = f_y
 R_sys.fz = f_z
 
+R_sys2.fx = f_x
+R_sys2.fy = f_y
+R_sys2.fz = f_z
+
 ticker = 0
 
 R_sys.initialize_set_up_ADI() ### Sets up matrices and operators for ADI method
+R_sys2.initialize_set_up_ADI()
 
 for t in np.arange(dt,T,dt):
     ### re-initializing the system
@@ -254,21 +274,29 @@ for t in np.arange(dt,T,dt):
     ### Running the system
     R_sys.T = t
     R_sys.single_run_ADI_v2(t)
-    ## Updating old fields
-    R_sys.E_old2.values = R_sys.E_old.values
-    R_sys.B_old2.values = R_sys.B_old.values
-    R_sys.M_old2.values = R_sys.M_old.values
-    R_sys.H_old2.values = R_sys.H_old.values
     
-    R_sys.E_old.values = R_sys.E_new.values
-    R_sys.H_old.values = R_sys.H_new.values
-    R_sys.M_old.values = R_sys.M_new.values
-    R_sys.B_old.values = R_sys.B_new.values
+    R_sys2.T = t
+    R_sys2.single_run_v2(t)
+    
+    ## Updating different time steps
+    R_sys2.E_old2.values = R_sys2.E_old.values
+    R_sys2.B_old2.values = R_sys2.B_old.values
+    R_sys2.H_old2.values = R_sys2.H_old.values
+    R_sys2.M_old2.values = R_sys2.M_old.values
+    
+    R_sys2.E_old.values = R_sys2.E_new.values
+    R_sys2.B_old.values = R_sys2.B_new.values
+    R_sys2.H_old.values = R_sys2.H_new.values
+    R_sys2.M_old.values = R_sys2.M_new.values
+    
+    
     
     ## Plotting stuff to demo
     if disp == True:
+        # print('Display?')
         if ticker%ho_disp < 1E-12:
-            disp()
+            # print('yes!')
+            disp_what()
             
     if hold_on == True:
         if ticker%ho_hold < 1e-12:
@@ -281,8 +309,17 @@ for t in np.arange(dt,T,dt):
             mkdir_p(name_date+'/'+name_time) #Creates sub-directory for this specific time
             R_sys.save_data(name_date+'/'+name_time+'/'+name_data) #Saves Field data
             ### Note: parameters are now saved outside the loop
-
-## Plotting stuff
+            
+    ## Updating X_n = X_n+1 for next time-step
+    R_sys.E_old2.values = R_sys.E_new.values
+    R_sys.B_old2.values = R_sys.B_new.values
+    R_sys.M_old2.values = R_sys.M_new.values
+    R_sys.H_old2.values = R_sys.H_new.values
+    
+    R_sys.E_old.values = R_sys.E_old.values*0
+    R_sys.B_old.values = R_sys.B_old.values*0
+    R_sys.M_old.values = R_sys.M_old.values*0
+    R_sys.H_old.values = R_sys.H_old.values*0
 
 t1 = time.time()
 print('Time taken:', t1-t0)
@@ -294,26 +331,27 @@ if save_final_time == True:
     
 # Run parameters
     # Global Parameters
-data = OrderedDict()
-data['mu0'] = mu0
-data['eps'] = eps 
-data['gamma'] = gamma
-data['K'] = K
-data['alpha'] = alpha
-data['H_s'] = H_s_val
-
-        # System Parameters
-data['max_x'] = max_x
-data['disc_x'] = disc[0]
-data['disc_y'] = disc[1]
-data['disc_z'] = disc[2]
-data['gnx'] = gnx
-data['gny'] = gny
-data['gnz'] = gnz
-data['T'] = T
-data['dt'] = dt
-data['CFL'] = c*dt/disc[0]
-
-df = pd.DataFrame([data])
-df.to_csv(name_date+'/'+name_data+'_param.csv')
+if save_time_steps == True:
+    data = OrderedDict()
+    data['mu0'] = mu0
+    data['eps'] = eps 
+    data['gamma'] = gamma
+    data['K'] = K
+    data['alpha'] = alpha
+    data['H_s'] = H_s_val
+    
+            # System Parameters
+    data['max_x'] = max_x
+    data['disc_x'] = disc[0]
+    data['disc_y'] = disc[1]
+    data['disc_z'] = disc[2]
+    data['gnx'] = gnx
+    data['gny'] = gny
+    data['gnz'] = gnz
+    data['T'] = T
+    data['dt'] = dt
+    data['CFL'] = c*dt/disc[0]
+    
+    df = pd.DataFrame([data])
+    df.to_csv(name_date+'/'+name_data+'_param.csv')
 

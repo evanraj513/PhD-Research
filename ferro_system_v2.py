@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Nov 20 08:06:04 2019
+Created on Fri May 15 2020
 
 @author: evanraj
 
-This will serve as my first attempt at coding the coupled Maxwell's equations with
-the LLG equation. System given as a class
+This will serve as my second attempt at coding the coupled Maxwell's equations with
+the LLG equation. System given as a class. 
 
 """
 
@@ -42,6 +42,7 @@ Vector = field_class.Vector
 ### Ferrosystem parameters
 mu0 = 1.25667e-6 #Permeability of free space
 eps = 8.85422e-12 #Permoittivity of free space
+sigma = 0.0 ## Conductivity. 0 = lossless media
 gamma = 2.2e5 #From Puttha's paper
 K = 0
 alpha = 0.2
@@ -58,23 +59,23 @@ H_s_guess = 10**5
 class Ferro_sys(object):
     '''    
     Initialization Attributes
-    -------------------------
-    X0: list
-        3 columns of initial conditions for field X, each column corresponding to 
-        the X,Y,Z components        
+    -------------------------       
     global_node_count: np.array, length = 1 or 3       Note: In old code, this was "size"
         Will give the number of nodes in one 'direction'
             - Assuming same number of nodes in each row
                 if only one number is passed
     disc: np_array of length 3
         Contains the step-size in the x,y,z direction, in that order
+    X0: list
+        3 columns of initial conditions for field X, each column corresponding to 
+        the X,Y,Z components 
+        
+    System Attributes
+    -----------------  
     dt: float
         Time-step value. 
     T: float
-        Final time
-        
-    System Attributes
-    -----------------    
+        Run current time (for plotting only)
     gn_: int
         gives the global number of nodes in any direction. 
     a: np.ndarray
@@ -84,21 +85,23 @@ class Ferro_sys(object):
     B_n_: np.ndarray
         [nx, ny, nz] for B_(_) = H_(_) = M_(_)
     
+    bound_ind: np.ndarray 3 by x
+        Gives list of nodes on boundary
         
     '''
     
     def __init__(self,global_node_count,disc,E0,H0,M0,H_s = H_s_guess):
         # Parameter Set-up
         self.dt = 0.1 
-        self.T = 1.0
+        self.T = -1.0
         ### Ferrosystem parameters
         self.mu0 = mu0 #Permeability of free space
         self.eps = eps #Permoittivity of free space
-        self.gamma = gamma #From Puttha's paper
-        self.K = K
-        self.alpha = alpha
-        self.H_s_guess = H_s_guess
-        self.sigma = 0.0
+        self.sigma = sigma #Conductivity
+        self.gamma = gamma #LLG parameter 1
+        self.K = K #Joly projection method
+        self.alpha = alpha ## LLG parameter 2
+        self.H_s_guess = H_s_guess ## Static magnetic field
 
         self.disc = disc
         self.node_count = global_node_count
@@ -113,12 +116,6 @@ class Ferro_sys(object):
         else:
             print('*'*40,'\n','Error in given node_count. Abort','\n','*'*40)
             raise Exception
-
-        # Sizing #
-        '''
-        This is now done in the function "sizing" below, so that it can be changed
-        on the fly
-        '''
         
         a = self.sizing(self.gnx,self.gny,self.gnz)
         self.a = a
@@ -131,19 +128,13 @@ class Ferro_sys(object):
         self.B_ny = a[4].astype('int')
         self.B_nz = a[5].astype('int')
          
-        ### Included here to make up for a previous mistake
-        ### and to deal with my laziness to change all
-        ### of the following code. 
-        
-        self.size_Ex = self.E_nx
-        self.size_Ey = self.E_ny
-        self.size_Ez = self.E_nz
+        ### Below included to deal with updated names
         
         self.size_Bx = self.B_nx
         self.size_By = self.B_ny
         self.size_Bz = self.B_nz
         
-        # Field set-up #
+        # Initialize all fields
         self.E_old = E0
         self.H_old = H0
         self.M_old = M0
@@ -161,18 +152,21 @@ class Ferro_sys(object):
         self.B_old2 = self.B0
         self.E_old2 = E0
         
+        ### Gives nodes that are on the boundary 
         self.bound_ind = self.bound_ind()
         
+        ## ADI parameters
         self.tol = 1E-12
         self.maxiter_half_step = 10
         self.maxiter_whole_step = 10
-        
+      
+    ### Setters to initialize field classes
     @property
     def E_old2(self):
         return self._E_old2
     @E_old2.setter
     def E_old2(self, values):
-        self._E_old2 = Field(self.size_Ex, self.size_Ey,self.size_Ez,self.disc,values)
+        self._E_old2 = Field(self.E_nx, self.E_ny,self.E_nz,self.disc,values)
 #        self._E_old.E = True
         if type(values) != np.ndarray or values.shape[0] != 3:
             print('Something is wrong. Assigned incorrect array to E_old')
@@ -220,7 +214,7 @@ class Ferro_sys(object):
     @E_old.setter
     def E_old(self, values):
 #        print(self.size_Ex, self.size_Ey, self.size_Ez)
-        self._E_old = Field(self.size_Ex, self.size_Ey,self.size_Ez,self.disc,values)
+        self._E_old = Field(self.E_nx, self.E_ny,self.E_nz,self.disc,values)
 #        self._E_old.E = True
         
         if type(values) != np.ndarray or values.shape[0] != 3:
@@ -268,8 +262,8 @@ class Ferro_sys(object):
         return self._E_new
     @E_new.setter
     def E_new(self, values):
-        self._E_new = Field(self.size_Ex, self.size_Ey
-                            ,self.size_Ez,self.disc,values)
+        self._E_new = Field(self.E_nx, self.E_ny
+                            ,self.E_nz,self.disc,values)
 #        self._E_new.E = True
         
         if type(values) != np.ndarray or values.shape[0] != 3:
@@ -325,7 +319,7 @@ class Ferro_sys(object):
                             ,self.size_Bz,self.disc,values)
         
         if type(values) != np.ndarray or values.shape[0] != 3:
-            print('Something is wrong. Assigned incorrect array to H_new')
+            print('Something is wrong. Assigned incorrect array to H_s')
             raise Exception      
             
         else: 
@@ -771,77 +765,7 @@ class Ferro_sys(object):
             ax.set_xlabel('x')
             ax.set_ylabel(F+comp)
             
-        return fig, ax
-                       
-    def set_up(self):
-        '''
-        This will set-up the system to be run. 
-        -Should this just be in the initialize? Maybe, who knows?
-            Ans: Probably not, as we will re-initialize each field as an update to
-                the single run. Thus, will need to keep reassigning derivatives and whatnot
-        '''
-#        self.E_old.x.Dx = self.E_old.x.Dx_E
-        self.E_old.x.Dy = self.E_old.x.Dy_E
-        self.E_old.x.Dz = self.E_old.x.Dz_E
-        
-        self.E_old.y.Dx = self.E_old.y.Dx_E
-#        self.E_old.y.Dy = self.E_old.y.Dy_E
-        self.E_old.y.Dz = self.E_old.y.Dz_E
-        
-        self.E_old.z.Dx = self.E_old.z.Dx_E
-        self.E_old.z.Dy = self.E_old.z.Dy_E
-#        self.E_old.z.Dz = self.E_old.z.Dz_E
-        
-        
-#        self.H_old.x.Dx = self.H_old.x.Dx_B
-        self.H_old.x.Dy = self.H_old.x.Dy_B
-        self.H_old.x.Dz = self.H_old.x.Dz_B
-        
-        self.H_old.y.Dx = self.H_old.y.Dx_B
-#        self.H_old.y.Dy = self.H_old.y.Dy_B
-        self.H_old.y.Dz = self.H_old.y.Dz_B
-        
-        self.H_old.z.Dx = self.H_old.z.Dx_B
-        self.H_old.z.Dy = self.H_old.z.Dy_B
-#        self.H_old.z.Dz = self.H_old.z.Dz_B
-        
-#        self.M_old.x.Dx = self.H_old.x.Dx_B
-        self.M_old.x.Dy = self.M_old.x.Dy_B
-        self.M_old.x.Dz = self.M_old.x.Dz_B
-        
-        self.M_old.y.Dx = self.M_old.y.Dx_B
-#        self.M_old.y.Dy = self.M_old.y.Dy_B
-        self.M_old.y.Dz = self.M_old.y.Dz_B
-        
-        self.M_old.z.Dx = self.M_old.z.Dx_B
-        self.M_old.z.Dy = self.M_old.z.Dy_B
-#        self.M_old.z.Dz = self.M_old.z.Dz_B
-
-#        self.B_old.x.Dx = self.B_old.x.Dx_B
-        self.B_old.x.Dy = self.B_old.x.Dy_B
-        self.B_old.x.Dz = self.B_old.x.Dz_B
-        
-        self.B_old.y.Dx = self.B_old.y.Dx_B
-#        self.B_old.y.Dy = self.B_old.y.Dy_B
-        self.B_old.y.Dz = self.B_old.y.Dz_B
-        
-        self.B_old.z.Dx = self.B_old.z.Dx_B
-        self.B_old.z.Dy = self.B_old.z.Dy_B
-#        self.B_old.z.Dz = self.B_old.z.Dz_B    
-        
-    def E_new_setup(self):
-#        self.E_new.x.Dx = self.E_new.x.Dx_E
-        self.E_new.x.Dy = self.E_new.x.Dy_E
-        self.E_new.x.Dz = self.E_new.x.Dz_E
-        
-        self.E_new.y.Dx = self.E_new.y.Dx_E
-#        self.E_new.y.Dy = self.E_new.y.Dy_E
-        self.E_new.y.Dz = self.E_new.y.Dz_E
-        
-        self.E_new.z.Dx = self.E_new.z.Dx_E
-        self.E_new.z.Dy = self.E_new.z.Dy_E
-#        self.E_new.z.Dz = self.E_new.z.Dz_E
-    
+        return fig, ax    
     
     def fx(self,x1,y1,z1,t1):
         a = x1*y1*z1
@@ -952,102 +876,10 @@ class Ferro_sys(object):
         
         Bx = self.B_old.x
         By = self.B_old.y
-        Bz = self.B_old.z
-        
-        # print(self.node_count, self.gnz)
-        
-        ### Indexing for Even node grid
-        if (self.node_count %2 == 0).all():
-            print('Warning, untested grid style. Change to odd number node_count, or be forewarned',
-                  '\n','    (bound_ind function noticiing)')
-            wait = input('Press ENTER to continue, or CTRL C to break')
-            
-            ind_Ex = np.array([0]) #First node is always a boundary
-            for ll in np.arange(0,Ex.nz):
-                for kk in np.arange(0,Ex.ny):
-                    for jj in np.arange(0,Ex.nx):
-                        if ll == 0:
-                            ind = [ll*Ex.nx*Ex.ny + kk*Ex.nx + jj]
-                            ind_Ex= np.concatenate((ind_Ex, ind))
-                        elif kk == 0:
-                            ind = [ll*Ex.nx*Ex.ny + kk*Ex.nx + jj]
-                            ind_Ex= np.concatenate((ind_Ex, ind))
-                        elif jj == Ex.nx-1: 
-                        # Note: This does NOT double count nodes if ll==0 and jj==0
-                            ind = [ll*Ex.nx*Ex.ny + kk*Ex.nx + jj]
-                            ind_Ex= np.concatenate((ind_Ex, ind))
-                            
-            ind_By = np.array([0])
-            for ll in np.arange(0,By.nz):
-                for kk in np.arange(0,By.ny):
-                    for jj in np.arange(0,By.nx):
-                        ind = [ll*By.nx*By.ny + kk*By.nx + jj]
-                        if ll == Bx.nz-1:
-                            ind_By = np.concatenate((ind_By, ind))
-                        elif kk == 0:
-                            ind_By = np.concatenate((ind_By, ind))
-                        elif jj == Ex.nx-1: 
-                            ind_By = np.concatenate((ind_By, ind))
-            
-            ind_Ey = np.array([0])
-            for ll in np.arange(0,Ey.nz):
-                for kk in np.arange(0,Ey.ny):
-                    for jj in np.arange(0,Ey.nx):
-                        ind = [ll*Ey.nx*Ey.ny + kk*Ey.nx + jj]
-                        if ll == 0:
-                            ind_Ey = np.concatenate((ind_Ey, ind))
-                        elif kk == Ex.ny-1:
-                            ind_Ey = np.concatenate((ind_Ey, ind))
-                        elif jj == 0:
-                            ind_Ey = np.concatenate((ind_Ey, ind))
-                            
-            ind_Bx = np.array([0])
-            for ll in np.arange(0,Bx.nz):
-                for kk in np.arange(0,Bx.ny):
-                    for jj in np.arange(0,Bx.nx):
-                        ind = [ll*Bx.nx*Bx.ny + kk*Bx.nx + jj]
-                        if ll == Bx.nz-1:
-                            ind_Bx = np.concatenate((ind_Bx, ind))
-                        elif kk == Ex.ny-1:
-                            ind_Bx = np.concatenate((ind_Bx, ind))
-                        elif jj == 0:
-                            ind_Bx = np.concatenate((ind_Bx, ind))
-            
-            ind_Ez = np.array([0])
-            for ll in np.arange(0,Ez.nz):
-                for kk in np.arange(0,Ez.ny):
-                    for jj in np.arange(0,Ez.nx):
-                        ind = [ll*Ez.nx*Ez.ny + kk*Ez.nx + jj]
-                        if ll == Ez.nz-1:
-                            ind_Ez = np.concatenate((ind_Ez, ind))
-                        elif kk == 0:
-                            ind_Ez = np.concatenate((ind_Ez, ind))
-                        elif jj == 0:
-                            ind_Ez = np.concatenate((ind_Ez, ind))
-                            
-            ind_Bz = np.array([0])
-            for ll in np.arange(0,Bz.nz):
-                for kk in np.arange(0,Bz.ny):
-                    for jj in np.arange(0,Bz.nx):
-                        ind = [ll*Bz.nx*Bz.ny + kk*Bz.nx + jj]
-                        if ll == Bz.nz-1:
-                            ind_Bz = np.concatenate((ind_Bz, ind))
-                        elif kk == 0:
-                            ind_Bz = np.concatenate((ind_Bz, ind))
-                        elif jj == 0:
-                            ind_Bz = np.concatenate((ind_Bz, ind))
-                        
-            ind_Ex = np.unique(ind_Ex)
-            ind_Ey = np.unique(ind_Ey)
-            ind_Ez = np.unique(ind_Ez)
-            
-            ind_Bx = np.unique(ind_Bx)
-            ind_By = np.unique(ind_By)
-            ind_Bz = np.unique(ind_Bz)
-        
+        # Bz = self.B_old.z
         
         ### Indexing for Odd node count
-        elif (self.node_count %2 == 1).all() and self.gnz != 1:
+        if (self.node_count %2 == 1).all() and self.gnz != 1:
             ind_Ex = np.array([0])
             for ll in np.arange(0,Ex.nz):
                 for kk in np.arange(0,Ex.ny):
@@ -1097,7 +929,7 @@ class Ferro_sys(object):
                             
             ind_Bz = np.array([])
             
-        ## Indexing for 2D case ##
+        ## Indexing for 2D case: TE mode ##
         elif (self.node_count %2 == 1).all() and self.gnz == 1:
             # print('we made it here')
             ind_Ex = np.array([0])
