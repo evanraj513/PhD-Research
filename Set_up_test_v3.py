@@ -224,6 +224,7 @@ def reset_for_next_run():
     tsr.H_old.values = tsr.H_new.values
     tsr.B_old.values = tsr.B_new.values
     
+def reset_tsr2():
     tsr2.E_old2.values = tsr.E_old.values
     tsr2.H_old2.values = tsr.H_old.values
     tsr2.B_old2.values = tsr.B_old.values
@@ -238,6 +239,11 @@ def do_ADI_run(k):
     New ADI run based on assumptions of Ricker pulse, as described by
     week 7 of spring term algorithm. 
     '''
+    F_old2 = ts.Fy((k-1)*dt)
+    b_ind = ts.bound_ind
+    
+    for l in b_ind[1]:
+        ts.E_old2.y.value[l] = F_old2[l]
     
     ######### E_n+1/2 = E_n + dt/(2eps)*(-curl_R(H_n)) + F_n
     ts.E_old.values = ts.E_old2.values + dt/(2*ts.eps)*(-ts.curl_R(ts.H_old2.values, 'i'))
@@ -265,33 +271,74 @@ def do_ADI_run(k):
     ts.H_new.values = ts.B_new.values/ts.mu0
     
 def do_Yee_run(k):
-    tsr.E_new_values = tsr.E_old.values + dt/tsr.eps*(-ts.curl_R(tsr.H_old.values,'i'))
+    ### Enforcing boundary conditions at first
     b_ind = tsr.bound_ind
-    F_old = tsr.Fy(k*dt)
-    
+    F_old2 = tsr.Fy((k-1)*dt)
     for l in b_ind[1]:
-        tsr.E_new.y.value[l] = F_old[l]
+        tsr.E_old2.y.value[l] = F_old2[l]
     
+    ################## First half-step ###################
+    tsr.E_old.values = tsr.E_old2.values + (dt/2)/tsr.eps*(-ts.curl_R(tsr.H_old2.values,'i'))
+    ## Boundary conditions
+    F_old = tsr.Fy(k*dt-dt/2)
+    for l in b_ind[1]:
+        tsr.E_old.y.value[l] = F_old[l]
+    tsr.B_old.values = tsr.B_old2.values + (dt/2)*(-ts.curl_L(tsr.E_old.values, 'o'))
+    tsr.H_old.values = tsr.B_old.values/tsr.mu0
+    
+    ################## Second half-step ###################
+    tsr.E_new_values = tsr.E_old.values + dt/tsr.eps*(-ts.curl_R(tsr.H_old.values,'i'))
+    ## Boundary conditions
+    F_new = tsr.Fy(k*dt)
+    for l in b_ind[1]:
+        tsr.E_new.y.value[l] = F_new[l]
     tsr.B_new.values = tsr.B_old.values + dt*(-ts.curl_L(tsr.E_new.values,'o'))
     tsr.H_new.values = tsr.B_new.values/tsr.mu0
     
-for k in range(1,50):
+tsr.dt = dt/2
+tsr2.dt = dt/2
+    
+for k in range(1,2):
+    '''
+    Here's the breakdown of what is happeneing here:
+        1. ts (test_system) will be used to run the simplified ADI code above
+            X_old2: time-step n
+            X_old: time-step n+1/2 (referenced for plotting, so may change values 
+                                    between runs)
+            X_new: time-step n+1
+        
+        2. tsr (test_system regular) will be used to run the simplified Yee
+                    scheme above, written with ADI functionality
+            E_old2: time-step n
+            E_old: time-step n+1/2
+            E_new: time-step n+1
+            
+            H_old2: time-step n+1/4
+            H_old: time-step n+3/4
+            H_new: time-step n+5/4
+            
+        3. tsr2 will be used to run Yee scheme that is 'working', but at half-steps
+            E_old2: time-step n
+            E_old: time-step n+1/2
+            E_new: time-step n+1
+            
+            H_old2: time-step n+1/4
+            H_old: time-step n+3/4
+            H_new: time-step n+5/4
+    '''
+    
     print('k:',k)
     do_ADI_run(k)
-    # do_Yee_run(k)
+    do_Yee_run(k)
+    tsr2.single_run_v2(dt*k-dt/2) ## Half-step
+    reset_tsr2()
+    tsr2.single_run_v2(dt*k) ## Whole-step
     
     ts.T = k*dt
-    # tsr.T = k*dt
+    tsr.T = k*dt
+    tsr2.T = k*dt
     
-    # tsr.single_run_v2(dt/2*k)
-    
-    # reset_for_next_run()
-    
-    tsr.single_run_v2(dt*k)
-    
-    # tsr2.single_run_v2(dt/2*k)
-    
-    if k%5 == 0:
+    if k%1 == 0:
           ts.E_old.values = ts.E_new.values
          # tsr.E_old.values = tsr.E_old2.values
          
@@ -327,7 +374,7 @@ for k in range(1,50):
           ax341.legend()
           ax342.set_title('Plots of difference')
          
-    reset_for_next_run()
+    # reset_for_next_run()
     
     
     

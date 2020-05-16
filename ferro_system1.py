@@ -1541,7 +1541,7 @@ class Ferro_sys(object):
         self.set_up_H_curl()
         
         ## Actual computation of time stepping
-        F = np.concatenate((self.Fx(t), self.Fy(t), self.Fz(t)),axis=1)
+        F = np.concatenate((self.Fx(t), self.Fy(t), self.Fz(t)),axis=1) ## F_n+1/2
         E_new_values = E_old.values + dt/eps*self.H_old_curl##*(self.curl_L(H_old.values,'i') - self.curl_R(H_old.values,'i'))
         
         #Setting all E boundaries to 0
