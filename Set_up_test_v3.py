@@ -53,8 +53,8 @@ dy = 0.04 # step size in y-direction
 dz = 0.04 # step size in z-direction
 disc = np.array([dx, dy, dz])
 
-max_x = 71*dx
-max_y = 71*dx
+max_x = 7*dx
+max_y = 7*dx
 max_z = 1*dx ## 3D
 # max_z = 1*dz ## 2D
 
@@ -171,9 +171,12 @@ test_sys.initialize_set_up_ADI()
 ts = test_sys
 
 tsr = set_up_system(gnx,gny,gnz,disc)
+tsr.dt = dt/2
 tsr.set_up_der_matrices()
+tsr.initialize_set_up_ADI()
 
 tsr2 = set_up_system(gnx,gny,gnz,disc)
+tsr2.dt = dt/2
 tsr2.set_up_der_matrices()
 
 ### Left Ricker Pulse forcing functions
@@ -225,13 +228,13 @@ def reset_for_next_run():
     tsr.B_old.values = tsr.B_new.values
     
 def reset_tsr2():
-    tsr2.E_old2.values = tsr.E_old.values
-    tsr2.H_old2.values = tsr.H_old.values
-    tsr2.B_old2.values = tsr.B_old.values
+    tsr2.E_old2.values = tsr2.E_old.values
+    tsr2.H_old2.values = tsr2.H_old.values
+    tsr2.B_old2.values = tsr2.B_old.values
     
-    tsr2.E_old.values = tsr.E_new.values
-    tsr2.H_old.values = tsr.H_new.values
-    tsr2.B_old.values = tsr.B_new.values
+    tsr2.E_old.values = tsr2.E_new.values
+    tsr2.H_old.values = tsr2.H_new.values
+    tsr2.B_old.values = tsr2.B_new.values
     
     
 def do_ADI_run(k):
@@ -274,31 +277,28 @@ def do_Yee_run(k):
     ### Enforcing boundary conditions at first
     b_ind = tsr.bound_ind
     F_old2 = tsr.Fy((k-1)*dt)
-    for l in b_ind[1]:
-        tsr.E_old2.y.value[l] = F_old2[l]
+    for l1 in b_ind[1]:
+        tsr.E_old2.y.value[l1] = F_old2[l1]
     
     ################## First half-step ###################
-    tsr.E_old.values = tsr.E_old2.values + (dt/2)/tsr.eps*(-ts.curl_R(tsr.H_old2.values,'i'))
+    tsr.E_old.values = tsr.E_old2.values + (dt/2)/tsr.eps*(-tsr.curl_R(tsr.H_old2.values,'i'))
     ## Boundary conditions
     F_old = tsr.Fy(k*dt-dt/2)
-    for l in b_ind[1]:
-        tsr.E_old.y.value[l] = F_old[l]
-    tsr.B_old.values = tsr.B_old2.values + (dt/2)*(-ts.curl_L(tsr.E_old.values, 'o'))
+    for l2 in b_ind[1]:
+        tsr.E_old.y.value[l2] = F_old[l2]
+    tsr.B_old.values = tsr.B_old2.values + (dt/2)*(-tsr.curl_L(tsr.E_old.values, 'o'))
     tsr.H_old.values = tsr.B_old.values/tsr.mu0
     
     ################## Second half-step ###################
-    tsr.E_new_values = tsr.E_old.values + dt/tsr.eps*(-ts.curl_R(tsr.H_old.values,'i'))
+    tsr.E_new.values = tsr.E_old.values + (dt/2)/tsr.eps*(-tsr.curl_R(tsr.H_old.values,'i'))
     ## Boundary conditions
-    F_new = tsr.Fy(k*dt)
-    for l in b_ind[1]:
-        tsr.E_new.y.value[l] = F_new[l]
-    tsr.B_new.values = tsr.B_old.values + dt*(-ts.curl_L(tsr.E_new.values,'o'))
+    F_new = tsr.Fy(k*dt) 
+    for l3 in b_ind[1]:
+        tsr.E_new.y.value[l3] = F_new[l3]
+    tsr.B_new.values = tsr.B_old.values + (dt/2)*(-tsr.curl_L(tsr.E_new.values,'o'))
     tsr.H_new.values = tsr.B_new.values/tsr.mu0
     
-tsr.dt = dt/2
-tsr2.dt = dt/2
-    
-for k in range(1,2):
+for k in range(1,10):
     '''
     Here's the breakdown of what is happeneing here:
         1. ts (test_system) will be used to run the simplified ADI code above
@@ -374,7 +374,7 @@ for k in range(1,2):
           ax341.legend()
           ax342.set_title('Plots of difference')
          
-    # reset_for_next_run()
+    reset_for_next_run()
     
     
     
