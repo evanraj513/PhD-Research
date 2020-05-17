@@ -53,8 +53,8 @@ dy = 0.04 # step size in y-direction
 dz = 0.04 # step size in z-direction
 disc = np.array([dx, dy, dz])
 
-max_x = 7*dx
-max_y = 7*dx
+max_x = 71*dx
+max_y = 71*dx
 max_z = 1*dx ## 3D
 # max_z = 1*dz ## 2D
 
@@ -265,6 +265,7 @@ def do_ADI_run(k):
     ## Step 2
     E_new_RHS = ts.E_old.values + dt/(2*ts.eps)*(-1/ts.mu0*ts.curl_R(ts.B_old.values, 'i'))
     ts.E_new.values = ts.step_2a_inv(E_new_RHS)
+    # ts.E_new.values = ts.E_old.values + dt/(2*ts.eps)*(-1/ts.mu0*ts.curl_R(ts.B_old.values, 'i'))
     F_new = ts.Fy(k*dt)
     
     for l in b_ind[1]:
@@ -298,7 +299,7 @@ def do_Yee_run(k):
     tsr.B_new.values = tsr.B_old.values + (dt/2)*(-tsr.curl_L(tsr.E_new.values,'o'))
     tsr.H_new.values = tsr.B_new.values/tsr.mu0
     
-for k in range(1,10):
+for k in range(1,51):
     '''
     Here's the breakdown of what is happeneing here:
         1. ts (test_system) will be used to run the simplified ADI code above
@@ -331,50 +332,66 @@ for k in range(1,10):
     do_ADI_run(k)
     do_Yee_run(k)
     tsr2.single_run_v2(dt*k-dt/2) ## Half-step
-    reset_tsr2()
+    reset_tsr2() ## Pulls new -> old, old -> old2 for tsr2 
     tsr2.single_run_v2(dt*k) ## Whole-step
+    reset_tsr2()
     
     ts.T = k*dt
     tsr.T = k*dt
     tsr2.T = k*dt
     
-    if k%1 == 0:
+    if k%10 == 0:
           ts.E_old.values = ts.E_new.values
          # tsr.E_old.values = tsr.E_old2.values
          
           fig1,ax1 = ts.plot_line('E','y')
           fig2,ax2 = tsr.plot_line('E','y')
+          fig3,ax3 = tsr2.plot_line('E','y')
          
-          fig12, (ax121,ax122) = plt.subplots(1,2)
+          ### To plot Ey and diff between ADI and Yee
+          # fig12, (ax121,ax122) = plt.subplots(1,2)
+          # line1 = ax1.get_lines()[0]
+          # line2 = ax2.get_lines()[0]
+         
+          # ax121.plot(line1.get_data()[0], line1.get_data()[1],label = 'ADI')
+          # ax121.plot(line2.get_data()[0], line2.get_data()[1], '--', label = 'Yee')
+         
+          # ax122.plot(line1.get_data()[0], (line1.get_data()[1] - line2.get_data()[1])/norm(ts.E_old.y.value))
+         
+          # ax121.set_title('Plots of ADI vs. Yee')
+          # ax121.legend()
+          # ax122.set_title('Plots of difference')
+         
+          # fig3,ax3 = ts.plot_line('H','z')
+          # fig4,ax4 = tsr.plot_line('H','z')
+         
+          # fig34, (ax341,ax342) = plt.subplots(1,2)
+          # line3 = ax3.get_lines()[0]
+          # line4 = ax4.get_lines()[0]
+         
+          # ax341.plot(line3.get_data()[0], line3.get_data()[1], label = 'ADI')
+          # ax341.plot(line4.get_data()[0], line4.get_data()[1], '--', label = 'Yee')
+         
+          # ax342.plot(line3.get_data()[0], (line3.get_data()[1] - line4.get_data()[1])/norm(ts.E_old.y.value))
+         
+          # ax341.set_title('Plots of ADI vs. Yee')
+          # ax341.legend()
+          # ax342.set_title('Plots of difference')
+          
+          ### Plotting all three systems
+          fig12, (ax121) = plt.subplots(1,1)
           line1 = ax1.get_lines()[0]
           line2 = ax2.get_lines()[0]
-         
+          line3 = ax3.get_lines()[0]
+          
           ax121.plot(line1.get_data()[0], line1.get_data()[1],label = 'ADI')
           ax121.plot(line2.get_data()[0], line2.get_data()[1], '--', label = 'Yee')
+          ax121.plot(line2.get_data()[0], line2.get_data()[1], '-x', label = 'Single run')
          
-          ax122.plot(line1.get_data()[0], (line1.get_data()[1] - line2.get_data()[1])/norm(ts.E_old.y.value))
-         
-          ax121.set_title('Plots of ADI vs. Yee')
+          ax121.set_title('Plots of ADI vs. Yee vs. Single run')
           ax121.legend()
-          ax122.set_title('Plots of difference')
          
-          fig3,ax3 = ts.plot_line('H','z')
-          fig4,ax4 = tsr.plot_line('H','z')
-         
-          fig34, (ax341,ax342) = plt.subplots(1,2)
-          line3 = ax3.get_lines()[0]
-          line4 = ax4.get_lines()[0]
-         
-          ax341.plot(line3.get_data()[0], line3.get_data()[1], label = 'ADI')
-          ax341.plot(line4.get_data()[0], line4.get_data()[1], '--', label = 'Yee')
-         
-          ax342.plot(line3.get_data()[0], (line3.get_data()[1] - line4.get_data()[1])/norm(ts.E_old.y.value))
-         
-          ax341.set_title('Plots of ADI vs. Yee')
-          ax341.legend()
-          ax342.set_title('Plots of difference')
-         
-    reset_for_next_run()
+    reset_for_next_run() ## Pulls new -> old, old -> old2 for tsr; new -> old2 for ts
     
     
     

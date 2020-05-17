@@ -1487,9 +1487,9 @@ class Ferro_sys(object):
         self.a2_3 = csr_matrix(np.identity(Ec3.shape[0])) - (dt**2)/(4*eps*mu0)*Ec3
         
         ## Setting up lu factorization
-        self.a2_1lu = linalg.splu(self.a1_1)
-        self.a2_2lu = linalg.splu(self.a1_2)
-        self.a2_3lu = linalg.splu(self.a1_3)
+        self.a2_1lu = linalg.splu(self.a2_1)
+        self.a2_2lu = linalg.splu(self.a2_2)
+        self.a2_3lu = linalg.splu(self.a2_3)
         
     def step_2a_inv(self,values):
         '''
