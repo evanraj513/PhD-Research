@@ -1,0 +1,11 @@
+This will serve as a location to store a description of examples run. 
+
+18_05_20/Free_space_ADI_v2: This would be more aptly named Ricker_ADI_v2, but I named it poorly. 
+	1. This contains the Ricker Pulse
+	2. It has runs until ticker:500
+	3. It took 3384 seconds to run!!!
+
+
+
+
+

@@ -40,7 +40,7 @@ Ferro_sys = ferro_system1.Ferro_sys
 #name = today+'/'+'test1'
 name_date = '18_05_20'
 # name_data1 = 'Refined_grid_free_space'
-name_data = 'ADI_v2'
+name_data = 'Free_space_ADI_v2'
 l1 = np.zeros(shape = 10) ## How many nodes to check (better name?)
 ticker_start = 1 ## Where do you want to start your unpacking
 
@@ -112,10 +112,12 @@ for k in l1:
     # print(name)
     try:
         ticker+=1
-        R_sys = set_up_ferro_system(name) 
+        R_sys = set_up_ferro_system(name)
+        R_sys2= set_up_ferro_system('03_05_20/'+str(dt_name*ticker)+'/Ricker_left_ADI_free_space') ## Actually Yee
         R_sys.t = ticker*dt_name*R_sys.dt
-        
-        fig,ax = R_sys.plot_slice('E','y', s = 0 )
+        R_sys2.t= ticker*dt_name*R_sys.dt
+        fig,ax = R_sys.plot_line('E','y' )
+        fig2,ax2 = R_sys2.plot_line('E','y')
         # ax.view_init(elev = 90,azim = 90)
         
         # print(name1)        

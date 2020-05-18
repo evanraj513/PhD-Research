@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon May 11 12:03:23 2020
+Created on Mon May 18 12:03:23 2020
 
-Used to run ferro_system1.single_run_ADI_v2
+Used to run ferro_system1.single_run_v2, i.e. the Yee scheme
 
 @author: evanraj
 """
@@ -13,18 +13,6 @@ import sys
 from datetime import date
 import time
 
-def mkdir_p(mypath):
-    '''Creates a directory. equivalent to using mkdir -p on the command line'''
-
-    from errno import EEXIST
-    from os import makedirs,path
-
-    try:
-        makedirs(mypath)
-    except OSError as exc: 
-        if exc.errno == EEXIST and path.isdir(mypath):
-            pass
-        else: raise
 
 import numpy as np
 from mpl_toolkits import mplot3d
@@ -45,7 +33,7 @@ else:
 from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
-from Research.Ferro_sys_functions import sizing, Ricker_pulse, Gaussian_source
+from Research.Ferro_sys_functions import sizing, Ricker_pulse, Gaussian_source, mkdir_p
 
 t0 = time.time()
 
@@ -71,7 +59,6 @@ def disp_what():
     # fig_Ey1,ax_Ey1 = R_sys.plot_slice('E','y',0)
     # fig_Ey2 = R_sys.plot_line('E','y',100,0)
     fig_Ey3,ax_Ey3 = R_sys.plot_line('E','y',3,0)
-    fig2 = R_sys2.plot_line()
     # ax_Ey1.view_init(elev = 90,azim = 90)
     
     # fig = plt.figure()
@@ -88,7 +75,7 @@ def disp_what():
 hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
 ho_hold = 1 ## How often to hold
 
-save_time_steps = True ## Turn on to ho time steps from run
+save_time_steps = False ## Turn on to ho time steps from run
 save_final_time = False ## Turn on to save final time step 
 ho_save = 50 #How often to save
 
@@ -245,20 +232,14 @@ def set_up_system(gnx,gny,gnz,disc):
 ########### Actually running system #############
 
 R_sys = set_up_system(gnx,gny,gnz,disc)
-R_sys2 = set_up_system(gnx,gny,gnz,disc)
 
 R_sys.fx = f_x
 R_sys.fy = f_y
 R_sys.fz = f_z
 
-R_sys2.fx = f_x
-R_sys2.fy = f_y
-R_sys2.fz = f_z
-
 ticker = 0
 
-R_sys.initialize_set_up_ADI() ### Sets up matrices and operators for ADI method
-R_sys2.initialize_set_up_ADI()
+R_sys.set_up_der_matrices() ### Sets up matrices and operators for ADI method
 
 for t in np.arange(dt,T,dt):
     ### re-initializing the system
@@ -273,10 +254,7 @@ for t in np.arange(dt,T,dt):
 
     ### Running the system
     R_sys.T = t
-    R_sys.single_run_ADI_v2(t)
-    
-    R_sys2.T = t
-    R_sys2.single_run_ADI_v2(t)
+    R_sys.single_run_v2(t)
     
     ## Plotting stuff to demo
     if disp == True:
@@ -297,16 +275,16 @@ for t in np.arange(dt,T,dt):
             R_sys.save_data(name_date+'/'+name_time+'/'+name_data) #Saves Field data
             ### Note: parameters are now saved outside the loop
             
-    ## Updating X_n = X_n+1 for next time-step
-    R_sys.E_old2.values = R_sys.E_new.values
-    R_sys.B_old2.values = R_sys.B_new.values
-    R_sys.M_old2.values = R_sys.M_new.values
-    R_sys.H_old2.values = R_sys.H_new.values
+    ## Updating X_n-1 = X_n, X_n = X_n+1 for next time-step
+    R_sys.E_old2.values = R_sys.E_old.values
+    R_sys.B_old2.values = R_sys.B_old.values
+    R_sys.M_old2.values = R_sys.M_old.values
+    R_sys.H_old2.values = R_sys.H_old.values
     
-    # R_sys.E_old.values = R_sys.E_old.values*0
-    # R_sys.B_old.values = R_sys.B_old.values*0
-    # R_sys.M_old.values = R_sys.M_old.values*0
-    # R_sys.H_old.values = R_sys.H_old.values*0
+    R_sys.E_old.values = R_sys.E_new.values
+    R_sys.B_old.values = R_sys.B_new.values
+    R_sys.M_old.values = R_sys.M_new.values
+    R_sys.H_old.values = R_sys.H_new.values
 
 t1 = time.time()
 print('Time taken:', t1-t0)
