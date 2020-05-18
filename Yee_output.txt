@@ -508,4 +508,4 @@ Current Time:  4.615e-08  and Ticker:  498
 Current Time:  4.6242e-08  and Ticker:  499
 Current Time:  4.6335e-08  and Ticker:  500
 Saving current conditions at time: ticker:500
-Time taken: 772.4546761512756
+Time taken: 768.7221035957336
