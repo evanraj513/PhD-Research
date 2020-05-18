@@ -38,13 +38,13 @@ Ferro_sys = ferro_system1.Ferro_sys
 
 ### Name of things to unpack
 #name = today+'/'+'test1'
-name_date = '11_05_20'
+name_date = '17_05_20'
 # name_data1 = 'Refined_grid_free_space'
 name_data = 'ADI_v2'
-l1 = np.zeros(shape = 20) ## How many nodes to check (better name?)
-ticker_start = 0 ## Where do you want to start your unpacking
+l1 = np.zeros(shape = 10) ## How many nodes to check (better name?)
+ticker_start = 1 ## Where do you want to start your unpacking
 
-dt_name = 25 ## How often saved. Works with new saving style. 
+dt_name = 50 ## How often saved. Works with new saving style. 
 
 def set_up_ferro_system(name):
     '''
@@ -115,7 +115,7 @@ for k in l1:
         R_sys = set_up_ferro_system(name) 
         R_sys.t = ticker*dt_name*R_sys.dt
         
-        fig,ax = R_sys.plot_line('E','y',cs = 5, s = 0 )
+        fig,ax = R_sys.plot_slice('E','y', s = 0 )
         # ax.view_init(elev = 90,azim = 90)
         
         # print(name1)        
