@@ -112,7 +112,7 @@ dx = 0.04
 dy = dx
 dz = dx
 disc = np.array([dx, dy, dz]) ### (dx, dy, dz)
-max_x = 10
+max_x = 201*dx 
 
 CFL = 1/(2**(1/2)) ### Testing. Soon this will be increased                  
 dt = CFL*disc[0]/c
@@ -145,20 +145,20 @@ gnz = 1 ### 2D Implementation
 ###################################################
 
 ### Left Ricker Pulse forcing functions
-def f_x(x,y,z,t):
-    return 0
-    
-def f_y(x,y,z,t):
-    f = 4E7
-    beta0 = 4E4
-    if abs(x) < disc[0]/4: #approx 0
-        d = beta0*Ricker_pulse(f*t)
-        return d
-    else:
-        return 0
-       
-def f_z(x,y,z,t):
-    return 0
+#def f_x(x,y,z,t):
+#    return 0
+#    
+#def f_y(x,y,z,t):
+#    f = 4E7
+#    beta0 = 4E4
+#    if abs(x) < disc[0]/4: #approx 0
+#        d = beta0*Ricker_pulse(f*t)
+#        return d
+#    else:
+#        return 0
+#       
+# def f_z(x,y,z,t):
+#    return 0
 
 ### Huang conditions
 # def f_x(x,y,z,t):
@@ -172,25 +172,25 @@ def f_z(x,y,z,t):
 #     return 0
 
 ### Centered Gaussian source
-# def f_x(x,y,z,t):
-#     return 0
+def f_x(x,y,z,t):
+     return 0
+   
+def f_y(x,y,z,t):
     
-# def f_y(x,y,z,t):
-    
-#     if t < 42*dt:
-#         # if max_x/2 - 2*dx < x < max_x/2 and max_x/2 - dy < y < max_x/2 + dy:
-#             # print(x,y)
-#         if max_x/2 - 2*dx < x < max_x/2 and max_x/2 - dy < y < max_x/2 + dy: #approx in the middle
-#             val = Gaussian_source(dt,t)
-#             # print(val)
-#             return val
-#         else:
-#             return 0
-#     else:
-#         return 0
+     if t < 42*dt:
+         # if max_x/2 - 2*dx < x < max_x/2 and max_x/2 - dy < y < max_x/2 + dy:
+             # print(x,y)
+         if max_x/2 - 2*dx < x < max_x/2 and max_x/2 - dy < y < max_x/2 + dy: #approx in the middle
+             val = Gaussian_source(dt,t)
+             # print(val)
+             return val
+         else:
+             return 0
+     else:
+         return 0
        
-# def f_z(x,y,z,t):
-#     return 0
+def f_z(x,y,z,t):
+     return 0
 
 ########################### Initializing system ########################
 
