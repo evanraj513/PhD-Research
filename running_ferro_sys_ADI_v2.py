@@ -53,7 +53,7 @@ t0 = time.time()
 ######################## Run settings ########################
 ########################################################################
 
-cont = 1 ## Continue with time-run. Else, just set up system.
+cont = True ## Continue with time-run. Else, just set up system.
 
 disp = False ## Display a run
 ho_disp = 5 ## How often to display the run
@@ -95,7 +95,7 @@ ho_save = 50 #How often to save
 today1 = date.today()
 name_date = today1.strftime("%d_%m_%y")
 mkdir_p(name_date)
-name_data ='ADI_v2'
+name_data ='Free_space_ADI_v2'
 
 ######################## Parameters (global) ########################
 mu0 = 1.25667e-6
