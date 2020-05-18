@@ -1,0 +1,2 @@
+/usr/share/anaconda3/lib/python3.7/site-packages/scipy/sparse/linalg/dsolve/linsolve.py:296: SparseEfficiencyWarning: splu requires CSC matrix format
+  warn('splu requires CSC matrix format', SparseEfficiencyWarning)
