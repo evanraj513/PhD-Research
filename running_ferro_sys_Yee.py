@@ -82,7 +82,7 @@ ho_save = 50 #How often to save
 today1 = date.today()
 name_date = today1.strftime("%d_%m_%y")
 mkdir_p(name_date)
-name_data ='Free_space_ADI_v2'
+name_data ='Ricker_Yee_free_space'
 
 ######################## Parameters (global) ########################
 mu0 = 1.25667e-6
