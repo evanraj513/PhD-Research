@@ -1,1021 +1,511 @@
 Warning. Even grid. Extending spatial domain to 
  have an odd-number of grid points in all direction
-we made it here
 Current Time:  9.3e-11  and Ticker:  1
-Running the new version
 Current Time:  1.85e-10  and Ticker:  2
-Running the new version
 Current Time:  2.78e-10  and Ticker:  3
-Running the new version
 Current Time:  3.71e-10  and Ticker:  4
-Running the new version
 Current Time:  4.63e-10  and Ticker:  5
-Running the new version
 Current Time:  5.56e-10  and Ticker:  6
-Running the new version
 Current Time:  6.49e-10  and Ticker:  7
-Running the new version
 Current Time:  7.41e-10  and Ticker:  8
-Running the new version
 Current Time:  8.34e-10  and Ticker:  9
-Running the new version
 Current Time:  9.27e-10  and Ticker:  10
-Running the new version
 Current Time:  1.019e-09  and Ticker:  11
-Running the new version
 Current Time:  1.112e-09  and Ticker:  12
-Running the new version
 Current Time:  1.205e-09  and Ticker:  13
-Running the new version
 Current Time:  1.297e-09  and Ticker:  14
-Running the new version
 Current Time:  1.39e-09  and Ticker:  15
-Running the new version
 Current Time:  1.483e-09  and Ticker:  16
-Running the new version
 Current Time:  1.575e-09  and Ticker:  17
-Running the new version
 Current Time:  1.668e-09  and Ticker:  18
-Running the new version
 Current Time:  1.761e-09  and Ticker:  19
-Running the new version
 Current Time:  1.853e-09  and Ticker:  20
-Running the new version
 Current Time:  1.946e-09  and Ticker:  21
-Running the new version
 Current Time:  2.039e-09  and Ticker:  22
-Running the new version
 Current Time:  2.131e-09  and Ticker:  23
-Running the new version
 Current Time:  2.224e-09  and Ticker:  24
-Running the new version
 Current Time:  2.317e-09  and Ticker:  25
-Running the new version
-Saving current conditions at time: ticker:25
 Current Time:  2.409e-09  and Ticker:  26
-Running the new version
 Current Time:  2.502e-09  and Ticker:  27
-Running the new version
 Current Time:  2.595e-09  and Ticker:  28
-Running the new version
 Current Time:  2.687e-09  and Ticker:  29
-Running the new version
 Current Time:  2.78e-09  and Ticker:  30
-Running the new version
 Current Time:  2.873e-09  and Ticker:  31
-Running the new version
 Current Time:  2.965e-09  and Ticker:  32
-Running the new version
 Current Time:  3.058e-09  and Ticker:  33
-Running the new version
 Current Time:  3.151e-09  and Ticker:  34
-Running the new version
 Current Time:  3.243e-09  and Ticker:  35
-Running the new version
 Current Time:  3.336e-09  and Ticker:  36
-Running the new version
 Current Time:  3.429e-09  and Ticker:  37
-Running the new version
 Current Time:  3.521e-09  and Ticker:  38
-Running the new version
 Current Time:  3.614e-09  and Ticker:  39
-Running the new version
 Current Time:  3.707e-09  and Ticker:  40
-Running the new version
 Current Time:  3.799e-09  and Ticker:  41
-Running the new version
 Current Time:  3.892e-09  and Ticker:  42
-Running the new version
 Current Time:  3.985e-09  and Ticker:  43
-Running the new version
 Current Time:  4.077e-09  and Ticker:  44
-Running the new version
 Current Time:  4.17e-09  and Ticker:  45
-Running the new version
 Current Time:  4.263e-09  and Ticker:  46
-Running the new version
 Current Time:  4.356e-09  and Ticker:  47
-Running the new version
 Current Time:  4.448e-09  and Ticker:  48
-Running the new version
 Current Time:  4.541e-09  and Ticker:  49
-Running the new version
 Current Time:  4.634e-09  and Ticker:  50
-Running the new version
 Saving current conditions at time: ticker:50
 Current Time:  4.726e-09  and Ticker:  51
-Running the new version
 Current Time:  4.819e-09  and Ticker:  52
-Running the new version
 Current Time:  4.912e-09  and Ticker:  53
-Running the new version
 Current Time:  5.004e-09  and Ticker:  54
-Running the new version
 Current Time:  5.097e-09  and Ticker:  55
-Running the new version
 Current Time:  5.19e-09  and Ticker:  56
-Running the new version
 Current Time:  5.282e-09  and Ticker:  57
-Running the new version
 Current Time:  5.375e-09  and Ticker:  58
-Running the new version
 Current Time:  5.468e-09  and Ticker:  59
-Running the new version
 Current Time:  5.56e-09  and Ticker:  60
-Running the new version
 Current Time:  5.653e-09  and Ticker:  61
-Running the new version
 Current Time:  5.746e-09  and Ticker:  62
-Running the new version
 Current Time:  5.838e-09  and Ticker:  63
-Running the new version
 Current Time:  5.931e-09  and Ticker:  64
-Running the new version
 Current Time:  6.024e-09  and Ticker:  65
-Running the new version
 Current Time:  6.116e-09  and Ticker:  66
-Running the new version
 Current Time:  6.209e-09  and Ticker:  67
-Running the new version
 Current Time:  6.302e-09  and Ticker:  68
-Running the new version
 Current Time:  6.394e-09  and Ticker:  69
-Running the new version
 Current Time:  6.487e-09  and Ticker:  70
-Running the new version
 Current Time:  6.58e-09  and Ticker:  71
-Running the new version
 Current Time:  6.672e-09  and Ticker:  72
-Running the new version
 Current Time:  6.765e-09  and Ticker:  73
-Running the new version
 Current Time:  6.858e-09  and Ticker:  74
-Running the new version
 Current Time:  6.95e-09  and Ticker:  75
-Running the new version
-Saving current conditions at time: ticker:75
 Current Time:  7.043e-09  and Ticker:  76
-Running the new version
 Current Time:  7.136e-09  and Ticker:  77
-Running the new version
 Current Time:  7.228e-09  and Ticker:  78
-Running the new version
 Current Time:  7.321e-09  and Ticker:  79
-Running the new version
 Current Time:  7.414e-09  and Ticker:  80
-Running the new version
 Current Time:  7.506e-09  and Ticker:  81
-Running the new version
 Current Time:  7.599e-09  and Ticker:  82
-Running the new version
 Current Time:  7.692e-09  and Ticker:  83
-Running the new version
 Current Time:  7.784e-09  and Ticker:  84
-Running the new version
 Current Time:  7.877e-09  and Ticker:  85
-Running the new version
 Current Time:  7.97e-09  and Ticker:  86
-Running the new version
 Current Time:  8.062e-09  and Ticker:  87
-Running the new version
 Current Time:  8.155e-09  and Ticker:  88
-Running the new version
 Current Time:  8.248e-09  and Ticker:  89
-Running the new version
 Current Time:  8.34e-09  and Ticker:  90
-Running the new version
 Current Time:  8.433e-09  and Ticker:  91
-Running the new version
 Current Time:  8.526e-09  and Ticker:  92
-Running the new version
 Current Time:  8.618e-09  and Ticker:  93
-Running the new version
 Current Time:  8.711e-09  and Ticker:  94
-Running the new version
 Current Time:  8.804e-09  and Ticker:  95
-Running the new version
 Current Time:  8.896e-09  and Ticker:  96
-Running the new version
 Current Time:  8.989e-09  and Ticker:  97
-Running the new version
 Current Time:  9.082e-09  and Ticker:  98
-Running the new version
 Current Time:  9.174e-09  and Ticker:  99
-Running the new version
 Current Time:  9.267e-09  and Ticker:  100
-Running the new version
 Saving current conditions at time: ticker:100
 Current Time:  9.36e-09  and Ticker:  101
-Running the new version
 Current Time:  9.452e-09  and Ticker:  102
-Running the new version
 Current Time:  9.545e-09  and Ticker:  103
-Running the new version
 Current Time:  9.638e-09  and Ticker:  104
-Running the new version
 Current Time:  9.73e-09  and Ticker:  105
-Running the new version
 Current Time:  9.823e-09  and Ticker:  106
-Running the new version
 Current Time:  9.916e-09  and Ticker:  107
-Running the new version
 Current Time:  1.0008e-08  and Ticker:  108
-Running the new version
 Current Time:  1.0101e-08  and Ticker:  109
-Running the new version
 Current Time:  1.0194e-08  and Ticker:  110
-Running the new version
 Current Time:  1.0286e-08  and Ticker:  111
-Running the new version
 Current Time:  1.0379e-08  and Ticker:  112
-Running the new version
 Current Time:  1.0472e-08  and Ticker:  113
-Running the new version
 Current Time:  1.0564e-08  and Ticker:  114
-Running the new version
 Current Time:  1.0657e-08  and Ticker:  115
-Running the new version
 Current Time:  1.075e-08  and Ticker:  116
-Running the new version
 Current Time:  1.0842e-08  and Ticker:  117
-Running the new version
 Current Time:  1.0935e-08  and Ticker:  118
-Running the new version
 Current Time:  1.1028e-08  and Ticker:  119
-Running the new version
 Current Time:  1.112e-08  and Ticker:  120
-Running the new version
 Current Time:  1.1213e-08  and Ticker:  121
-Running the new version
 Current Time:  1.1306e-08  and Ticker:  122
-Running the new version
 Current Time:  1.1398e-08  and Ticker:  123
-Running the new version
 Current Time:  1.1491e-08  and Ticker:  124
-Running the new version
 Current Time:  1.1584e-08  and Ticker:  125
-Running the new version
-Saving current conditions at time: ticker:125
 Current Time:  1.1676e-08  and Ticker:  126
-Running the new version
 Current Time:  1.1769e-08  and Ticker:  127
-Running the new version
 Current Time:  1.1862e-08  and Ticker:  128
-Running the new version
 Current Time:  1.1954e-08  and Ticker:  129
-Running the new version
 Current Time:  1.2047e-08  and Ticker:  130
-Running the new version
 Current Time:  1.214e-08  and Ticker:  131
-Running the new version
 Current Time:  1.2232e-08  and Ticker:  132
-Running the new version
 Current Time:  1.2325e-08  and Ticker:  133
-Running the new version
 Current Time:  1.2418e-08  and Ticker:  134
-Running the new version
 Current Time:  1.251e-08  and Ticker:  135
-Running the new version
 Current Time:  1.2603e-08  and Ticker:  136
-Running the new version
 Current Time:  1.2696e-08  and Ticker:  137
-Running the new version
 Current Time:  1.2788e-08  and Ticker:  138
-Running the new version
 Current Time:  1.2881e-08  and Ticker:  139
-Running the new version
 Current Time:  1.2974e-08  and Ticker:  140
-Running the new version
 Current Time:  1.3067e-08  and Ticker:  141
-Running the new version
 Current Time:  1.3159e-08  and Ticker:  142
-Running the new version
 Current Time:  1.3252e-08  and Ticker:  143
-Running the new version
 Current Time:  1.3345e-08  and Ticker:  144
-Running the new version
 Current Time:  1.3437e-08  and Ticker:  145
-Running the new version
 Current Time:  1.353e-08  and Ticker:  146
-Running the new version
 Current Time:  1.3623e-08  and Ticker:  147
-Running the new version
 Current Time:  1.3715e-08  and Ticker:  148
-Running the new version
 Current Time:  1.3808e-08  and Ticker:  149
-Running the new version
 Current Time:  1.3901e-08  and Ticker:  150
-Running the new version
 Saving current conditions at time: ticker:150
 Current Time:  1.3993e-08  and Ticker:  151
-Running the new version
 Current Time:  1.4086e-08  and Ticker:  152
-Running the new version
 Current Time:  1.4179e-08  and Ticker:  153
-Running the new version
 Current Time:  1.4271e-08  and Ticker:  154
-Running the new version
 Current Time:  1.4364e-08  and Ticker:  155
-Running the new version
 Current Time:  1.4457e-08  and Ticker:  156
-Running the new version
 Current Time:  1.4549e-08  and Ticker:  157
-Running the new version
 Current Time:  1.4642e-08  and Ticker:  158
-Running the new version
 Current Time:  1.4735e-08  and Ticker:  159
-Running the new version
 Current Time:  1.4827e-08  and Ticker:  160
-Running the new version
 Current Time:  1.492e-08  and Ticker:  161
-Running the new version
 Current Time:  1.5013e-08  and Ticker:  162
-Running the new version
 Current Time:  1.5105e-08  and Ticker:  163
-Running the new version
 Current Time:  1.5198e-08  and Ticker:  164
-Running the new version
 Current Time:  1.5291e-08  and Ticker:  165
-Running the new version
 Current Time:  1.5383e-08  and Ticker:  166
-Running the new version
 Current Time:  1.5476e-08  and Ticker:  167
-Running the new version
 Current Time:  1.5569e-08  and Ticker:  168
-Running the new version
 Current Time:  1.5661e-08  and Ticker:  169
-Running the new version
 Current Time:  1.5754e-08  and Ticker:  170
-Running the new version
 Current Time:  1.5847e-08  and Ticker:  171
-Running the new version
 Current Time:  1.5939e-08  and Ticker:  172
-Running the new version
 Current Time:  1.6032e-08  and Ticker:  173
-Running the new version
 Current Time:  1.6125e-08  and Ticker:  174
-Running the new version
 Current Time:  1.6217e-08  and Ticker:  175
-Running the new version
-Saving current conditions at time: ticker:175
 Current Time:  1.631e-08  and Ticker:  176
-Running the new version
 Current Time:  1.6403e-08  and Ticker:  177
-Running the new version
 Current Time:  1.6495e-08  and Ticker:  178
-Running the new version
 Current Time:  1.6588e-08  and Ticker:  179
-Running the new version
 Current Time:  1.6681e-08  and Ticker:  180
-Running the new version
 Current Time:  1.6773e-08  and Ticker:  181
-Running the new version
 Current Time:  1.6866e-08  and Ticker:  182
-Running the new version
 Current Time:  1.6959e-08  and Ticker:  183
-Running the new version
 Current Time:  1.7051e-08  and Ticker:  184
-Running the new version
 Current Time:  1.7144e-08  and Ticker:  185
-Running the new version
 Current Time:  1.7237e-08  and Ticker:  186
-Running the new version
 Current Time:  1.7329e-08  and Ticker:  187
-Running the new version
 Current Time:  1.7422e-08  and Ticker:  188
-Running the new version
 Current Time:  1.7515e-08  and Ticker:  189
-Running the new version
 Current Time:  1.7607e-08  and Ticker:  190
-Running the new version
 Current Time:  1.77e-08  and Ticker:  191
-Running the new version
 Current Time:  1.7793e-08  and Ticker:  192
-Running the new version
 Current Time:  1.7885e-08  and Ticker:  193
-Running the new version
 Current Time:  1.7978e-08  and Ticker:  194
-Running the new version
 Current Time:  1.8071e-08  and Ticker:  195
-Running the new version
 Current Time:  1.8163e-08  and Ticker:  196
-Running the new version
 Current Time:  1.8256e-08  and Ticker:  197
-Running the new version
 Current Time:  1.8349e-08  and Ticker:  198
-Running the new version
 Current Time:  1.8441e-08  and Ticker:  199
-Running the new version
 Current Time:  1.8534e-08  and Ticker:  200
-Running the new version
 Saving current conditions at time: ticker:200
 Current Time:  1.8627e-08  and Ticker:  201
-Running the new version
 Current Time:  1.8719e-08  and Ticker:  202
-Running the new version
 Current Time:  1.8812e-08  and Ticker:  203
-Running the new version
 Current Time:  1.8905e-08  and Ticker:  204
-Running the new version
 Current Time:  1.8997e-08  and Ticker:  205
-Running the new version
 Current Time:  1.909e-08  and Ticker:  206
-Running the new version
 Current Time:  1.9183e-08  and Ticker:  207
-Running the new version
 Current Time:  1.9275e-08  and Ticker:  208
-Running the new version
 Current Time:  1.9368e-08  and Ticker:  209
-Running the new version
 Current Time:  1.9461e-08  and Ticker:  210
-Running the new version
 Current Time:  1.9553e-08  and Ticker:  211
-Running the new version
 Current Time:  1.9646e-08  and Ticker:  212
-Running the new version
 Current Time:  1.9739e-08  and Ticker:  213
-Running the new version
 Current Time:  1.9831e-08  and Ticker:  214
-Running the new version
 Current Time:  1.9924e-08  and Ticker:  215
-Running the new version
 Current Time:  2.0017e-08  and Ticker:  216
-Running the new version
 Current Time:  2.0109e-08  and Ticker:  217
-Running the new version
 Current Time:  2.0202e-08  and Ticker:  218
-Running the new version
 Current Time:  2.0295e-08  and Ticker:  219
-Running the new version
 Current Time:  2.0387e-08  and Ticker:  220
-Running the new version
 Current Time:  2.048e-08  and Ticker:  221
-Running the new version
 Current Time:  2.0573e-08  and Ticker:  222
-Running the new version
 Current Time:  2.0665e-08  and Ticker:  223
-Running the new version
 Current Time:  2.0758e-08  and Ticker:  224
-Running the new version
 Current Time:  2.0851e-08  and Ticker:  225
-Running the new version
-Saving current conditions at time: ticker:225
 Current Time:  2.0943e-08  and Ticker:  226
-Running the new version
 Current Time:  2.1036e-08  and Ticker:  227
-Running the new version
 Current Time:  2.1129e-08  and Ticker:  228
-Running the new version
 Current Time:  2.1221e-08  and Ticker:  229
-Running the new version
 Current Time:  2.1314e-08  and Ticker:  230
-Running the new version
 Current Time:  2.1407e-08  and Ticker:  231
-Running the new version
 Current Time:  2.15e-08  and Ticker:  232
-Running the new version
 Current Time:  2.1592e-08  and Ticker:  233
-Running the new version
 Current Time:  2.1685e-08  and Ticker:  234
-Running the new version
 Current Time:  2.1778e-08  and Ticker:  235
-Running the new version
 Current Time:  2.187e-08  and Ticker:  236
-Running the new version
 Current Time:  2.1963e-08  and Ticker:  237
-Running the new version
 Current Time:  2.2056e-08  and Ticker:  238
-Running the new version
 Current Time:  2.2148e-08  and Ticker:  239
-Running the new version
 Current Time:  2.2241e-08  and Ticker:  240
-Running the new version
 Current Time:  2.2334e-08  and Ticker:  241
-Running the new version
 Current Time:  2.2426e-08  and Ticker:  242
-Running the new version
 Current Time:  2.2519e-08  and Ticker:  243
-Running the new version
 Current Time:  2.2612e-08  and Ticker:  244
-Running the new version
 Current Time:  2.2704e-08  and Ticker:  245
-Running the new version
 Current Time:  2.2797e-08  and Ticker:  246
-Running the new version
 Current Time:  2.289e-08  and Ticker:  247
-Running the new version
 Current Time:  2.2982e-08  and Ticker:  248
-Running the new version
 Current Time:  2.3075e-08  and Ticker:  249
-Running the new version
 Current Time:  2.3168e-08  and Ticker:  250
-Running the new version
 Saving current conditions at time: ticker:250
 Current Time:  2.326e-08  and Ticker:  251
-Running the new version
 Current Time:  2.3353e-08  and Ticker:  252
-Running the new version
 Current Time:  2.3446e-08  and Ticker:  253
-Running the new version
 Current Time:  2.3538e-08  and Ticker:  254
-Running the new version
 Current Time:  2.3631e-08  and Ticker:  255
-Running the new version
 Current Time:  2.3724e-08  and Ticker:  256
-Running the new version
 Current Time:  2.3816e-08  and Ticker:  257
-Running the new version
 Current Time:  2.3909e-08  and Ticker:  258
-Running the new version
 Current Time:  2.4002e-08  and Ticker:  259
-Running the new version
 Current Time:  2.4094e-08  and Ticker:  260
-Running the new version
 Current Time:  2.4187e-08  and Ticker:  261
-Running the new version
 Current Time:  2.428e-08  and Ticker:  262
-Running the new version
 Current Time:  2.4372e-08  and Ticker:  263
-Running the new version
 Current Time:  2.4465e-08  and Ticker:  264
-Running the new version
 Current Time:  2.4558e-08  and Ticker:  265
-Running the new version
 Current Time:  2.465e-08  and Ticker:  266
-Running the new version
 Current Time:  2.4743e-08  and Ticker:  267
-Running the new version
 Current Time:  2.4836e-08  and Ticker:  268
-Running the new version
 Current Time:  2.4928e-08  and Ticker:  269
-Running the new version
 Current Time:  2.5021e-08  and Ticker:  270
-Running the new version
 Current Time:  2.5114e-08  and Ticker:  271
-Running the new version
 Current Time:  2.5206e-08  and Ticker:  272
-Running the new version
 Current Time:  2.5299e-08  and Ticker:  273
-Running the new version
 Current Time:  2.5392e-08  and Ticker:  274
-Running the new version
 Current Time:  2.5484e-08  and Ticker:  275
-Running the new version
-Saving current conditions at time: ticker:275
 Current Time:  2.5577e-08  and Ticker:  276
-Running the new version
 Current Time:  2.567e-08  and Ticker:  277
-Running the new version
 Current Time:  2.5762e-08  and Ticker:  278
-Running the new version
 Current Time:  2.5855e-08  and Ticker:  279
-Running the new version
 Current Time:  2.5948e-08  and Ticker:  280
-Running the new version
 Current Time:  2.604e-08  and Ticker:  281
-Running the new version
 Current Time:  2.6133e-08  and Ticker:  282
-Running the new version
 Current Time:  2.6226e-08  and Ticker:  283
-Running the new version
 Current Time:  2.6318e-08  and Ticker:  284
-Running the new version
 Current Time:  2.6411e-08  and Ticker:  285
-Running the new version
 Current Time:  2.6504e-08  and Ticker:  286
-Running the new version
 Current Time:  2.6596e-08  and Ticker:  287
-Running the new version
 Current Time:  2.6689e-08  and Ticker:  288
-Running the new version
 Current Time:  2.6782e-08  and Ticker:  289
-Running the new version
 Current Time:  2.6874e-08  and Ticker:  290
-Running the new version
 Current Time:  2.6967e-08  and Ticker:  291
-Running the new version
 Current Time:  2.706e-08  and Ticker:  292
-Running the new version
 Current Time:  2.7152e-08  and Ticker:  293
-Running the new version
 Current Time:  2.7245e-08  and Ticker:  294
-Running the new version
 Current Time:  2.7338e-08  and Ticker:  295
-Running the new version
 Current Time:  2.743e-08  and Ticker:  296
-Running the new version
 Current Time:  2.7523e-08  and Ticker:  297
-Running the new version
 Current Time:  2.7616e-08  and Ticker:  298
-Running the new version
 Current Time:  2.7708e-08  and Ticker:  299
-Running the new version
 Current Time:  2.7801e-08  and Ticker:  300
-Running the new version
 Saving current conditions at time: ticker:300
 Current Time:  2.7894e-08  and Ticker:  301
-Running the new version
 Current Time:  2.7986e-08  and Ticker:  302
-Running the new version
 Current Time:  2.8079e-08  and Ticker:  303
-Running the new version
 Current Time:  2.8172e-08  and Ticker:  304
-Running the new version
 Current Time:  2.8264e-08  and Ticker:  305
-Running the new version
 Current Time:  2.8357e-08  and Ticker:  306
-Running the new version
 Current Time:  2.845e-08  and Ticker:  307
-Running the new version
 Current Time:  2.8542e-08  and Ticker:  308
-Running the new version
 Current Time:  2.8635e-08  and Ticker:  309
-Running the new version
 Current Time:  2.8728e-08  and Ticker:  310
-Running the new version
 Current Time:  2.882e-08  and Ticker:  311
-Running the new version
 Current Time:  2.8913e-08  and Ticker:  312
-Running the new version
 Current Time:  2.9006e-08  and Ticker:  313
-Running the new version
 Current Time:  2.9098e-08  and Ticker:  314
-Running the new version
 Current Time:  2.9191e-08  and Ticker:  315
-Running the new version
 Current Time:  2.9284e-08  and Ticker:  316
-Running the new version
 Current Time:  2.9376e-08  and Ticker:  317
-Running the new version
 Current Time:  2.9469e-08  and Ticker:  318
-Running the new version
 Current Time:  2.9562e-08  and Ticker:  319
-Running the new version
 Current Time:  2.9654e-08  and Ticker:  320
-Running the new version
 Current Time:  2.9747e-08  and Ticker:  321
-Running the new version
 Current Time:  2.984e-08  and Ticker:  322
-Running the new version
 Current Time:  2.9933e-08  and Ticker:  323
-Running the new version
 Current Time:  3.0025e-08  and Ticker:  324
-Running the new version
 Current Time:  3.0118e-08  and Ticker:  325
-Running the new version
-Saving current conditions at time: ticker:325
 Current Time:  3.0211e-08  and Ticker:  326
-Running the new version
 Current Time:  3.0303e-08  and Ticker:  327
-Running the new version
 Current Time:  3.0396e-08  and Ticker:  328
-Running the new version
 Current Time:  3.0489e-08  and Ticker:  329
-Running the new version
 Current Time:  3.0581e-08  and Ticker:  330
-Running the new version
 Current Time:  3.0674e-08  and Ticker:  331
-Running the new version
 Current Time:  3.0767e-08  and Ticker:  332
-Running the new version
 Current Time:  3.0859e-08  and Ticker:  333
-Running the new version
 Current Time:  3.0952e-08  and Ticker:  334
-Running the new version
 Current Time:  3.1045e-08  and Ticker:  335
-Running the new version
 Current Time:  3.1137e-08  and Ticker:  336
-Running the new version
 Current Time:  3.123e-08  and Ticker:  337
-Running the new version
 Current Time:  3.1323e-08  and Ticker:  338
-Running the new version
 Current Time:  3.1415e-08  and Ticker:  339
-Running the new version
 Current Time:  3.1508e-08  and Ticker:  340
-Running the new version
 Current Time:  3.1601e-08  and Ticker:  341
-Running the new version
 Current Time:  3.1693e-08  and Ticker:  342
-Running the new version
 Current Time:  3.1786e-08  and Ticker:  343
-Running the new version
 Current Time:  3.1879e-08  and Ticker:  344
-Running the new version
 Current Time:  3.1971e-08  and Ticker:  345
-Running the new version
 Current Time:  3.2064e-08  and Ticker:  346
-Running the new version
 Current Time:  3.2157e-08  and Ticker:  347
-Running the new version
 Current Time:  3.2249e-08  and Ticker:  348
-Running the new version
 Current Time:  3.2342e-08  and Ticker:  349
-Running the new version
 Current Time:  3.2435e-08  and Ticker:  350
-Running the new version
 Saving current conditions at time: ticker:350
 Current Time:  3.2527e-08  and Ticker:  351
-Running the new version
 Current Time:  3.262e-08  and Ticker:  352
-Running the new version
 Current Time:  3.2713e-08  and Ticker:  353
-Running the new version
 Current Time:  3.2805e-08  and Ticker:  354
-Running the new version
 Current Time:  3.2898e-08  and Ticker:  355
-Running the new version
 Current Time:  3.2991e-08  and Ticker:  356
-Running the new version
 Current Time:  3.3083e-08  and Ticker:  357
-Running the new version
 Current Time:  3.3176e-08  and Ticker:  358
-Running the new version
 Current Time:  3.3269e-08  and Ticker:  359
-Running the new version
 Current Time:  3.3361e-08  and Ticker:  360
-Running the new version
 Current Time:  3.3454e-08  and Ticker:  361
-Running the new version
 Current Time:  3.3547e-08  and Ticker:  362
-Running the new version
 Current Time:  3.3639e-08  and Ticker:  363
-Running the new version
 Current Time:  3.3732e-08  and Ticker:  364
-Running the new version
 Current Time:  3.3825e-08  and Ticker:  365
-Running the new version
 Current Time:  3.3917e-08  and Ticker:  366
-Running the new version
 Current Time:  3.401e-08  and Ticker:  367
-Running the new version
 Current Time:  3.4103e-08  and Ticker:  368
-Running the new version
 Current Time:  3.4195e-08  and Ticker:  369
-Running the new version
 Current Time:  3.4288e-08  and Ticker:  370
-Running the new version
 Current Time:  3.4381e-08  and Ticker:  371
-Running the new version
 Current Time:  3.4473e-08  and Ticker:  372
-Running the new version
 Current Time:  3.4566e-08  and Ticker:  373
-Running the new version
 Current Time:  3.4659e-08  and Ticker:  374
-Running the new version
 Current Time:  3.4751e-08  and Ticker:  375
-Running the new version
-Saving current conditions at time: ticker:375
 Current Time:  3.4844e-08  and Ticker:  376
-Running the new version
 Current Time:  3.4937e-08  and Ticker:  377
-Running the new version
 Current Time:  3.5029e-08  and Ticker:  378
-Running the new version
 Current Time:  3.5122e-08  and Ticker:  379
-Running the new version
 Current Time:  3.5215e-08  and Ticker:  380
-Running the new version
 Current Time:  3.5307e-08  and Ticker:  381
-Running the new version
 Current Time:  3.54e-08  and Ticker:  382
-Running the new version
 Current Time:  3.5493e-08  and Ticker:  383
-Running the new version
 Current Time:  3.5585e-08  and Ticker:  384
-Running the new version
 Current Time:  3.5678e-08  and Ticker:  385
-Running the new version
 Current Time:  3.5771e-08  and Ticker:  386
-Running the new version
 Current Time:  3.5863e-08  and Ticker:  387
-Running the new version
 Current Time:  3.5956e-08  and Ticker:  388
-Running the new version
 Current Time:  3.6049e-08  and Ticker:  389
-Running the new version
 Current Time:  3.6141e-08  and Ticker:  390
-Running the new version
 Current Time:  3.6234e-08  and Ticker:  391
-Running the new version
 Current Time:  3.6327e-08  and Ticker:  392
-Running the new version
 Current Time:  3.6419e-08  and Ticker:  393
-Running the new version
 Current Time:  3.6512e-08  and Ticker:  394
-Running the new version
 Current Time:  3.6605e-08  and Ticker:  395
-Running the new version
 Current Time:  3.6697e-08  and Ticker:  396
-Running the new version
 Current Time:  3.679e-08  and Ticker:  397
-Running the new version
 Current Time:  3.6883e-08  and Ticker:  398
-Running the new version
 Current Time:  3.6975e-08  and Ticker:  399
-Running the new version
 Current Time:  3.7068e-08  and Ticker:  400
-Running the new version
 Saving current conditions at time: ticker:400
 Current Time:  3.7161e-08  and Ticker:  401
-Running the new version
 Current Time:  3.7253e-08  and Ticker:  402
-Running the new version
 Current Time:  3.7346e-08  and Ticker:  403
-Running the new version
 Current Time:  3.7439e-08  and Ticker:  404
-Running the new version
 Current Time:  3.7531e-08  and Ticker:  405
-Running the new version
 Current Time:  3.7624e-08  and Ticker:  406
-Running the new version
 Current Time:  3.7717e-08  and Ticker:  407
-Running the new version
 Current Time:  3.7809e-08  and Ticker:  408
-Running the new version
 Current Time:  3.7902e-08  and Ticker:  409
-Running the new version
 Current Time:  3.7995e-08  and Ticker:  410
-Running the new version
 Current Time:  3.8087e-08  and Ticker:  411
-Running the new version
 Current Time:  3.818e-08  and Ticker:  412
-Running the new version
 Current Time:  3.8273e-08  and Ticker:  413
-Running the new version
 Current Time:  3.8365e-08  and Ticker:  414
-Running the new version
 Current Time:  3.8458e-08  and Ticker:  415
-Running the new version
 Current Time:  3.8551e-08  and Ticker:  416
-Running the new version
 Current Time:  3.8644e-08  and Ticker:  417
-Running the new version
 Current Time:  3.8736e-08  and Ticker:  418
-Running the new version
 Current Time:  3.8829e-08  and Ticker:  419
-Running the new version
 Current Time:  3.8922e-08  and Ticker:  420
-Running the new version
 Current Time:  3.9014e-08  and Ticker:  421
-Running the new version
 Current Time:  3.9107e-08  and Ticker:  422
-Running the new version
 Current Time:  3.92e-08  and Ticker:  423
-Running the new version
 Current Time:  3.9292e-08  and Ticker:  424
-Running the new version
 Current Time:  3.9385e-08  and Ticker:  425
-Running the new version
-Saving current conditions at time: ticker:425
 Current Time:  3.9478e-08  and Ticker:  426
-Running the new version
 Current Time:  3.957e-08  and Ticker:  427
-Running the new version
 Current Time:  3.9663e-08  and Ticker:  428
-Running the new version
 Current Time:  3.9756e-08  and Ticker:  429
-Running the new version
 Current Time:  3.9848e-08  and Ticker:  430
-Running the new version
 Current Time:  3.9941e-08  and Ticker:  431
-Running the new version
 Current Time:  4.0034e-08  and Ticker:  432
-Running the new version
 Current Time:  4.0126e-08  and Ticker:  433
-Running the new version
 Current Time:  4.0219e-08  and Ticker:  434
-Running the new version
 Current Time:  4.0312e-08  and Ticker:  435
-Running the new version
 Current Time:  4.0404e-08  and Ticker:  436
-Running the new version
 Current Time:  4.0497e-08  and Ticker:  437
-Running the new version
 Current Time:  4.059e-08  and Ticker:  438
-Running the new version
 Current Time:  4.0682e-08  and Ticker:  439
-Running the new version
 Current Time:  4.0775e-08  and Ticker:  440
-Running the new version
 Current Time:  4.0868e-08  and Ticker:  441
-Running the new version
 Current Time:  4.096e-08  and Ticker:  442
-Running the new version
 Current Time:  4.1053e-08  and Ticker:  443
-Running the new version
 Current Time:  4.1146e-08  and Ticker:  444
-Running the new version
 Current Time:  4.1238e-08  and Ticker:  445
-Running the new version
 Current Time:  4.1331e-08  and Ticker:  446
-Running the new version
 Current Time:  4.1424e-08  and Ticker:  447
-Running the new version
 Current Time:  4.1516e-08  and Ticker:  448
-Running the new version
 Current Time:  4.1609e-08  and Ticker:  449
-Running the new version
 Current Time:  4.1702e-08  and Ticker:  450
-Running the new version
 Saving current conditions at time: ticker:450
 Current Time:  4.1794e-08  and Ticker:  451
-Running the new version
 Current Time:  4.1887e-08  and Ticker:  452
-Running the new version
 Current Time:  4.198e-08  and Ticker:  453
-Running the new version
 Current Time:  4.2072e-08  and Ticker:  454
-Running the new version
 Current Time:  4.2165e-08  and Ticker:  455
-Running the new version
 Current Time:  4.2258e-08  and Ticker:  456
-Running the new version
 Current Time:  4.235e-08  and Ticker:  457
-Running the new version
 Current Time:  4.2443e-08  and Ticker:  458
-Running the new version
 Current Time:  4.2536e-08  and Ticker:  459
-Running the new version
 Current Time:  4.2628e-08  and Ticker:  460
-Running the new version
 Current Time:  4.2721e-08  and Ticker:  461
-Running the new version
 Current Time:  4.2814e-08  and Ticker:  462
-Running the new version
 Current Time:  4.2906e-08  and Ticker:  463
-Running the new version
 Current Time:  4.2999e-08  and Ticker:  464
-Running the new version
 Current Time:  4.3092e-08  and Ticker:  465
-Running the new version
 Current Time:  4.3184e-08  and Ticker:  466
-Running the new version
 Current Time:  4.3277e-08  and Ticker:  467
-Running the new version
 Current Time:  4.337e-08  and Ticker:  468
-Running the new version
 Current Time:  4.3462e-08  and Ticker:  469
-Running the new version
 Current Time:  4.3555e-08  and Ticker:  470
-Running the new version
 Current Time:  4.3648e-08  and Ticker:  471
-Running the new version
 Current Time:  4.374e-08  and Ticker:  472
-Running the new version
 Current Time:  4.3833e-08  and Ticker:  473
-Running the new version
 Current Time:  4.3926e-08  and Ticker:  474
-Running the new version
 Current Time:  4.4018e-08  and Ticker:  475
-Running the new version
-Saving current conditions at time: ticker:475
 Current Time:  4.4111e-08  and Ticker:  476
-Running the new version
 Current Time:  4.4204e-08  and Ticker:  477
-Running the new version
 Current Time:  4.4296e-08  and Ticker:  478
-Running the new version
 Current Time:  4.4389e-08  and Ticker:  479
-Running the new version
 Current Time:  4.4482e-08  and Ticker:  480
-Running the new version
 Current Time:  4.4574e-08  and Ticker:  481
-Running the new version
 Current Time:  4.4667e-08  and Ticker:  482
-Running the new version
 Current Time:  4.476e-08  and Ticker:  483
-Running the new version
 Current Time:  4.4852e-08  and Ticker:  484
-Running the new version
 Current Time:  4.4945e-08  and Ticker:  485
-Running the new version
 Current Time:  4.5038e-08  and Ticker:  486
-Running the new version
 Current Time:  4.513e-08  and Ticker:  487
-Running the new version
 Current Time:  4.5223e-08  and Ticker:  488
-Running the new version
 Current Time:  4.5316e-08  and Ticker:  489
-Running the new version
 Current Time:  4.5408e-08  and Ticker:  490
-Running the new version
 Current Time:  4.5501e-08  and Ticker:  491
-Running the new version
 Current Time:  4.5594e-08  and Ticker:  492
-Running the new version
 Current Time:  4.5686e-08  and Ticker:  493
-Running the new version
 Current Time:  4.5779e-08  and Ticker:  494
-Running the new version
 Current Time:  4.5872e-08  and Ticker:  495
-Running the new version
 Current Time:  4.5964e-08  and Ticker:  496
-Running the new version
 Current Time:  4.6057e-08  and Ticker:  497
-Running the new version
 Current Time:  4.615e-08  and Ticker:  498
-Running the new version
 Current Time:  4.6242e-08  and Ticker:  499
-Running the new version
-Time taken: 1075.3663799762726
+Time taken: 1478.3867282867432
