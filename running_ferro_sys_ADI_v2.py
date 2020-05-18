@@ -90,12 +90,12 @@ ho_hold = 1 ## How often to hold
 
 save_time_steps = True ## Turn on to ho time steps from run
 save_final_time = False ## Turn on to save final time step 
-ho_save = 50 #How often to save
+ho_save = 5 #How often to save
 
 today1 = date.today()
 name_date = today1.strftime("%d_%m_%y")
 mkdir_p(name_date)
-name_data ='Free_space_ADI_v2'
+name_data ='Ricker_left_ADI_CFL10'
 
 ######################## Parameters (global) ########################
 mu0 = 1.25667e-6
@@ -115,7 +115,7 @@ disc = np.array([dx, dy, dz]) ### (dx, dy, dz)
 max_x = 15
 
 CFL = 1/(2**(1/2)) ### Testing. Soon this will be increased                  
-dt = CFL*disc[0]/c
+dt = CFL*disc[0]/c*10
 T = 501*dt ## Final time
 # T = np.round(T,np.int(abs(np.log(dt)/np.log(10))))
 

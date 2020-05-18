@@ -113,12 +113,22 @@ for k in l1:
     try:
         ticker+=1
         R_sys = set_up_ferro_system(name)
-        R_sys2= set_up_ferro_system('03_05_20/'+str(dt_name*ticker)+'/Ricker_left_ADI_free_space') ## Actually Yee
+        R_sys2= set_up_ferro_system('18_05_20/ticker:'+str(dt_name*ticker)+'/Ricker_Yee_free_space') ## Actually Yee
         R_sys.t = ticker*dt_name*R_sys.dt
         R_sys2.t= ticker*dt_name*R_sys.dt
         fig,ax = R_sys.plot_line('E','y' )
         fig2,ax2 = R_sys2.plot_line('E','y')
         # ax.view_init(elev = 90,azim = 90)
+        
+        fig12, (ax121) = plt.subplots(1,1)
+        line1 = ax.get_lines()[0]
+        line2 = ax2.get_lines()[0]
+        
+        ax121.plot(line1.get_data()[0], line1.get_data()[1],label = 'ADI')
+        ax121.plot(line2.get_data()[0], line2.get_data()[1], '--', label = 'Yee')
+       
+        ax121.set_title('Plots of ADI vs. Yee vs. Single run')
+        ax121.legend()
         
         # print(name1)        
         # R_sys1 = set_up_ferro_system(name1)
