@@ -41,10 +41,21 @@ Ferro_sys = ferro_system1.Ferro_sys
 name_date = '18_05_20'
 # name_data1 = 'Refined_grid_free_space'
 name_data = 'Free_space_ADI_v2'
-l1 = np.zeros(shape = 10) ## How many nodes to check (better name?)
-ticker_start = 1 ## Where do you want to start your unpacking
 
-dt_name = 50 ## How often saved. Works with new saving style. 
+### Dictionary to be able to run and compile multiple runs over and over
+### This allows for an indeterminate amount of runs to be tested together
+### as long as they're in the same directory
+         
+# names = {name_data:50, 
+#          'Ricker_left_ADI_CFL10':5,
+#          'Ricker_Yee_free_space':50}
+
+names = {'Ricker_left_ADI_CFL10':5}
+
+l1 = np.zeros(shape = 30) ## How many nodes to check (better name?)
+ticker_start = 11 ## Where do you want to start your unpacking
+
+# dt_name = 50 ## How often saved. Works with new saving style.  ### Now set above in names dictionary
 
 def set_up_ferro_system(name):
     '''
@@ -104,36 +115,32 @@ for k in l1:
     print(ticker)
     # name = name_date + '/time:'+str(round(ticker*.5e-08,10))+'/'+name_data
     # name = name_date + '/time:'+str(round(dt_name*ticker,12))+'/'+name_data
-    name = name_date + '/ticker:'+str(dt_name*ticker)+'/'+name_data
+    
 
-    print(name)
     # name1 = name_date + '/time:'+str(round(ticker*.5e-08,14))+'/'+name_data1
     # name2 = name_date + '/time:'+str(round(ticker*.5e-08,14))+'/'+name_data2
     # print(name)
     try:
         ticker+=1
-        R_sys = set_up_ferro_system(name)
-        R_sys2= set_up_ferro_system('18_05_20/ticker:'+str(dt_name*ticker)+'/Ricker_Yee_free_space') ## Actually Yee
-        R_sys.t = ticker*dt_name*R_sys.dt
-        R_sys2.t= ticker*dt_name*R_sys.dt
-        fig,ax = R_sys.plot_line('E','y' )
-        fig2,ax2 = R_sys2.plot_line('E','y')
-        # ax.view_init(elev = 90,azim = 90)
-        
         fig12, (ax121) = plt.subplots(1,1)
-        line1 = ax.get_lines()[0]
-        line2 = ax2.get_lines()[0]
+        for name_a in names:
+            name = name_date + '/ticker:'+str(names[name_a]*ticker)+'/'+name_a
+            R_sys = set_up_ferro_system(name)
+            R_sys.t = ticker*names[name_a]*R_sys.dt
+            fig,ax = R_sys.plot_line('E','y' )
         
-        ax121.plot(line1.get_data()[0], line1.get_data()[1],label = 'ADI')
-        ax121.plot(line2.get_data()[0], line2.get_data()[1], '--', label = 'Yee')
+            line1 = ax.get_lines()[0]
+            ax121.plot(line1.get_data()[0], line1.get_data()[1],'--',label = name_a)
        
-        ax121.set_title('Plots of ADI vs. Yee vs. Single run')
+        ax121.set_title('Plots of varying algorithms')
         ax121.legend()
         
         # print(name1)        
         # R_sys1 = set_up_ferro_system(name1)
         # R_sys2 = set_up_ferro_system(name2)
         # print(name2)
+        
+        # ax.view_init(elev = 90,azim = 90) ## For rotating 3D plots
 
     except:
         print('Error importing, try again')
