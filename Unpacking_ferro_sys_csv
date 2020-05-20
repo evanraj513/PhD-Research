@@ -122,18 +122,30 @@ for k in l1:
     # print(name)
     try:
         ticker+=1
-        fig12, (ax121) = plt.subplots(1,1)
+        # fig12, (ax121) = plt.subplots(3,1)
+        fig31, (ax131, ax132, ax133) = plt.subplots(3,1)
         for name_a in name_dict:
             name_ticker = 'ticker:'+str(name_dict[name_a]*ticker)
             R_sys = set_up_ferro_system(name_ticker, name_a)
             R_sys.T = ticker*name_dict[name_a]*R_sys.dt
-            fig,ax = R_sys.plot_line('E','y' )
+            
+            fig,ax = R_sys.plot_line('E','x',cs = 20 )
+            fig2,ax2 = R_sys.plot_line('E','y', cs = 20)
+            fig3,ax3 = R_sys.plot_line('E','z', cs = 20)
         
             line1 = ax.get_lines()[0]
-            ax121.plot(line1.get_data()[0], line1.get_data()[1],'--',label = name_a)
+            ax131.plot(line1.get_data()[0], line1.get_data()[1],'--',label = r'$$E_x$$')
+            
+            line2 = ax2.get_lines()[0]
+            ax132.plot(line1.get_data()[0], line1.get_data()[1],'--',label = r'$$E_y$$')
+            
+            line3 = ax3.get_lines()[0]
+            ax133.plot(line1.get_data()[0], line1.get_data()[1],'--',label = r'$$E_z$$')
        
         # ax121.set_title('Plots of varying algorithms')
-        # ax121.legend()
+        ax131.legend()
+        ax132.legend()
+        ax133.legend()
         
         # print(name1)        
         # R_sys1 = set_up_ferro_system(name1)
