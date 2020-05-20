@@ -1,0 +1,18 @@
+/usr/share/anaconda3/lib/python3.7/site-packages/scipy/sparse/linalg/dsolve/linsolve.py:296: SparseEfficiencyWarning: splu requires CSC matrix format
+  warn('splu requires CSC matrix format', SparseEfficiencyWarning)
+/home/rajbhane/Git/Research/ferro_system1.py:1769: RuntimeWarning: overflow encountered in multiply
+  x_new_num = f + (a_dot_f)*a - np.cross(a.T,f.T).T
+/home/rajbhane/Git/Research/ferro_system1.py:1769: RuntimeWarning: invalid value encountered in subtract
+  x_new_num = f + (a_dot_f)*a - np.cross(a.T,f.T).T
+/home/rajbhane/Git/Research/ferro_system1.py:1772: RuntimeWarning: invalid value encountered in true_divide
+  x_new_values = np.divide(x_new_num.T, np.array([x_new_den]).T)
+Traceback (most recent call last):
+  File "running_ferro_sys_ADI_v2.py", line 296, in <module>
+    R_sys.single_run_ADI_v2(t)
+  File "/home/rajbhane/Git/Research/ferro_system1.py", line 2008, in single_run_ADI_v2
+    while ticker1 < self.maxiter_half_step and norm(M_values_1 - M_values_4) > tol:
+  File "/usr/share/anaconda3/lib/python3.7/site-packages/scipy/linalg/misc.py", line 137, in norm
+    a = np.asarray_chkfinite(a)
+  File "/usr/share/anaconda3/lib/python3.7/site-packages/numpy/lib/function_base.py", line 498, in asarray_chkfinite
+    "array must not contain infs or NaNs")
+ValueError: array must not contain infs or NaNs
