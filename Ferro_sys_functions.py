@@ -87,6 +87,55 @@ def sizing(nx,ny,nz):
         
     return [size_outer_x, size_outer_y, size_outer_z,\
             size_inner_x, size_inner_y, size_inner_z]
+        
+def cardanos_method(a,b,c,d,eps = 1E-12):
+    '''
+    Solves for the real root of a cubic polynomial. 
+    Note that it will not solve for the symmetric
+    real roots, even if they exist. 
+    See here for more explanation:
+        https://brilliant.org/wiki/cardano-method/
+    '''
+    if abs(a) < eps:
+        print('*'*40,'\n','Error, not a cubic. Aborting','\n','*'*40)
+        raise Exception
+        
+    def real_cubic_root(arg):
+        '''
+        Forces python to return the real root of a cubic. 
+        Note: "< 0" case works as 
+            -(-n)^(1/3) = ((-1)^3(-n))^(1/3) = ((-1)(-n))^(1/3) = (n)^1/3
+        '''
+        if type(arg) == complex:
+            return (arg)**(1/3)
+        else:
+            if arg < 0:
+                return -(-arg)**(1/3)
+            else:
+                return (arg)**(1/3)
+    
+    Q = (3*a*c - b**2)/(9*a**2)
+    R = (9*a*b*c - 27*a**2*d - 2*b**3)/(54*a**3)
+#    
+#    if Q**3 > R**2-eps:
+#        print('*'*40,'\n','Break. Error in cardanos method, cannot use',
+#              'Dont know why, but Q**3 > R**2 is hard.','\n','*'*40)
+#        raise Exception
+    
+    S = real_cubic_root(R + (Q**3 + R**2)**(1/2))
+    T = real_cubic_root(R - (Q**3 + R**2)**(1/2))
+    print('Q: ',Q,'\n'*2,
+          'R: ',R,'\n'*2,
+          'S: ',S,'\n'*2,
+          'T: ',T,'\n'*2)
+    
+    root = S+T - (b)/(3*a)
+    
+    if abs(root.imag) > eps:
+        print('Warning. Imaginary part of the root is too large.')
+        wait = input('Press ENTER, or CTRL C to break')        
+    
+    return root.real
     
 #############################################################################
 ################ Boundary conditions, and Forcing functions #################
@@ -222,56 +271,6 @@ def Gaussian_source(dt,t):
     
 #     return fig
 
-    
-
-# def cardanos_method(a,b,c,d,eps = 1E-12):
-#     '''
-#     Solves for the real root of a cubic polynomial. 
-#     Note that it will not solve for the symmetric
-#     real roots, even if they exist. 
-#     See here for more explanation:
-#         https://brilliant.org/wiki/cardano-method/
-#     '''
-#     if abs(a) < eps:
-#         print('*'*40,'\n','Error, not a cubic. Aborting','\n','*'*40)
-#         raise Exception
-        
-#     def real_cubic_root(arg):
-#         '''
-#         Forces python to return the real root of a cubic. 
-#         Note: "< 0" case works as 
-#             -(-n)^(1/3) = ((-1)^3(-n))^(1/3) = ((-1)(-n))^(1/3) = (n)^1/3
-#         '''
-#         if type(arg) == complex:
-#             return (arg)**(1/3)
-#         else:
-#             if arg < 0:
-#                 return -(-arg)**(1/3)
-#             else:
-#                 return (arg)**(1/3)
-    
-#     Q = (3*a*c - b**2)/(9*a**2)
-#     R = (9*a*b*c - 27*a**2*d - 2*b**3)/(54*a**3)
-# #    
-# #    if Q**3 > R**2-eps:
-# #        print('*'*40,'\n','Break. Error in cardanos method, cannot use',
-# #              'Dont know why, but Q**3 > R**2 is hard.','\n','*'*40)
-# #        raise Exception
-    
-#     S = real_cubic_root(R + (Q**3 + R**2)**(1/2))
-#     T = real_cubic_root(R - (Q**3 + R**2)**(1/2))
-#     print('Q: ',Q,'\n'*2,
-#           'R: ',R,'\n'*2,
-#           'S: ',S,'\n'*2,
-#           'T: ',T,'\n'*2)
-    
-#     root = S+T - (b)/(3*a)
-    
-#     if abs(root.imag) > eps:
-#         print('Warning. Imaginary part of the root is too large.')
-#         wait = input('Press ENTER, or CTRL C to break')        
-    
-#     return root.real
     
 
 # def det_E_M():

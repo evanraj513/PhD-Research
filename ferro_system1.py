@@ -1638,6 +1638,10 @@ class Ferro_sys(object):
         ## Get curl values
         self.set_up_H_curl()
         
+        ## Boundary conditions being satisfied
+        F_old = np.concatenate((self.Fx(t-dt), self.Fy(t-dt), self.Fz(t-dt)),axis=1) ## F_n-1/2
+        E_old.values += F_old.T
+        
         ## Actual computation of time stepping
         F = np.concatenate((self.Fx(t), self.Fy(t), self.Fz(t)),axis=1) ## F_n+1/2
         E_new_values = E_old.values + dt/eps*self.H_old_curl##*(self.curl_L(H_old.values,'i') - self.curl_R(H_old.values,'i'))
@@ -1839,6 +1843,10 @@ class Ferro_sys(object):
         mu0 = self.mu0
         eps = self.eps
         sigma = self.sigma 
+        
+        ### Applying boundary conditions
+        F_old2 = np.concatenate((self.Fx(t-dt), self.Fy(t-dt), self.Fz(t-dt)),axis=1)
+        E_old2.values += F_old2
         
         ##### Solving for E_n+1/2
         s_a = 1/mu0*self.curl_L(B_old2.values,'Inner')

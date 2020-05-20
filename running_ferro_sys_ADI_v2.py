@@ -45,7 +45,7 @@ else:
 from Research import ferro_system1
 Ferro_sys = ferro_system1.Ferro_sys
 
-from Research.Ferro_sys_functions import sizing, Ricker_pulse, Gaussian_source
+from Research.Ferro_sys_functions import sizing, Ricker_pulse, Gaussian_source, cardanos_method
 
 t0 = time.time()
 
@@ -71,7 +71,7 @@ def disp_what():
     # fig_Ey1,ax_Ey1 = R_sys.plot_slice('E','y',0)
     # fig_Ey2 = R_sys.plot_line('E','y',100,0)
     fig_Ey3,ax_Ey3 = R_sys.plot_line('E','y',3,0)
-    fig2 = R_sys2.plot_line()
+    # fig2 = R_sys2.plot_line()
     # ax_Ey1.view_init(elev = 90,azim = 90)
     
     # fig = plt.figure()
@@ -85,17 +85,17 @@ def disp_what():
     
     # print(Ricker_pulse(t))
 
-hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
+hold_on = 1 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
 ho_hold = 1 ## How often to hold
 
 save_time_steps = True ## Turn on to ho time steps from run
 save_final_time = False ## Turn on to save final time step 
-ho_save = 5 #How often to save
+ho_save = 25 #How often to save
 
 today1 = date.today()
 name_date = today1.strftime("%d_%m_%y")
 mkdir_p(name_date)
-name_data ='Ricker_left_ADI_CFL10'
+name_data ='Ricker_ADI_CFL10_LLG'
 
 ######################## Parameters (global) ########################
 mu0 = 1.25667e-6
@@ -104,19 +104,23 @@ c = 1/(mu0*eps)**(1/2) ## Speed of light
 gamma = 2.2e5 
 K = 0
 alpha = 0.2
+gamma = 2.2E5
 H_s_val = 10**5 ## H_s value
-init_mag = 0 ## Magnetization initialization constant for M_z, 0 => free-space (non-LLG)
+init_mag = 100 ## Magnetization initialization constant for M_z, 0 => free-space (non-LLG)
 
 ################## Parameters (system) ########################
-dx = 0.04
+dx = 0.4
 dy = dx
 dz = dx
 disc = np.array([dx, dy, dz]) ### (dx, dy, dz)
-max_x = 15
+max_x = 16
 
-CFL = 1/(2**(1/2)) ### Testing. Soon this will be increased                  
-dt = CFL*disc[0]/c*10
-T = 501*dt ## Final time
+# CFL = 1/(2**(1/2))*5 ### Testing. Soon this will be increased                  
+# dt = CFL*disc[0]/c
+dt = 5e-10 ### Puttha's dt
+CFL = dt*c/disc[0] ### calculated
+
+T = 251*dt ## Final time
 # T = np.round(T,np.int(abs(np.log(dt)/np.log(10))))
 
 ## Making sure we have an odd-number for global nodes, otherwise
@@ -143,6 +147,13 @@ gnz = 1 ### 2D Implementation
 ###################################################
 ### Boundary conditions, and Forcing terms ########
 ###################################################
+'''
+Note that now, boundary conditions are applied only in f_x, f_y, f_z
+
+'Forcing functions' i.e. in this case J, can be applied through the subsequent
+    j_x, j_y, j_z functions. They are applied in the same way as the f's
+    
+'''
 
 ### Left Ricker Pulse forcing functions
 def f_x(x,y,z,t):
@@ -242,23 +253,30 @@ def set_up_system(gnx,gny,gnz,disc):
     return R_sys
 
 #################################################
-########### Actually running system #############
+########### Assigning run parameters ############
+#################################################
 
 R_sys = set_up_system(gnx,gny,gnz,disc)
-R_sys2 = set_up_system(gnx,gny,gnz,disc)
+R_sys.cubic_solver = cardanos_method
+# R_sys2 = set_up_system(gnx,gny,gnz,disc)
 
 R_sys.fx = f_x
 R_sys.fy = f_y
 R_sys.fz = f_z
 
-R_sys2.fx = f_x
-R_sys2.fy = f_y
-R_sys2.fz = f_z
+# R_sys2.fx = f_x
+# R_sys2.fy = f_y
+# R_sys2.fz = f_z
+
+
+#################################################
+########### Running system ############
+#################################################
 
 ticker = 0
 
 R_sys.initialize_set_up_ADI() ### Sets up matrices and operators for ADI method
-R_sys2.initialize_set_up_ADI()
+# R_sys2.initialize_set_up_ADI()
 
 for t in np.arange(dt,T,dt):
     ### re-initializing the system
@@ -275,8 +293,8 @@ for t in np.arange(dt,T,dt):
     R_sys.T = t
     R_sys.single_run_ADI_v2(t)
     
-    R_sys2.T = t
-    R_sys2.single_run_ADI_v2(t)
+    # R_sys2.T = t
+    # R_sys2.single_run_ADI_v2(t)
     
     ## Plotting stuff to demo
     if disp == True:
