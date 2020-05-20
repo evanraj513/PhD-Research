@@ -85,7 +85,7 @@ def disp_what():
     
     # print(Ricker_pulse(t))
 
-hold_on = 1 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
+hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
 ho_hold = 1 ## How often to hold
 
 save_time_steps = True ## Turn on to ho time steps from run

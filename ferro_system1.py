@@ -1545,10 +1545,10 @@ class Ferro_sys(object):
         Ec2 = self.Hx_Dz_mat.dot(self.Ey_Dz_mat)
         Ec3 = self.Hy_Dx_mat.dot(self.Ez_Dx_mat)
         
-                            ## 1 + (dt/2)*sigma - dt^2/(4*eps*mu0)*(curl_L)*(curl_R)
-        self.a1_1 = csr_matrix(np.identity(Ec1.shape[0]) + dt/2*self.sigma*np.identity(Ec1.shape[0])) - (dt**2)/(4*eps*mu0)*Ec1
-        self.a1_2 = csr_matrix(np.identity(Ec2.shape[0]) + dt/2*self.sigma*np.identity(Ec2.shape[0])) - (dt**2)/(4*eps*mu0)*Ec2
-        self.a1_3 = csr_matrix(np.identity(Ec3.shape[0]) + dt/2*self.sigma*np.identity(Ec3.shape[0])) - (dt**2)/(4*eps*mu0)*Ec3
+                            ## 1 + (dt/4)*sigma - dt^2/(4*eps*mu0)*(curl_L)*(curl_R)
+        self.a1_1 = csr_matrix(np.identity(Ec1.shape[0]) + dt/4*self.sigma*np.identity(Ec1.shape[0])) - (dt**2)/(4*eps*mu0)*Ec1
+        self.a1_2 = csr_matrix(np.identity(Ec2.shape[0]) + dt/4*self.sigma*np.identity(Ec2.shape[0])) - (dt**2)/(4*eps*mu0)*Ec2
+        self.a1_3 = csr_matrix(np.identity(Ec3.shape[0]) + dt/4*self.sigma*np.identity(Ec3.shape[0])) - (dt**2)/(4*eps*mu0)*Ec3
         
         self.a1_1lu = linalg.splu(self.a1_1)
         self.a1_2lu = linalg.splu(self.a1_2)
@@ -1579,10 +1579,10 @@ class Ferro_sys(object):
         Ec2 = self.Hz_Dx_mat.dot(self.Ey_Dx_mat)
         Ec3 = self.Hx_Dy_mat.dot(self.Ez_Dy_mat)
         
-                            ## 1  +dt/2*sigma - dt^2/(4*eps*mu0)*(curl_R)*(curl_L)
-        self.a2_1 = csr_matrix(np.identity(Ec1.shape[0]) + dt/2*self.sigma*np.identity(Ec1.shape[0])) - (dt**2)/(4*eps*mu0)*Ec1
-        self.a2_2 = csr_matrix(np.identity(Ec2.shape[0]) + dt/2*self.sigma*np.identity(Ec2.shape[0])) - (dt**2)/(4*eps*mu0)*Ec2
-        self.a2_3 = csr_matrix(np.identity(Ec3.shape[0]) + dt/2*self.sigma*np.identity(Ec3.shape[0])) - (dt**2)/(4*eps*mu0)*Ec3
+                            ## 1  +dt/4*sigma - dt^2/(4*eps*mu0)*(curl_R)*(curl_L)
+        self.a2_1 = csr_matrix(np.identity(Ec1.shape[0]) + dt/4*self.sigma*np.identity(Ec1.shape[0])) - (dt**2)/(4*eps*mu0)*Ec1
+        self.a2_2 = csr_matrix(np.identity(Ec2.shape[0]) + dt/4*self.sigma*np.identity(Ec2.shape[0])) - (dt**2)/(4*eps*mu0)*Ec2
+        self.a2_3 = csr_matrix(np.identity(Ec3.shape[0]) + dt/4*self.sigma*np.identity(Ec3.shape[0])) - (dt**2)/(4*eps*mu0)*Ec3
         
         ## Setting up lu factorization
         self.a2_1lu = linalg.splu(self.a2_1)
@@ -1846,7 +1846,7 @@ class Ferro_sys(object):
         
         ### Applying boundary conditions
         F_old2 = np.concatenate((self.Fx(t-dt), self.Fy(t-dt), self.Fz(t-dt)),axis=1)
-        E_old2.values += F_old2
+        E_old2.values += F_old2.T
         
         ##### Solving for E_n+1/2
         s_a = 1/mu0*self.curl_L(B_old2.values,'Inner')
@@ -1857,7 +1857,7 @@ class Ferro_sys(object):
         s_main = (s_a - s_b - s_c - s_d)
         J_old = np.concatenate((self.Jx(t-3*dt/4), self.Jy(t-3*dt/4), self.Jz(t-3*dt/4)),axis=1)
         
-        E_old_RHS = E_old2.values + dt/(2*eps)*s_main - (dt/2)*sigma*E_old2.values + dt/2*J_old.T
+        E_old_RHS = E_old2.values + dt/(2*eps)*s_main - (dt/4)*sigma*E_old2.values + dt/2*J_old.T
         
         ### Using back-solve for new values
         E_old_values = self.step_1a_inv(E_old_RHS)
@@ -1935,7 +1935,7 @@ class Ferro_sys(object):
         s2_main = s2_a - s2_b - s2_c + s2_d
         J_new = np.concatenate((self.Jx(t-dt/4), self.Jy(t-dt/4), self.Jz(t-dt/4)),axis=1)
         
-        E_new_RHS = E_old.values + dt/(2*eps)*s2_main - dt/2*sigma*E_old.values +dt/2*J_new.T
+        E_new_RHS = E_old.values + dt/(2*eps)*s2_main - dt/4*sigma*E_old.values +dt/2*J_new.T
         
         # Backsolve
         
