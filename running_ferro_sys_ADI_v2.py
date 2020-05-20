@@ -109,7 +109,7 @@ H_s_val = 10**5 ## H_s value
 init_mag = 100 ## Magnetization initialization constant for M_z, 0 => free-space (non-LLG)
 
 ################## Parameters (system) ########################
-dx = 0.4
+dx = 0.2
 dy = dx
 dz = dx
 disc = np.array([dx, dy, dz]) ### (dx, dy, dz)

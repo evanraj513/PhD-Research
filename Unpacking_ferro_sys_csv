@@ -38,9 +38,9 @@ Ferro_sys = ferro_system1.Ferro_sys
 
 ### Name of things to unpack
 #name = today+'/'+'test1'
-name_date = '18_05_20'
+name_date = '20_05_20'
 # name_data1 = 'Refined_grid_free_space'
-name_data = 'Free_space_ADI_v2'
+# name_data = 'Free_space_ADI_v2'
 
 ### Dictionary to be able to run and compile multiple runs over and over
 ### This allows for an indeterminate amount of runs to be tested together
@@ -50,20 +50,20 @@ name_data = 'Free_space_ADI_v2'
 #          'Ricker_left_ADI_CFL10':5,
 #          'Ricker_Yee_free_space':50}
 
-names = {'Ricker_left_ADI_CFL10':5}
+name_dict = {'Ricker_ADI_CFL10_LLG':25}
 
-l1 = np.zeros(shape = 30) ## How many nodes to check (better name?)
-ticker_start = 11 ## Where do you want to start your unpacking
+l1 = np.zeros(shape = 10) ## How many nodes to check (better name?)
+ticker_start = 1 ## Where do you want to start your unpacking
 
 # dt_name = 50 ## How often saved. Works with new saving style.  ### Now set above in names dictionary
 
-def set_up_ferro_system(name):
+def set_up_ferro_system(name_ticker, name_data):
     '''
     Sets up R_sys, given the name
     '''
     try: 
-        df_inner = pd.read_csv(name+'_inner.csv')
-        df_outer = pd.read_csv(name+'_outer.csv')
+        df_inner = pd.read_csv(name_date+'/'+name_ticker+'/'+name_data+'_inner.csv')
+        df_outer = pd.read_csv(name_date+'/'+name_ticker+'/'+name_data+'_outer.csv')
         # df_param = pd.read_csv(name+'_param.csv')
         df_param = pd.read_csv(name_date+'/'+name_data+'_param.csv') ## Parameters now saved only once
         # df_param = pd.read_csv('10_04_20/time:2.95e-07/Refined_grid_free_space_param.csv')
@@ -103,7 +103,7 @@ def set_up_ferro_system(name):
     R_sys.alpha = df_param['alpha'][0] 
     R_sys.H_s = df_param['H_s'][0]
     
-    R_sys.dt = df_param['dt']
+    R_sys.dt = df_param['dt'][0]
     R_sys.T = df_param['T']
     
     return R_sys
@@ -123,17 +123,17 @@ for k in l1:
     try:
         ticker+=1
         fig12, (ax121) = plt.subplots(1,1)
-        for name_a in names:
-            name = name_date + '/ticker:'+str(names[name_a]*ticker)+'/'+name_a
-            R_sys = set_up_ferro_system(name)
-            R_sys.t = ticker*names[name_a]*R_sys.dt
+        for name_a in name_dict:
+            name_ticker = 'ticker:'+str(name_dict[name_a]*ticker)
+            R_sys = set_up_ferro_system(name_ticker, name_a)
+            R_sys.T = ticker*name_dict[name_a]*R_sys.dt
             fig,ax = R_sys.plot_line('E','y' )
         
             line1 = ax.get_lines()[0]
             ax121.plot(line1.get_data()[0], line1.get_data()[1],'--',label = name_a)
        
-        ax121.set_title('Plots of varying algorithms')
-        ax121.legend()
+        # ax121.set_title('Plots of varying algorithms')
+        # ax121.legend()
         
         # print(name1)        
         # R_sys1 = set_up_ferro_system(name1)
@@ -144,7 +144,6 @@ for k in l1:
 
     except:
         print('Error importing, try again')
-        print(name)
         pass
     
     # try:
