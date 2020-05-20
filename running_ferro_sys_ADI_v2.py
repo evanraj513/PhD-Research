@@ -264,6 +264,8 @@ R_sys.fx = f_x
 R_sys.fy = f_y
 R_sys.fz = f_z
 
+R_sys.tol = 5e-9
+
 # R_sys2.fx = f_x
 # R_sys2.fy = f_y
 # R_sys2.fz = f_z
