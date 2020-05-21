@@ -53,7 +53,7 @@ t0 = time.time()
 ######################## Run settings ########################
 ########################################################################
 
-cont = True ## Continue with time-run. Else, just set up system.
+cont = False ## Continue with time-run. Else, just set up system.
 
 disp = False ## Display a run
 ho_disp = 5 ## How often to display the run
@@ -109,16 +109,16 @@ H_s_val = 10**5 ## H_s value
 init_mag = 100 ## Magnetization initialization constant for M_z, 0 => free-space (non-LLG)
 
 ################## Parameters (system) ########################
-dx = 0.1
+dx = 0.2
 dy = dx
 dz = dx
 disc = np.array([dx, dy, dz]) ### (dx, dy, dz)
 max_x = 16
 
-# CFL = 1/(2**(1/2))*5 ### Testing. Soon this will be increased                  
-# dt = CFL*disc[0]/c
-dt = 5e-10 ### Puttha's dt
-CFL = dt*c/disc[0] ### calculated
+CFL = 1/(2**(1/2))*5 ### Testing. Soon this will be increased                  
+dt = CFL*disc[0]/c
+# dt = 5e-10 ### Puttha's dt
+# CFL = dt*c/disc[0] ### calculated
 
 T = 251*dt ## Final time
 # T = np.round(T,np.int(abs(np.log(dt)/np.log(10))))

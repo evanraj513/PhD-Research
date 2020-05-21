@@ -90,7 +90,9 @@ def sizing(nx,ny,nz):
         
 def cardanos_method(a,b,c,d,eps = 1E-12):
     '''
-    Solves for the real root of a cubic polynomial. 
+    Cubic: ax^3 + bx^2 + cx + d
+    
+    Solves for the real root of the given cubic polynomial. 
     Note that it will not solve for the symmetric
     real roots, even if they exist. 
     See here for more explanation:
