@@ -38,19 +38,21 @@ Ferro_sys = ferro_system1.Ferro_sys
 
 ### Name of things to unpack
 #name = today+'/'+'test1'
-name_date = '20_05_20'
+name_date = '18_05_20'
 # name_data1 = 'Refined_grid_free_space'
-# name_data = 'Free_space_ADI_v2'
+name_data = 'Free_space_ADI_v2'
 
 ### Dictionary to be able to run and compile multiple runs over and over
 ### This allows for an indeterminate amount of runs to be tested together
 ### as long as they're in the same directory
          
 # names = {name_data:50, 
-#          'Ricker_left_ADI_CFL10':5,
-#          'Ricker_Yee_free_space':50}
+#           'Ricker_left_ADI_CFL10':5,
+#           'Ricker_Yee_free_space':50}
 
-name_dict = {'Ricker_ADI_CFL10_LLG':25}
+name_dict = {name_data:50}
+
+# name_dict = {'Ricker_ADI_CFL10_LLG':25}
 
 l1 = np.zeros(shape = 10) ## How many nodes to check (better name?)
 ticker_start = 1 ## Where do you want to start your unpacking
@@ -131,10 +133,10 @@ for k in l1:
             
             # fig,ax = R_sys.plot_slice('E','x')
             # fig2,ax2 = R_sys.plot_slice('E','y')
-            fig3,ax3 = R_sys.plot_slice('M','z')
+            # fig3,ax3 = R_sys.plot_slice('M','z')
             
             # fig,ax = R_sys.plot_line('E','x',cs = 20 )
-            # fig2,ax2 = R_sys.plot_line('E','y', cs = 20)
+            fig2,ax2 = R_sys.plot_line('E','y', cs = 20)
             # fig3,ax3 = R_sys.plot_line('E','z', cs = 20)
         
             # line1 = ax.get_lines()[0]

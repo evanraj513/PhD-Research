@@ -137,7 +137,17 @@ def cardanos_method(a,b,c,d,eps = 1E-12):
         print('Warning. Imaginary part of the root is too large.')
         wait = input('Press ENTER, or CTRL C to break')        
     
+    
+    
     return root.real
+
+from math import log10, floor
+
+def round_to_3(x):
+    '''
+    Rounds x to 3 sig figs
+    '''
+    return round(x, -int(floor(log10(abs(x))))+2)
     
 #############################################################################
 ################ Boundary conditions, and Forcing functions #################

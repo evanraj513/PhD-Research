@@ -684,8 +684,7 @@ class Ferro_sys(object):
                 print('Error, not "x", "y", "z". No comprendo, start over')
                 raise Exception
             
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
+        fig,ax = plt.subplots(1,1)
         
         m_s = s*pc.nx*pc.ny
         if s >= pc.nz:
@@ -702,7 +701,7 @@ class Ferro_sys(object):
                 x1[k-m_cs] = ind(k)[0]
                 y1[k-m_cs] = pc.value[k]
                 
-            ax.plot(x1,y1)
+            ax.plot(x1,y1,'-x')
 #            title = 'Plot of: '+F+'_'+comp+'\n'+ 'slice number: '+str(s)+\
 #                    '\n'+'cross_section: '+str(cs)
             title = 'Plot of: '+F+'_'+comp+'\n'+\
@@ -739,7 +738,7 @@ class Ferro_sys(object):
                 y1[k-m_cs] = pc.value[k]
                 
                       #   (num rows, num cols)
-            ax.plot(x1,y1)
+            ax.plot(x1,y1,'x')
             title = 'Plot of: '+F+'_'+comp+'\n'+ 'slice number: '+str(s)+\
                     '\n'+'cross_section: '+str(cs)+'\n'+\
                     'Time: '+str(self.T)
@@ -1620,7 +1619,7 @@ class Ferro_sys(object):
 #        disc = self.disc
         
         E_old = self.E_old
-        H_old = self.H_old
+        # H_old = self.H_old
         M_old = self.M_old
         B_old = self.B_old
         
@@ -1665,6 +1664,7 @@ class Ferro_sys(object):
         B_new_values = B_old.values - dt*self.E_new_curl
         self.B_new.values = B_new_values
         
+        ## Solving for M_n+1
         B_on = (B_old.values + B_new_values)/2
         
         f = 2*M_old.values

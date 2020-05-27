@@ -237,6 +237,110 @@ def reset_tsr2():
     tsr2.B_old.values = tsr2.B_new.values
     
     
+def do_Yee_run(k):
+    
+    E_old = self.E_old
+        # H_old = self.H_old
+        M_old = self.M_old
+        B_old = self.B_old
+        
+        dt = self.dt
+        b_ind = self.bound_ind
+        bdp = self.better_dot_pdt
+        
+        ## Parameters
+        mu0 = self.mu0
+        eps = self.eps
+        gamma = self.gamma
+        K = self.K
+        alpha = self.alpha
+        
+        ## Get curl values
+        self.set_up_H_curl()
+        
+        ## Boundary conditions being satisfied
+        F_old = np.concatenate((self.Fx(t-dt), self.Fy(t-dt), self.Fz(t-dt)),axis=1) ## F_n-1/2
+        E_old.values += F_old.T
+        
+        ## Actual computation of time stepping
+        F = np.concatenate((self.Fx(t), self.Fy(t), self.Fz(t)),axis=1) ## F_n+1/2
+        E_new_values = E_old.values + dt/eps*self.H_old_curl##*(self.curl_L(H_old.values,'i') - self.curl_R(H_old.values,'i'))
+        
+        #Setting all E boundaries to 0
+        for j in b_ind[0]:
+            E_new_values[0][j] = 0 #x_bound(j)
+        for k in b_ind[1]:
+            E_new_values[1][k] = 0
+        for l in b_ind[2]:
+            E_new_values[2][l] = 0
+        
+        #Forcing term and boundary conditions inside F
+        E_new_values = E_new_values+F.T
+        
+        self.E_new.values = E_new_values
+        
+        # self.E_new_setup()
+        self.set_up_E_curl()
+        
+        B_new_values = B_old.values - dt*self.E_new_curl
+        self.B_new.values = B_new_values
+        
+        ## Solving for M_n+1
+        B_on = (B_old.values + B_new_values)/2
+        
+        f = 2*M_old.values
+        a = -(abs(gamma)*dt/2)*(B_on/mu0 + self.H_s.values) - alpha*M_old.values
+        lam = -K*abs(gamma)*self.dt/4
+        
+        a_dot_f =  bdp(a.T,f.T).T
+        
+        p_x = np.zeros(shape = (M_old.values.shape[1],1))
+        p_y = np.copy(p_x)
+        p_z = np.ones(shape = (M_old.values.shape[1],1))
+        p = np.concatenate((p_x, p_y, p_z), axis = 1).T
+        
+        if K == 0 or abs(t-dt) < 1e-12:
+            x_new_num = f + (a_dot_f)*a - np.cross(a.T,f.T).T
+            x_new_den = np.array(1+np.linalg.norm(a,axis=0)**2).T
+            
+            x_new_values = np.divide(x_new_num.T, np.array([x_new_den]).T)
+                
+        else:
+            
+            cubic_solver = self.cubic_solver
+            
+            a1 = lam**2
+            b1 = 2*lam*(bdp(a.T, p.T) + lam*(bdp(p.T, f.T)))
+            c1 = 1+np.linalg.norm(a)**2 - lam*(bdp(a.T, f.T)) + 3*lam*\
+            (bdp(a.T, p.T)) * (bdp(p.T, f.T)) + \
+            lam**2*(bdp(p.T, f.T))
+            d1 = -lam*(bdp(a.T, f.T)*(bdp(p.T,f.T))) - (bdp(a.T, p.T)*(bdp(p.T,f.T))**2)\
+            + lam*((bdp(a.T, p.T)*(bdp(p.T,f.T))**2))\
+            +np.linalg.norm(a)**2*(bdp(p.T, f.T))
+            -bdp(np.cross(a.T, p.T),f.T)
+            Z = np.zeros(shape = b1.shape)
+            X = np.copy(Z)
+            Y = np.copy(Z)
+            x_new_values = np.copy(Z)
+            for k in np.arange(0,x_new_values.shape[1]):
+                if k%100 == 1:
+                    Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k],disp = 'Yes')
+                else:
+                    Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k],disp = 'no')
+            
+            X = (bdp(a.T,f.T)) - lam*Z*(Z+bdp(p.T,f.T))
+            Y = Z+bdp(p.T,f.T)
+            
+            x_new_values = 1/np.linalg.norm(np.cross(a.T,p.T).T)**2*\
+            ((X - (bdp(a.T,p.T))*Y).T*a\
+              + (((np.linalg.norm(a))**2*Y) - (bdp(a.T,p.T))).T*X\
+              + (Z*np.cross(a.T, p.T)).T)
+            
+            
+        self.M_new.values = x_new_values.T - M_old.values
+        
+        self.H_new.values = B_new_values/mu0 - self.M_new.values   
+    
 def do_ADI_run(k):
     '''
     New ADI run based on assumptions of Ricker pulse, as described by
