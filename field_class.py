@@ -994,7 +994,95 @@ class Field_2(object):
         
         return np.array([curl_x,curl_y,curl_z])
     
+class Field_v3(object):
+    ''' 
+    This class will store the values of a given field, as three vectors
+    The size will be determined by initialization
+    where each component is located will be based on my_ind()
+    
+    It will be F = <F_x, F_y, F_z>
+    
+    The main difference from above will be how its values are stored and called
+    
+    
+    Attributes:
+    -----------
+    node_grid_(): np_array of length 3
+        Contains the number of nodes in the x,y,z direction, in that order 
+        of the () component of the field
+    disc: np_array of length 3
+        Contains the spatial step-size
+        in the x,y,z direction, in that order
+    x: Vector
+        stores the first component of the field
+    y,z similar to x
+    
+    values: np.array of 3 by x
+        Stores the values to initialize the Vectors x,y,z respectively. 
+            
+    '''
+    
+    def __init__(self,node_grid_x, node_grid_y, node_grid_z, disc, values):
+#        self.index = index
+        if node_grid_x.size !=3 or node_grid_y.size !=3 or node_grid_z.size !=3:
+            print('*'*40,'\n','Error in field initialization.',
+                  'Incorrect nodal_count given. Abort. ')
+            raise Exception
+        elif disc.size !=3:
+            print('*'*40,'\n','Error in field initialization.',
+                  'Incorrect discretization given. Abort. ')
+            raise Exception
+        
+        self.node_grid_x = node_grid_x
+        self.node_grid_y = node_grid_y
+        self.node_grid_z = node_grid_z
+        self.disc = disc
+        self.values = values
+        
+    @property 
+    def x(self):
+        return self._x
+    @x.setter
+    def x(self, val):
+        self._x = Vector(self.node_grid_x, self.disc, val)
+        
+    @property 
+    def y(self):
+        return self._y
+    @y.setter
+    def y(self, val):
+        self._y = Vector(self.node_grid_y, self.disc, val)
+        
+    @property 
+    def z(self):
+        return self._z
+    @z.setter
+    def z(self, val):
+        self._z = Vector(self.node_grid_z, self.disc, val)
+                
+    @property
+    def values(self):
+        return self._values
+    @values.setter
+    def values(self, vals):
+        self._values = vals
+        self.x = vals[0]
+        self.y = vals[1]
+        self.z = vals[2]        
 
+    def curl(self):
+        '''
+        Finds an approximation to the curl, given the index and x,y,z values
+        in Cartesian coordinates
+        
+        Returns as three vectors. Can be used to generate a field 
+        '''
+        
+        curl_x = self.z.Dy() - self.y.Dz()
+        curl_y = self.x.Dz() - self.z.Dx()
+        curl_z = self.y.Dx() - self.x.Dy()
+        
+        return np.array([curl_x,curl_y,curl_z])
 
             
         

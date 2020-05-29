@@ -53,10 +53,10 @@ t0 = time.time()
 ######################## Run settings ########################
 ########################################################################
 
-cont = False ## Continue with time-run. Else, just set up system.
+cont = True ## Continue with time-run. Else, just set up system.
 
-disp = False ## Display a run
-ho_disp = 5 ## How often to display the run
+disp = True ## Display a run
+ho_disp = 10 ## How often to display the run
 
 def disp_what():
     '''
@@ -67,7 +67,7 @@ def disp_what():
     # fig_Ey = R_sys.plot_slice('E','y',0)
     
     # fig_Ey0 = R_sys.plot_line('E','y',0,0)
-    # fig_Mz0 = R_sys.plot_line('M','z',0,0)
+    fig_Mz0 = R_sys.plot_line('M','z',3,0)
     # fig_Ey1,ax_Ey1 = R_sys.plot_slice('E','y',0)
     # fig_Ey2 = R_sys.plot_line('E','y',100,0)
     fig_Ey3,ax_Ey3 = R_sys.plot_line('E','y',3,0)
@@ -115,12 +115,12 @@ dz = dx
 disc = np.array([dx, dy, dz]) ### (dx, dy, dz)
 max_x = 16
 
-CFL = 1/(2**(1/2))*5 ### Testing. Soon this will be increased                  
+CFL = 1/(2**(1/2))*3 ### Testing. Soon this will be increased                  
 dt = CFL*disc[0]/c
 # dt = 5e-10 ### Puttha's dt
 # CFL = dt*c/disc[0] ### calculated
 
-T = 251*dt ## Final time
+T = 101*dt ## Final time
 # T = np.round(T,np.int(abs(np.log(dt)/np.log(10))))
 
 ## Making sure we have an odd-number for global nodes, otherwise
@@ -264,7 +264,7 @@ R_sys.fx = f_x
 R_sys.fy = f_y
 R_sys.fz = f_z
 
-R_sys.tol = 5e-9
+# R_sys.tol = 1E10
 
 # R_sys2.fx = f_x
 # R_sys2.fy = f_y

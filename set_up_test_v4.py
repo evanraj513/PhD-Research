@@ -48,7 +48,8 @@ disc = np.array([dx, dy, dz])
 
 max_x = 10.2
 max_y = max_x
-max_z = dx ## 2D
+max_z = dz ## 2D
+# max_z = max_x ## 3D
 
 gnx = np.round(max_x/dx)
 gny = np.round(max_y/dy)
@@ -117,121 +118,235 @@ def reset_ts_for_next_run():
     ts.M_old2.values = ts.M_new.values
     
 def reset_tsr_for_next_run():
-    tsr.E_old2.values = tsr.E_old.values
-    tsr.H_old2.values = tsr.H_old.values
-    tsr.B_old2.values = tsr.B_old.values
-    tsr.M_old2.values = tsr.M_old.values
+    # tsr.E_old2.values = tsr.E_old.values
+    # tsr.H_old2.values = tsr.H_old.values
+    # tsr.B_old2.values = tsr.B_old.values
+    # tsr.M_old2.values = tsr.M_old.values
     
-    tsr.E_old.values = tsr.E_new.values
-    tsr.H_old.values = tsr.H_new.values
-    tsr.B_old.values = tsr.B_new.values
-    tsr.M_old.values = tsr.M_new.values
+    # tsr.E_old.values = tsr.E_new.values
+    # tsr.H_old.values = tsr.H_new.values
+    # tsr.B_old.values = tsr.B_new.values
+    # tsr.M_old.values = tsr.M_new.values
+    
+    tsr.E_old2.values = tsr.E_new.values
+    tsr.H_old2.values = tsr.H_new.values
+    tsr.B_old2.values = tsr.B_new.values
+    tsr.M_old2.values = tsr.M_new.values
+    
+def LLG_portion(sys, X = 'Old'):
+    '''
+    Performs the Joly trick on system. 
+    
+    If X == 'Old', performs trick on old2 to update old
+    If X == 'New', performs trick on old to update new
+    
+    These two set-ups are necessary for the ADI, but Yee scheme is written
+        to use it as well now. 
+    '''
+    
+    ## Parameters
+    dt = sys.dt/2 ### Half-step for ADI
+    bdp = sys.better_dot_pdt
+    gamma = sys.gamma
+    K = sys.K
+    
+    M_old = sys.M_old
+            
+    if X == 'old' or X == 'Old': ## Set-up for half-step
+    ## old2 = n-1/2, old = n+1/2 for Joly legibility
+        
+        f = 2*sys.M_old2.values
+        B_on = (sys.B_old2.values + sys.B_old.values)/2
+        
+        a = -( (abs(gamma)*dt/2)*(B_on/mu0 + sys.H_s.values) + alpha*sys.M_old2.values)
+        lam = -K*abs(gamma)*dt/4
+        
+    elif X == 'new' or X == 'New':
+        f = 2*sys.M_old.values
+        B_on = (sys.B_old.values + sys.B_new.values)/2
+        
+        a = -( (abs(gamma)*dt/2)*(B_on/mu0 + sys.H_s.values) + alpha*sys.M_old.values)
+        lam = -K*abs(gamma)*dt/4
+        
+    a_dot_f =  bdp(a.T,f.T).T
+    
+    ## Projection of 'easy' axis
+    p_x = np.zeros(shape = (sys.M_old2.values.shape[1],1))
+    p_y = np.copy(p_x)
+    p_z = np.ones(shape = (sys.M_old2.values.shape[1],1))
+    p = np.concatenate((p_x, p_y, p_z), axis = 1).T
+    
+    if K == 0 or t == dt:
+        x_new_num = f + (a_dot_f)*a - np.cross(a.T,f.T).T
+        x_new_den = np.array(1+np.linalg.norm(a,axis=0)**2).T
+        
+        x_new_values = np.divide(x_new_num.T, np.array([x_new_den]).T)
+            
+    else:
+        
+        cubic_solver = sys.cubic_solver
+        
+        a1 = lam**2
+        b1 = 2*lam*(bdp(a.T, p.T) + lam*(bdp(p.T, f.T)))
+        c1 = 1+np.linalg.norm(a)**2 - lam*(bdp(a.T, f.T)) + 3*lam*\
+        (bdp(a.T, p.T)) * (bdp(p.T, f.T)) + \
+        lam**2*(bdp(p.T, f.T))
+        d1 = -lam*(bdp(a.T, f.T)*(bdp(p.T,f.T))) - (bdp(a.T, p.T)*(bdp(p.T,f.T))**2)\
+        + lam*((bdp(a.T, p.T)*(bdp(p.T,f.T))**2))\
+        +np.linalg.norm(a)**2*(bdp(p.T, f.T))
+        -bdp(np.cross(a.T, p.T),f.T)
+        Z = np.zeros(shape = b1.shape)
+        X = np.copy(Z)
+        Y = np.copy(Z)
+        x_new_values = np.copy(Z)
+        for k in np.arange(0,x_new_values.shape[1]):
+            if k%100 == 1:
+                Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k],disp = 'Yes')
+            else:
+                Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k],disp = 'no')
+        
+        X = (bdp(a.T,f.T)) - lam*Z*(Z+bdp(p.T,f.T))
+        Y = Z+bdp(p.T,f.T)
+        
+        x_new_values = 1/np.linalg.norm(np.cross(a.T,p.T).T)**2*\
+        ((X - (bdp(a.T,p.T))*Y).T*a\
+          + (((np.linalg.norm(a))**2*Y) - (bdp(a.T,p.T))).T*X\
+          + (Z*np.cross(a.T, p.T)).T)
+        
+    if X == 'old' or X == 'Old':
+        return x_new_values.T - sys.M_old2.values
+    elif X == 'new' or X == 'New':
+        return x_new_values.T - sys.M_old.values
+    else:
+        print('Something is wrong in LLG_ADI')
     
 def Yee_run(t):
     '''
-    A test Yee run to (compare with ADI) run below
+    A test Yee run to (compare with ADI) run below. 
+    
+    Will be implemented to do two time-steps, to match counters and whatnot
+    with ADI method
+    
+    n = old2 = t-tsr.dt*2
+    n+1/2 = old = t-tsr.dt
+    n+1 = new = t
+    
+    Note that tsr.dt = ts.dt/2. 
     '''
-    E_old = tsr.E_old
+    ### First Half-step
+    E_old2 = tsr.E_old2
     # H_old = tsr.H_old
-    M_old = tsr.M_old
-    B_old = tsr.B_old
+    # M_old2 = tsr.M_old2
+    B_old2 = tsr.B_old2
     
     dt = tsr.dt
     b_ind = tsr.bound_ind
-    bdp = tsr.better_dot_pdt
     
-    ## Parameters
-    mu0 = tsr.mu0
-    eps = tsr.eps
-    gamma = tsr.gamma
-    # K = tsr.K
-    alpha = tsr.alpha
+    ## Get curl values
+    tsr.H_old.values = tsr.H_old2.values ## necessary to use the next line
+    tsr.set_up_H_curl()
+    
+    ## Boundary conditions being satisfied
+    # F_old = np.concatenate((tsr.Fx(t), tsr.Fy(t), tsr.Fz(t)),axis=1) ## F_n-1/2
+    # E_old.values += F_old.T
+    
+    '''
+    Note, the above is not necessary, as we solve for E first. 
+    '''
+    
+    ## Update E_old  
+    F = np.concatenate((tsr.Fx(t-dt), tsr.Fy(t-dt), tsr.Fz(t-dt)),axis=1) ## F_n+1/2
+    E_old_values = E_old2.values + dt/eps*tsr.H_old_curl ## +dt*sigma*E_old.values + dt*J
+    
+    #Setting all E boundaries
+    for j in b_ind[0]:
+        E_old_values[0][j] = F.T[0][j] #x_bound(j)
+    for k in b_ind[1]:
+        E_old_values[1][k] = F.T[1][k]
+    for l in b_ind[2]:
+        E_old_values[2][l] = F.T[2][l]
+    
+    tsr.E_old.values = E_old_values
+    
+    tsr.E_new.values = tsr.E_old.values ## Similar to H above, necessary for next line
+    tsr.set_up_E_curl()
+    
+    ## Update B_old
+    tsr.B_old.values = B_old2.values - dt*tsr.E_new_curl
+    
+    ## Solving for M_old
+    tsr.M_old.values = LLG_portion(tsr, X = 'Old')
+    
+    ## Update H_new
+    tsr.H_old.values = tsr.B_old.values/mu0 - tsr.M_old.values   
+    
+    # tsr.plot_slice('E','y')
+    # tsr.plot_slice('M','z')
+    # tsr.plot_slice('E','z')
+    
+    ### Setting TM mode to 0
+    tsr.E_old.values[2] = tsr.E_old.z.value*0
+    
+    tsr.M_old.values[0] = tsr.M_old.x.value*0
+    tsr.M_old.values[1] = tsr.M_old.y.value*0
+    
+    tsr.B_old.values[0] = tsr.B_old.x.value*0
+    tsr.B_old.values[1] = tsr.B_old.y.value*0
+    
+    tsr.M_old.values[0] = tsr.M_old.x.value*0
+    tsr.M_old.values[1] = tsr.M_old.y.value*0
+    
+    ##### Second Half-step
+    E_old = tsr.E_old
+    # H_old = tsr.H_old
+    # M_old = tsr.M_old
+    B_old = tsr.B_old
     
     ## Get curl values
     tsr.set_up_H_curl()
     
     ## Boundary conditions being satisfied
-    F_old = np.concatenate((tsr.Fx(t-dt), tsr.Fy(t-dt), tsr.Fz(t-dt)),axis=1) ## F_n-1/2
-    E_old.values += F_old.T
+    # F_old = np.concatenate((tsr.Fx(t), tsr.Fy(t), tsr.Fz(t)),axis=1) ## F_n-1/2
+    # E_old.values += F_old.T
     
-    ## Actual computation of time stepping
+    ## Update E_new
     F = np.concatenate((tsr.Fx(t), tsr.Fy(t), tsr.Fz(t)),axis=1) ## F_n+1/2
     E_new_values = E_old.values + dt/eps*tsr.H_old_curl ## +dt*sigma*E_old.values + dt*J
     
-    #Setting all E boundaries to 0
+    #Setting all E boundaries
     for j in b_ind[0]:
-        E_new_values[0][j] = 0 #x_bound(j)
+        E_new_values[0][j] = F.T[0][j] #x_bound(j)
     for k in b_ind[1]:
-        E_new_values[1][k] = 0
+        E_new_values[1][k] = F.T[1][k]
     for l in b_ind[2]:
-        E_new_values[2][l] = 0
-    
-    #Boundary conditions inside F
-    E_new_values = E_new_values+F.T
+        E_new_values[2][l] = F.T[2][l]
     
     tsr.E_new.values = E_new_values
     
-    # tsr.E_new_setup()
     tsr.set_up_E_curl()
     
+    ## Update B_new
     B_new_values = B_old.values - dt*tsr.E_new_curl
     tsr.B_new.values = B_new_values
     
-    ## Solving for M_n+1
-    B_on = (B_old.values + B_new_values)/2
+    ## Solving for M_new
+    tsr.M_new.values = LLG_portion(tsr,X = 'New')
     
-    f = 2*M_old.values
-    a = -(abs(gamma)*dt/2)*(B_on/mu0 + tsr.H_s.values) - alpha*M_old.values
-    # lam = -K*abs(gamma)*tsr.dt/4
-    
-    a_dot_f =  bdp(a.T,f.T).T
-    
-    # p_x = np.zeros(shape = (M_old.values.shape[1],1))
-    # p_y = np.copy(p_x)
-    # p_z = np.ones(shape = (M_old.values.shape[1],1))
-    # p = np.concatenate((p_x, p_y, p_z), axis = 1).T
-    
-    # if K == 0 or abs(t-dt) < 1e-12:
-    x_new_num = f + (a_dot_f)*a - np.cross(a.T,f.T).T
-    x_new_den = np.array(1+np.linalg.norm(a,axis=0)**2).T
-    
-    x_new_values = np.divide(x_new_num.T, np.array([x_new_den]).T)
-            
-    # else:
-        
-    #     cubic_solver = tsr.cubic_solver
-        
-    #     a1 = lam**2
-    #     b1 = 2*lam*(bdp(a.T, p.T) + lam*(bdp(p.T, f.T)))
-    #     c1 = 1+np.linalg.norm(a)**2 - lam*(bdp(a.T, f.T)) + 3*lam*\
-    #     (bdp(a.T, p.T)) * (bdp(p.T, f.T)) + \
-    #     lam**2*(bdp(p.T, f.T))
-    #     d1 = -lam*(bdp(a.T, f.T)*(bdp(p.T,f.T))) - (bdp(a.T, p.T)*(bdp(p.T,f.T))**2)\
-    #     + lam*((bdp(a.T, p.T)*(bdp(p.T,f.T))**2))\
-    #     +np.linalg.norm(a)**2*(bdp(p.T, f.T))
-    #     -bdp(np.cross(a.T, p.T),f.T)
-    #     Z = np.zeros(shape = b1.shape)
-    #     X = np.copy(Z)
-    #     Y = np.copy(Z)
-    #     x_new_values = np.copy(Z)
-    #     for k in np.arange(0,x_new_values.shape[1]):
-    #         if k%100 == 1:
-    #             Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k],disp = 'Yes')
-    #         else:
-    #             Z[k] = cubic_solver(a1,b1[k],c1[k],d1[k],M_old.x.value[k],disp = 'no')
-        
-    #     X = (bdp(a.T,f.T)) - lam*Z*(Z+bdp(p.T,f.T))
-    #     Y = Z+bdp(p.T,f.T)
-        
-    #     x_new_values = 1/np.linalg.norm(np.cross(a.T,p.T).T)**2*\
-    #     ((X - (bdp(a.T,p.T))*Y).T*a\
-    #       + (((np.linalg.norm(a))**2*Y) - (bdp(a.T,p.T))).T*X\
-    #       + (Z*np.cross(a.T, p.T)).T)
-        
-        
-    tsr.M_new.values = x_new_values.T - M_old.values
-    
+    ## Update H_new
     tsr.H_new.values = B_new_values/mu0 - tsr.M_new.values   
+    
+    
+    ### Setting TM mode to 0
+    tsr.E_new.values[2] = tsr.E_old.z.value*0
+    
+    tsr.M_new.values[0] = tsr.M_old.x.value*0
+    tsr.M_new.values[1] = tsr.M_old.y.value*0
+    
+    tsr.B_new.values[0] = tsr.B_old.x.value*0
+    tsr.B_new.values[1] = tsr.B_old.y.value*0
+    
+    tsr.H_new.values[0] = tsr.M_old.x.value*0
+    tsr.H_new.values[1] = tsr.M_old.y.value*0
     
 def LLG_run(t):
     ## Half-step parameters
@@ -431,11 +546,14 @@ def plot_y_cs(F = 'E', comp = 'y', cs = 0, s = 0, direc = 'y'):
     return fig, ax
     
 # ts.tol = 1e-8
-for k in range(1,20):
+for k in range(1,120):
     print(k)
     t = k*dt
-    LLG_run(t)
-    ts.T = round_to_3(t)
+    # LLG_run(t)
+    # ts.T = round_to_3(t)
+    
+    Yee_run(t)
+    tsr.T = round_to_3(tsr.dt*k)
     
     ## Double half-step forces tsr_old = ts_old time-wise
     # tsr.single_run_v2(t-dt/2)
@@ -448,11 +566,11 @@ for k in range(1,20):
         
         # ts.M_old.values = abs(tsr.M_old.values - ts.M_new.values)
         
-        fig2,ax2 = ts.plot_slice('E','y')
+        fig2,ax2 = tsr.plot_slice('E','y')
         ax2.set_title(r'ADI plot: $E_y$'+
                       '\n Ticker: '+str(k))
         
-        fig3,ax3 = ts.plot_slice('M','z')
+        fig3,ax3 = tsr.plot_slice('M','z')
         ax3.set_title(r'ADI plot: $M_z$'+
                       '\n Ticker: '+str(k))
         # fig2,ax2 = tsr.plot_slice('E','y')
@@ -468,8 +586,17 @@ for k in range(1,20):
         # ax.set_zlim(99.999,100.001)
         # fig1, ax1 = plot_y_cs(F = 'M', comp = 'z', s = 0, cs = 4, direc = 'y')
         # fig2, ax2 = plot_y_cs(F = 'M', comp = 'z', s = 0, cs = 6, direc = 'y')
-    reset_ts_for_next_run()
+        
+    # reset_ts_for_next_run()
     reset_tsr_for_next_run()
+    
+    ## For plotting only
+    # tsr.E_old.values = tsr.E_new.values
+    # tsr.M_old.values = tsr.M_new.values
+    
+    # tsr.plot_slice('E','y')
+    # tsr.plot_slice('M','z')
+    # tsr.plot_slice('E','z')
     
     
     

@@ -701,7 +701,7 @@ class Ferro_sys(object):
                 x1[k-m_cs] = ind(k)[0]
                 y1[k-m_cs] = pc.value[k]
                 
-            ax.plot(x1,y1,'-x')
+            ax.plot(x1,y1)
 #            title = 'Plot of: '+F+'_'+comp+'\n'+ 'slice number: '+str(s)+\
 #                    '\n'+'cross_section: '+str(cs)
             title = 'Plot of: '+F+'_'+comp+'\n'+\
@@ -738,7 +738,7 @@ class Ferro_sys(object):
                 y1[k-m_cs] = pc.value[k]
                 
                       #   (num rows, num cols)
-            ax.plot(x1,y1,'x')
+            ax.plot(x1,y1,'-x')
             title = 'Plot of: '+F+'_'+comp+'\n'+ 'slice number: '+str(s)+\
                     '\n'+'cross_section: '+str(cs)+'\n'+\
                     'Time: '+str(self.T)
@@ -2011,13 +2011,26 @@ class Ferro_sys(object):
             self.M_old.values = M_values_1
             self.ADI_first_half(t)
             M_values_4 = self.LLG_ADI('old')
-            print('Current iteration for half-step fixed point:', ticker1)
-            print('Current residual for half-step:', norm(M_values_1 - M_values_4))
+            print(' - Current iteration for half-step fixed point:', ticker1)
+            print(' - Current residual for half-step:', norm(M_values_1 - M_values_4))
         
         if ticker1 == self.maxiter_half_step:
-            print('**Warning. Convergence in fixed-point not reached in first half step**')
+            print('** Warning. Convergence in fixed-point not reached in first half step**')
             
         self.M_old.values = M_values_4
+        
+        ### Setting TM mode to 0
+        self.E_old.values[2] = self.E_old.z.value*0
+        
+        self.M_old.values[0] = self.M_old.x.value*0
+        self.M_old.values[1] = self.M_old.y.value*0
+        
+        self.B_old.values[0] = self.B_old.x.value*0
+        self.B_old.values[1] = self.B_old.y.value*0
+        
+        self.M_old.values[0] = self.M_old.x.value*0
+        self.M_old.values[1] = self.M_old.y.value*0
+        
         
         #####################################################
         ################ Second Half step ###################
@@ -2028,9 +2041,9 @@ class Ferro_sys(object):
         
         ################# Solving for M_n+1 (5) #################
         self.B_new.values = self.B_old.values ### Setting for forward scheme LLG
-        M_new_values_1 = self.LLG_ADI(t, 'new')
+        M_new_values_5 = self.LLG_ADI(t, 'new')
         
-        self.M_new.values = M_new_values_1
+        self.M_new.values = M_new_values_5
         
         ############# Updating E,B,H n+1  (6-7) ################
         self.ADI_second_half(t)
@@ -2038,23 +2051,33 @@ class Ferro_sys(object):
         # self.plot_line('E','y')
         
         ########## Computing Mn+1/2(4) using Bn, Bn+1/2 (8) #######
-        M_new_values_4 = self.LLG_ADI('new')
+        M_new_values_8 = self.LLG_ADI('new')
         
-        while ticker2 < self.maxiter_whole_step and norm(M_values_1 - M_new_values_4) > tol:
+        while ticker2 < self.maxiter_whole_step and norm(M_new_values_5 - M_new_values_8) > tol:
             ticker2+=1
-            M_new_values_1 = M_new_values_4
-            self.M_new.values = M_new_values_1
+            M_new_values_5 = M_new_values_8
+            self.M_new.values = M_new_values_5
             self.ADI_first_half(t)
-            M_new_values_4 = self.LLG_ADI('new')
-            print('Current iteration for whole-step fixed point:', ticker2)
-            print('Current residual for whole-step:', norm(M_values_1 - M_values_4))
+            M_new_values_8 = self.LLG_ADI('new')
+            print(' + Current iteration for whole-step fixed point:', ticker2)
+            print(' + Current residual for whole-step:', norm(M_new_values_5 - M_new_values_8))
             
-        self.M_new.values = M_new_values_4
+        self.M_new.values = M_new_values_8
             
         if ticker2 == self.maxiter_whole_step:
-            print('**Warning. Convergence in fixed-point not reached in second half step**')
+            print('** Warning. Convergence in fixed-point not reached in second half step**')
         
+        ### Setting TM mode to 0
+        self.E_new.values[2] = self.E_old.z.value*0
         
+        self.M_new.values[0] = self.M_old.x.value*0
+        self.M_new.values[1] = self.M_old.y.value*0
+        
+        self.B_new.values[0] = self.B_old.x.value*0
+        self.B_new.values[1] = self.B_old.y.value*0
+        
+        self.M_new.values[0] = self.M_old.x.value*0
+        self.M_new.values[1] = self.M_old.y.value*0
         
     def cubic_solver(self,a,b,c,d,x0,disp = 'no'):
         '''
