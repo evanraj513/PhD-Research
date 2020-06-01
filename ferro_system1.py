@@ -147,7 +147,7 @@ class Ferro_sys(object):
         self.E_old = E0
         self.H_old = H0
         self.M_old = M0
-        self.B0 = self.mu0*H0 + M0 
+        self.B0 = self.mu0*(H0 + M0)
         self.B_old = self.B0
         self.H_s = H_s
         
@@ -1566,7 +1566,7 @@ class Ferro_sys(object):
     
     def set_up_step_2a_inv(self):
         '''
-        Sets up step_1a (as in huang 2018) to compute E^n+1/2
+        Sets up step_2a (as in huang 2018) to compute E^n+1/2
         '''
         ## Parameters
         dt = self.dt
@@ -1869,7 +1869,7 @@ class Ferro_sys(object):
             E_old_values[0][j] = 0 #x_bound(j)
         for k in b_ind[1]:
             E_old_values[1][k] = 0
-        for l in b_ind[2]:
+        for l in b_ind[2]: 
             E_old_values[2][l] = 0
             
         ### Add in forcing terms at the half-step
@@ -1994,7 +1994,7 @@ class Ferro_sys(object):
         
         ################ Solving for Mn+1/2 (1) ################
         self.B_old.values = self.B_old2.values ### Setting up for only forward scheme LLG
-        M_values_1 = self.LLG_ADI('old')
+        M_values_1 = self.LLG_ADI(t, 'old')
         
         self.M_old.values = M_values_1 
                 

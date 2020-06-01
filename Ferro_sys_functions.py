@@ -28,6 +28,9 @@ if not os.path.exists(m_path):
     raise Exception
 else:
     sys.path.append(m_path)
+    
+from Research import ferro_system1
+Ferro_sys = ferro_system1.Ferro_sys
 
 
 ########################## General functions ##########################
@@ -43,7 +46,41 @@ def mkdir_p(mypath):
         if exc.errno == EEXIST and path.isdir(mypath):
             pass
         else: raise
-
+def set_up_system(gnx,gny,gnz,disc,H_s_val = 0,init_mag = 0):
+    '''
+    Sets up Ferrosystem to be run. 
+    '''
+    
+    ### Initial conditions
+    node_count = np.array([gnx, gny, gnz])
+    a = np.round(np.array(sizing(node_count[0], node_count[1], node_count[2])).prod(axis=1))
+    
+    ####################################################
+    ########### Initial conditions ################
+    ####################################################
+    E0_x = np.zeros(shape = (int(a[0]),1))
+    E0_y = np.zeros(shape = (int(a[1]),1))
+    E0_z = np.zeros(shape = (int(a[2]),1))
+    E0 = np.concatenate((E0_x, E0_y, E0_z),axis=1).T
+    
+    M0_x = np.zeros(shape = (int(a[3]),1))
+    M0_y = np.zeros(shape = (int(a[4]),1))
+    M0_z = init_mag*np.ones(shape = (int(a[5]),1))
+    M0 = np.concatenate((M0_x, M0_y, M0_z),axis=1).T
+    
+    H0_x = np.zeros(shape = (int(a[3]),1))
+    H0_y = np.zeros(shape = (int(a[4]),1))
+    H0_z = np.zeros(shape = (int(a[5]),1))
+    H0 = np.concatenate((H0_x, H0_y, H0_z),axis=1).T
+    
+    H_s_x = H_s_val*np.ones(shape = (int(a[3]),1))
+    H_s_y = H_s_val*np.ones(shape = (int(a[4]),1))
+    H_s_z = H_s_val*np.ones(shape = (int(a[5]),1))
+    H_s = np.concatenate((H_s_x, H_s_y, H_s_z),axis=1).T
+    
+    R_sys = Ferro_sys(node_count,disc,E0,H0,M0,H_s)
+    
+    return R_sys
         
 def sizing(nx,ny,nz):
     '''

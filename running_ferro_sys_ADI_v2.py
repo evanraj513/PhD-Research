@@ -56,7 +56,7 @@ t0 = time.time()
 cont = True ## Continue with time-run. Else, just set up system.
 
 disp = True ## Display a run
-ho_disp = 10 ## How often to display the run
+ho_disp = 5 ## How often to display the run
 
 def disp_what():
     '''
@@ -120,7 +120,7 @@ dt = CFL*disc[0]/c
 # dt = 5e-10 ### Puttha's dt
 # CFL = dt*c/disc[0] ### calculated
 
-T = 101*dt ## Final time
+T = 51*dt ## Final time
 # T = np.round(T,np.int(abs(np.log(dt)/np.log(10))))
 
 ## Making sure we have an odd-number for global nodes, otherwise
@@ -264,7 +264,7 @@ R_sys.fx = f_x
 R_sys.fy = f_y
 R_sys.fz = f_z
 
-# R_sys.tol = 1E10
+R_sys.tol = 1E-6
 
 # R_sys2.fx = f_x
 # R_sys2.fy = f_y
