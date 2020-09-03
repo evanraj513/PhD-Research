@@ -66,14 +66,14 @@ c = 1/(mu0*eps)**(1/2) ## Speed of light
 K = 0
 alpha = 0.2
 gamma = 2.2E5
-init_mag = 100.0 ## Initial magnetization in z-direction
-H_s_val = 1E5 ## Static magnetic field value (uniform in x,y,z assumption)
+init_mag = 0.0 ## Initial magnetization in z-direction
+H_s_val = 0 ## Static magnetic field value (uniform in x,y,z assumption)
 
 CFL = 1/(2**(1/2))*5
 dt = CFL*dx/c
 
 #### Initializing system
-test_sys = fsf.set_up_system(gnx, gny, gnz, disc,init_mag = 100)
+test_sys = fsf.set_up_system(gnx, gny, gnz, disc,H_s_val = H_s_val,init_mag = 100)
 # test_sys.initialize_set_up_ADI()
 test_sys.cubic_solver = fsf.cardanos_method
 ts = test_sys ### System running code to debug
@@ -85,7 +85,7 @@ ts.dt = dt
 # ts2.initialize_set_up_ADI()
 # ts2.cubic_solver = cardanos_method
 
-tsr = fsf.set_up_system(gnx,gny,gnz,disc,init_mag = 100) ### test_system_regular: runs Yee to compare to new algorithms
+tsr = fsf.set_up_system(gnx,gny,gnz,disc,H_s_val = 10**5,init_mag = 100) ### test_system_regular: runs Yee to compare to new algorithms
 tsr.dt = dt/2
 # tsr.gamma = 0.0
 # tsr.alpha = 0.0
@@ -116,11 +116,89 @@ tsr.fx = f_x
 tsr.fy = f_y
 tsr.fz = f_z
 
+def set_TM_to_0(system, comp = 'all'):
+    '''
+    Sets the TM mode to 0 for all components
+    '''    
+    
+    if comp == 'old2' or comp == 'all':
+        system.E_old2.values[2] = system.E_old2.values[2]*0
+
+        system.M_old2.values[0] = system.M_old2.values[0]*0
+        system.M_old2.values[1] = system.M_old2.values[1]*0
+        
+        system.B_old2.values[0] = system.B_old2.values[0]*0
+        system.B_old2.values[1] = system.B_old2.values[1]*0
+        
+        system.H_old2.values[0] = system.H_old2.values[0]*0
+        system.H_old2.values[1] = system.H_old2.values[1]*0
+        
+        system.E_old2.z.value = system.E_old2.values[2]*0
+
+        system.M_old2.x.value = system.M_old2.values[0]*0
+        system.M_old2.y.value = system.M_old2.values[1]*0
+        
+        system.B_old2.x.value = system.B_old2.values[0]*0
+        system.B_old2.y.value = system.B_old2.values[1]*0
+        
+        system.H_old2.x.value = system.H_old2.values[0]*0
+        system.H_old2.y.value = system.H_old2.values[1]*0
+        
+    if comp == 'old' or comp == 'all':
+        system.E_old.values[2] = system.E_old2.values[2]*0
+
+        system.M_old.values[0] = system.M_old2.values[0]*0
+        system.M_old.values[1] = system.M_old2.values[1]*0
+        
+        system.B_old.values[0] = system.B_old2.values[0]*0
+        system.B_old.values[1] = system.B_old2.values[1]*0
+        
+        system.H_old.values[0] = system.H_old2.values[0]*0
+        system.H_old.values[1] = system.H_old2.values[1]*0
+        
+        system.E_old.z.value = system.E_old2.values[2]*0
+
+        system.M_old.x.value = system.M_old2.values[0]*0
+        system.M_old.y.value = system.M_old2.values[1]*0
+        
+        system.B_old.x.value = system.B_old2.values[0]*0
+        system.B_old.y.value = system.B_old2.values[1]*0
+        
+        system.H_old.x.value = system.H_old2.values[0]*0
+        system.H_old.y.value = system.H_old2.values[1]*0
+        
+    if comp == 'new' or comp == 'all':
+        system.E_new.values[2] = system.E_old2.values[2]*0
+
+        system.M_new.values[0] = system.M_old2.values[0]*0
+        system.M_new.values[1] = system.M_old2.values[1]*0
+        
+        system.B_new.values[0] = system.B_old2.values[0]*0
+        system.B_new.values[1] = system.B_old2.values[1]*0
+        
+        system.H_new.values[0] = system.H_old2.values[0]*0
+        system.H_new.values[1] = system.H_old2.values[1]*0
+        
+        system.E_new.z.value = system.E_old2.values[2]*0
+
+        system.M_new.x.value = system.M_old2.values[0]*0
+        system.M_new.y.value = system.M_old2.values[1]*0
+        
+        system.B_new.x.value = system.B_old2.values[0]*0
+        system.B_new.y.value = system.B_old2.values[1]*0
+        
+        system.H_new.x.value = system.H_old2.values[0]*0
+        system.H_new.y.value = system.H_old2.values[1]*0
+    
+
 def reset_ts_for_next_run():
     ts.E_old2.values = ts.E_new.values
     ts.H_old2.values = ts.H_new.values
     ts.B_old2.values = ts.B_new.values  
     ts.M_old2.values = ts.M_new.values
+    
+    
+    set_TM_to_0(ts)
     
 def reset_tsr_for_next_run():
     # tsr.E_old2.values = tsr.E_old.values
@@ -138,6 +216,7 @@ def reset_tsr_for_next_run():
     tsr.B_old2.values = tsr.B_new.values
     tsr.M_old2.values = tsr.M_new.values
     
+
 def LLG_portion(system, X = 'Old'):
     '''
     Performs the Joly trick on system. 
@@ -175,6 +254,9 @@ def LLG_portion(system, X = 'Old'):
         lam = -K*abs(gamma)*dt/4
         
     a_dot_f =  bdp(a.T,f.T).T
+    
+    # tsr.M_old.values = a_dot_f*a
+    # tsr.plot_slice('M','z')
     
     ## Projection of 'easy' axis
     p_x = np.zeros(shape = (system.M_old2.values.shape[1],1))
@@ -389,8 +471,15 @@ def ADI_first_half_test(system,t):
     sigma = system.sigma 
     
     ### Applying boundary conditions
+    b_ind = system.bound_ind
     F_old2 = np.concatenate((system.Fx(t-dt), system.Fy(t-dt), system.Fz(t-dt)),axis=1)
-    E_old2.values += F_old2.T
+
+    for j in b_ind[0]:
+        E_old2.values[0][j] = F_old2.T[0][j] #x_bound(j)
+    for k in b_ind[1]:
+        E_old2.values[1][k] = F_old2.T[1][k]
+    for l in b_ind[2]: 
+        E_old2.values[2][l] = F_old2.T[2][l]
     
     ##### Solving for E_n+1/2
     s_a = 1/mu0*system.curl_L(B_old2.values,'Inner')
@@ -518,9 +607,13 @@ def ADI_run(t):
     M_values_1 = LLG_portion(ts, 'old')
     
     ts.M_old.values = M_values_1 
+    
+    set_TM_to_0(ts,'all')
             
     ############# Updating E,B,H n+1/2 (2-3) ################
     ADI_first_half_test(ts,t)
+    
+    set_TM_to_0(ts)
     # ts.plot_line('E','y')
     
     ########## Computing Mn+1/2(4) using Bn, Bn+1/2 (4) #######
@@ -531,8 +624,16 @@ def ADI_run(t):
         M_values_1 = M_values_4
         # print('res here:', norm(M_values_1 - M_values_4))
         ts.M_old.values = M_values_1
+        set_TM_to_0(ts)
         ts.ADI_first_half(t)
+        set_TM_to_0(ts)
         M_values_4 = ts.LLG_ADI(t, 'old')
+        
+        M_values_4[0] = M_values_4[0]*0
+        M_values_4[1] = M_values_4[1]*0
+        
+        # ts.plot_slice('M','z')
+        # set_TM_to_0(ts)
         
         # ts.M_old.values = M_values_4
         # ts.plot_slice('M','z')
@@ -549,6 +650,8 @@ def ADI_run(t):
         
     ts.M_old.values = M_values_4
     
+    set_TM_to_0(ts)
+    
     #####################################################
     ################ Second Half step ###################
     ##################################################### 
@@ -562,29 +665,34 @@ def ADI_run(t):
     
     ts.M_new.values = M_new_values_5
     
+    set_TM_to_0(ts)
+    
     ############# Updating E,B,H n+1  (6-7) ################
     ADI_second_half_test(ts,t)
-    # ts.E_old.values = ts.E_new.values
-    # ts.plot_line('E','y')
+    set_TM_to_0(ts)
     
     ########## Computing Mn+1/2(4) using Bn, Bn+1/2 (8) #######
     M_new_values_8 = LLG_portion(ts, 'new')
+    set_TM_to_0(ts)
     
-    # while ticker2 < ts.maxiter_whole_step and norm(M_new_values_5 - M_new_values_8) > tol:
-    #     ticker2+=1
-    #     M_new_values_5 = M_new_values_8
-    #     ts.M_new.values = M_new_values_5
-    #     ts.ADI_first_half(t)
-    #     M_new_values_8 = ts.LLG_ADI(t, 'new')
-    #     print(' + Current iteration for whole-step fixed point:', ticker2)
-    #     print(' + Current residual for whole-step:', norm(M_new_values_5 - M_new_values_8))
+    while ticker2 < ts.maxiter_whole_step and norm(M_new_values_5 - M_new_values_8) > tol:
+        ticker2+=1
+        M_new_values_5 = M_new_values_8
+        ts.M_new.values = M_new_values_5
+        ts.ADI_first_half(t)
+        M_new_values_8 = LLG_portion(ts, 'new')
+        set_TM_to_0(ts)
         
+        # ts.plot_slice('M','z')
+        print(' + Current iteration for whole-step fixed point:', ticker2)
+        print(' + Current residual for whole-step:', norm(M_new_values_5 - M_new_values_8))
+        
+    if ticker2 == ts.maxiter_whole_step:
+        print('** Warning. Convergence in fixed-point not reached in second half step **')    
+    
     ts.M_new.values = M_new_values_8
-        
-    # if ticker2 == ts.maxiter_whole_step:
-    #     print('**Warning. Convergence in fixed-point not reached in second half step**')
-
-
+    
+    set_TM_to_0(ts)
     
 def plot_y_cs(F = 'E', comp = 'y', cs = 0, s = 0, direc = 'y'):
     '''
@@ -667,8 +775,8 @@ def plot_y_cs(F = 'E', comp = 'y', cs = 0, s = 0, direc = 'y'):
  
 
 ts.initialize_set_up_ADI()   
-# ts.tol = 1e-8
-for k in range(1,20):
+# ts.tol = 1e10
+for k in range(1,51):
     print(k)
     t = k*dt
     # LLG_run(t)
@@ -685,18 +793,30 @@ for k in range(1,20):
     # tsr.T = round_to_3(tsr.dt*k)
     # Yee_run(t)
     
-    if k%1 == 0:
+    if k%5 == 1:
         # print(ts.M_old.values[2].std())
         
         # ts.M_old.values = abs(tsr.M_old.values - ts.M_new.values)
         
-        fig2,ax2 = ts.plot_line('E','y')
-        ax2.set_title(r'ADI plot: $E_y$'+
-                      '\n Ticker: '+str(k))
+        # fig2,ax2 = ts.plot_line('E','y')
+        # ax2.set_title(r'ADI plot: $E_y$'+
+        #               '\n Ticker: '+str(k))
         
-        fig3,ax3 = ts.plot_line('M','z')
-        ax3.set_title(r'ADI plot: $M_z$'+
+        # fig3,ax3 = ts.plot_line('B','z')
+        # ax3.set_title(r'ADI plot: $B_z$'+
+        #               '\n Ticker: '+str(k))
+        
+        fig,ax = ts.plot_slice('E','y')
+        ax.set_title(r'ADI plot: $M_z$'+
                       '\n Ticker: '+str(k))
+        # ax.set_ylim(0,100)
+        
+        # fig3,ax1 = ts.plot_slice('M','z')
+        # ax1.set_title(r'ADI plot: $M_z$'+
+        #               '\n Ticker: '+str(k))
+        
+        # ax1.set_ylim(50,110)
+        
         # fig2,ax2 = tsr.plot_slice('E','y')
         # ax2.set_title(r'Yee plot: $E_y$'+
         #               '\n Ticker: '+str(k))
@@ -704,12 +824,26 @@ for k in range(1,20):
         # fig3,ax3 = tsr.plot_slice('M','z')
         # ax3.set_title(r'Yee plot: $M_z$'+
         #               '\n Ticker: '+str(k))
+        # ax3.set_ylim(50,110)
+        
         # ax.set_ylim(99.999,100.001)
         # fig,ax = tsr.plot_slice('M','z')
         # ax.set_zlim(99.999,100.001)
         # ax.set_zlim(99.999,100.001)
         # fig1, ax1 = plot_y_cs(F = 'M', comp = 'z', s = 0, cs = 4, direc = 'y')
         # fig2, ax2 = plot_y_cs(F = 'M', comp = 'z', s = 0, cs = 6, direc = 'y')
+        # line1 = ax1.get_lines()[0]
+        # line3 = ax3.get_lines()[0]
+        
+        # fig,ax = plt.subplots(1,1)
+        
+        # ax.plot(line1.get_data()[0], line1.get_data()[1],'-',label = 'ADI')
+        # ax.plot(line3.get_data()[0], line3.get_data()[1], '--', label = 'Yee')
+        # ax.set_ylim(20,100)
+        # ax.legend()
+        
+        plt.show(block=False)
+        # wait = input('Press ENTER to continue')
         
     reset_ts_for_next_run()
     # reset_tsr_for_next_run()

@@ -898,102 +898,6 @@ class Vector(object):
     
         
         
-class Field_2(object):
-    ''' 
-    This class will store the values of a given field, as three vectors
-    The size will be determined by initialization
-    where each component is located will be based on my_ind()
-    
-    It will be F = <F_x, F_y, F_z>
-    
-    Attributes:
-    -----------
-    node_grid_(): np_array of length 3
-        Contains the number of nodes in the x,y,z direction, in that order 
-        of the () component of the field
-    disc: np_array of length 3
-        Contains the spatial step-size
-        in the x,y,z direction, in that order
-    x: Vector
-        stores the first component of the field
-    y,z similar to x
-    
-    values: np.array of 3 by x
-        Stores the values to initialize the Vectors x,y,z respectively. 
-    
-    TODO:
-        - (done) Add in setter properties for x,y,z? This will force the user
-            to use the Vector class.
-            
-        - (done) Boundary conditions need to be implemented. Think more about how
-            to implement these
-            
-            Ans: Done in system
-            
-    '''
-    
-    def __init__(self,node_grid_x, node_grid_y, node_grid_z, disc, values):
-#        self.index = index
-        if node_grid_x.size !=3 or node_grid_y.size !=3 or node_grid_z.size !=3:
-            print('*'*40,'\n','Error in field initialization.',
-                  'Incorrect nodal_count given. Abort. ')
-            raise Exception
-        elif disc.size !=3:
-            print('*'*40,'\n','Error in field initialization.',
-                  'Incorrect discretization given. Abort. ')
-            raise Exception
-        
-        self.node_grid_x = node_grid_x
-        self.node_grid_y = node_grid_y
-        self.node_grid_z = node_grid_z
-        self.disc = disc
-        self.values = values
-        
-    @property 
-    def x(self):
-        return self._x
-    @x.setter
-    def x(self, val):
-        self._x = Vector(self.node_grid_x, self.disc, val)
-        
-    @property 
-    def y(self):
-        return self._y
-    @y.setter
-    def y(self, val):
-        self._y = Vector(self.node_grid_y, self.disc, val)
-        
-    @property 
-    def z(self):
-        return self._z
-    @z.setter
-    def z(self, val):
-        self._z = Vector(self.node_grid_z, self.disc, val)
-                
-    @property
-    def values(self):
-        return self._values
-    @values.setter
-    def values(self, vals):
-        self._values = vals
-        self.x = vals[0]
-        self.y = vals[1]
-        self.z = vals[2]        
-
-    def curl(self):
-        '''
-        Finds an approximation to the curl, given the index and x,y,z values
-        in Cartesian coordinates
-        
-        Returns as three vectors. Can be used to generate a field 
-        '''
-        
-        curl_x = self.z.Dy() - self.y.Dz()
-        curl_y = self.x.Dz() - self.z.Dx()
-        curl_z = self.y.Dx() - self.x.Dy()
-        
-        return np.array([curl_x,curl_y,curl_z])
-    
 class Field_v3(object):
     ''' 
     This class will store the values of a given field, as three vectors
@@ -1002,14 +906,11 @@ class Field_v3(object):
     
     It will be F = <F_x, F_y, F_z>
     
-    The main difference from above will be how its values are stored and called
-    
-    
     Attributes:
     -----------
-    node_grid_(): np_array of length 3
-        Contains the number of nodes in the x,y,z direction, in that order 
-        of the () component of the field
+    node_grid: dict
+        Contains the number of nodes in the x,y,z direction of each spatial 
+        direction of the field
     disc: np_array of length 3
         Contains the spatial step-size
         in the x,y,z direction, in that order
@@ -1017,27 +918,47 @@ class Field_v3(object):
         stores the first component of the field
     y,z similar to x
     
-    values: np.array of 3 by x
+    vals: list of 3 np.arrays of 1 by n
         Stores the values to initialize the Vectors x,y,z respectively. 
+    
+    TODO:
             
     '''
     
-    def __init__(self,node_grid_x, node_grid_y, node_grid_z, disc, values):
+    def __init__(self,node_grid = {}, disc = [], vals = []):
 #        self.index = index
-        if node_grid_x.size !=3 or node_grid_y.size !=3 or node_grid_z.size !=3:
+        if node_grid['x'].size !=3 or node_grid['y'].size !=3 or node_grid['z'].size !=3:
             print('*'*40,'\n','Error in field initialization.',
-                  'Incorrect nodal_count given. Abort. ')
+                  'Incorrect nodal_grid given. Abort. ')
             raise Exception
-        elif disc.size !=3:
+        if disc.size !=3:
             print('*'*40,'\n','Error in field initialization.',
                   'Incorrect discretization given. Abort. ')
+            raise Exception        
+        
+        self.node_grid_x = np.array(node_grid['x'])
+        self.node_grid_y = np.array(node_grid['y'])
+        self.node_grid_z = np.array(node_grid['z'])
+        self.disc = disc
+
+        # self.values = values
+        
+        if type(vals[0]) != np.ndarray:
+            print('Error with Field initialization. x not np array')
+            raise Exception
+            
+        if type(vals[1]) != np.ndarray:
+            print('Error with Field initialization. y not np array')
+            raise Exception
+            
+        if type(vals[2]) != np.ndarray:
+            print('Error with Field initialization. z not np array')
             raise Exception
         
-        self.node_grid_x = node_grid_x
-        self.node_grid_y = node_grid_y
-        self.node_grid_z = node_grid_z
-        self.disc = disc
-        self.values = values
+        self.x = vals[0]
+        self.y = vals[1]
+        self.z = vals[2]
+        self.values = vals
         
     @property 
     def x(self):
@@ -1059,7 +980,7 @@ class Field_v3(object):
     @z.setter
     def z(self, val):
         self._z = Vector(self.node_grid_z, self.disc, val)
-                
+        
     @property
     def values(self):
         return self._values
@@ -1068,7 +989,11 @@ class Field_v3(object):
         self._values = vals
         self.x = vals[0]
         self.y = vals[1]
-        self.z = vals[2]        
+        self.z = vals[2]
+        
+        # return np.array(vals)
+        
+        
 
     def curl(self):
         '''
@@ -1083,11 +1008,4 @@ class Field_v3(object):
         curl_z = self.y.Dx() - self.x.Dy()
         
         return np.array([curl_x,curl_y,curl_z])
-
-            
-        
     
-        
-        
-        
-        

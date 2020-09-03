@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Nov 20 08:06:04 2019
+Created on Fri Jun  5 13:18:45 2020
+
+This will differ from ferro_system1 in that it no longer utilizes the Field class
+Instead, each vector will be initialized seperately. The field's values can still
+be accessed via a similar call (TBD), but all other functionality will be lost
+
 
 @author: evanraj
-
-This will serve as my first attempt at coding the coupled Maxwell's equations with
-the LLG equation. System given as a class
-
 """
 
 import os
@@ -39,7 +40,7 @@ from Research import field_class
 Field = field_class.Field_v3
 Vector = field_class.Vector
 
-### Ferrosystem parameters
+### Ferrosystem parameters, can be altered outside of here. Are attributes of the class
 mu0 = 1.25667e-6 #Permeability of free space
 eps = 8.85422e-12 #Permoittivity of free space
 gamma = 2.2e5 #From Puttha's paper
@@ -47,24 +48,31 @@ K = 0
 alpha = 0.2
 H_s_guess = 10**5
 
-''' TO DO 
-    1. (done) Find values for mu0, eps that are realistic (check paper again)
-    2. (done) Determine how we will find M_new. In paper, just need to read it again
-    3. (done) Determine if np.cross is working
-    4. (done) Determine path stuff
-    5. (done) Add in check that given initial values are np.arrays of arrays (maybe)
-    '''
+# class Field_all(values):
+    
+#     def __init__(self,values):
+#         self.old2 = values
+#         self.old = values
+#         self.new = values
+        
+#     @property
+#     def old2(self):
+#         return self._old2
+#     @old2.setter
+#     def old2(self):
+        
 
-class Ferro_sys(object):
+class Ferro_sys_v2(object):
     '''    
     Initialization Attributes
     -------------------------
     X0: list
         3 columns of initial conditions for field X, each column corresponding to 
         the X,Y,Z components        
-    global_node_count: np.array, length = 1 or 3       Note: In old code, this was "size"
+    global_node_count: np.array, length = 1 or 3       
+        Note: In old code, this was "size"
         Will give the number of nodes in one 'direction'
-            - Assuming same number of nodes in each row
+            Note: Assumes uniform number of nodes in each direction
                 if only one number is passed
     disc: np_array of length 3
         Contains the step-size in the x,y,z direction, in that order
@@ -87,7 +95,14 @@ class Ferro_sys(object):
         
     '''
     
-    def __init__(self,global_node_count,disc,E0,H0,M0,H_s = H_s_guess):
+    def __init__(self,global_node_count, disc, E0 = [], H0 = [], M0 = [], H_s = []):
+        ## Checks before initializing
+        # if type(E0) != list or type(H0) != list or type(M0) != list:
+        #     print('*'*30, '\n')
+        #     print('Error, incorrect initialization type for initial value. Abort. ')
+        #     print('\n','*'*30)
+        #     raise Exception
+            
         # Parameter Set-up
         self.dt = 0.1 
         self.T = 1.0
@@ -99,7 +114,7 @@ class Ferro_sys(object):
         self.alpha = alpha
         self.H_s_guess = H_s_guess
         self.sigma = 0.0
-
+        
         self.disc = disc
         self.node_count = global_node_count
         if global_node_count.size == 1:
@@ -111,7 +126,7 @@ class Ferro_sys(object):
             self.gny = global_node_count[1]
             self.gnz = global_node_count[2]
         else:
-            print('*'*40,'\n','Error in given node_count. Abort','\n','*'*40)
+            print('*'*40,'\n','Error in given global_node_count. Abort','\n','*'*40)
             raise Exception
 
         # Sizing #
@@ -123,32 +138,33 @@ class Ferro_sys(object):
         a = self.sizing(self.gnx,self.gny,self.gnz)
         self.a = a
         
-        self.E_nx = a[0].astype('int')
-        self.E_ny = a[1].astype('int')
-        self.E_nz = a[2].astype('int')
+        E_nx = a[0].astype('int') ## local node count for E_x
+        E_ny = a[1].astype('int') ## local node count for E_y
+        E_nz = a[2].astype('int') ## local node count for E_z
         
-        self.B_nx = a[3].astype('int')
-        self.B_ny = a[4].astype('int')
-        self.B_nz = a[5].astype('int')
-         
-        ### Included here to make up for a previous mistake
-        ### and to deal with my laziness to change all
-        ### of the following code. 
+        self.outer_node_grid = {'x':E_nx,'y':E_ny,'z':E_nz}
         
-        self.size_Ex = self.E_nx
-        self.size_Ey = self.E_ny
-        self.size_Ez = self.E_nz
+        B_nx = a[3].astype('int') ## local node count for B_x
+        B_ny = a[4].astype('int') ## local node count for B_y
+        B_nz = a[5].astype('int') ## local node count for B_z
         
-        self.size_Bx = self.B_nx
-        self.size_By = self.B_ny
-        self.size_Bz = self.B_nz
+        self.inner_node_grid = {'x':B_nx,'y':B_ny,'z':B_nz}
         
         # Field set-up #
         self.E_old = E0
         self.H_old = H0
         self.M_old = M0
         self.B0 = self.mu0*(H0 + M0)
+        # self.B_old = self.B0
+        
+        ## Necessary as lists don't support subtraction
+        # B0_0 = self.mu0*(H0[0] - M0[0])
+        # B0_1 = self.mu0*(H0[1] - M0[1])
+        # B0_2 = self.mu0*(H0[2] - M0[2])
+        
+        # self.B0 = np.array([B0_0, B0_1, B0_2])
         self.B_old = self.B0
+        
         self.H_s = H_s
         
         self.E_new = E0
@@ -166,153 +182,95 @@ class Ferro_sys(object):
         self.tol = 1E-12
         self.maxiter_half_step = 10
         self.maxiter_whole_step = 10
-        
+    
     @property
     def E_old2(self):
         return self._E_old2
     @E_old2.setter
     def E_old2(self, values):
-        self._E_old2 = Field(self.size_Ex, self.size_Ey,self.size_Ez,self.disc,values)
+        self._E_old2 = Field(self.outer_node_grid,self.disc,values)
 #        self._E_old.E = True
-        if type(values) != np.ndarray or values.shape[0] != 3:
-            print('Something is wrong. Assigned incorrect array to E_old')
-            raise Exception
+        # if type(values) != np.ndarray or values.shape[0] != 3:
+            # print('Something is wrong. Assigned incorrect array to E_old')
+            # raise Exception
    
     @property
     def H_old2(self):
         return self._H_old2
     @H_old2.setter
     def H_old2(self, values):
-        self._H_old2 = Field(self.size_Bx, self.size_By
-                            ,self.size_Bz,self.disc,values)
-        
-        if type(values) != np.ndarray or values.shape[0] != 3:
-            print('Something is wrong. Assigned incorrect array to H_old')
-            raise Exception        
+        self._H_old2 = Field(self.inner_node_grid,self.disc,values)
         
     @property
     def M_old2(self):
         return self._M_old2
     @M_old2.setter
     def M_old2(self, values):
-        self._M_old2 = Field(self.size_Bx, self.size_By
-                            ,self.size_Bz,self.disc,values)
-        
-        if type(values) != np.ndarray or values.shape[0] != 3:
-            print('Something is wrong. Assigned incorrect array to M_old')
-            raise Exception        
+        self._M_old2 = Field(self.inner_node_grid,self.disc,values)       
          
     @property
     def B_old2(self):
         return self._B_old2
     @B_old2.setter
     def B_old2(self, values):
-        self._B_old2 = Field(self.size_Bx, self.size_By
-                            ,self.size_Bz,self.disc,values)
-        
-        if type(values) != np.ndarray or values.shape[0] != 3:
-            print('Something is wrong. Assigned incorrect array to B_old')
-            raise Exception  
-        
+        self._B_old2 = Field(self.inner_node_grid,self.disc,values)
+    
     @property
     def E_old(self):
         return self._E_old
     @E_old.setter
     def E_old(self, values):
-#        print(self.size_Ex, self.size_Ey, self.size_Ez)
-        self._E_old = Field(self.size_Ex, self.size_Ey,self.size_Ez,self.disc,values)
-#        self._E_old.E = True
-        
-        if type(values) != np.ndarray or values.shape[0] != 3:
-            print('Something is wrong. Assigned incorrect array to E_old')
-            raise Exception
+        self._E_old = Field(self.outer_node_grid, self.disc, values)
+
    
     @property
     def H_old(self):
         return self._H_old
     @H_old.setter
     def H_old(self, values):
-        self._H_old = Field(self.size_Bx, self.size_By
-                            ,self.size_Bz,self.disc,values)
-        
-        if type(values) != np.ndarray or values.shape[0] != 3:
-            print('Something is wrong. Assigned incorrect array to H_old')
-            raise Exception        
+        self._H_old = Field(self.inner_node_grid,self.disc,values)
         
     @property
     def M_old(self):
         return self._M_old
     @M_old.setter
     def M_old(self, values):
-        self._M_old = Field(self.size_Bx, self.size_By
-                            ,self.size_Bz,self.disc,values)
-        
-        if type(values) != np.ndarray or values.shape[0] != 3:
-            print('Something is wrong. Assigned incorrect array to M_old')
-            raise Exception  
+        self._M_old = Field(self.inner_node_grid,self.disc,values)
             
     @property
     def B_old(self):
         return self._B_old
     @B_old.setter
     def B_old(self, values):
-        self._B_old = Field(self.size_Bx, self.size_By
-                            ,self.size_Bz,self.disc,values)
-        
-        if type(values) != np.ndarray or values.shape[0] != 3:
-            print('Something is wrong. Assigned incorrect array to M_old')
-            raise Exception  
+        self._B_old = Field(self.inner_node_grid,self.disc,values)
             
     @property
     def E_new(self):
         return self._E_new
     @E_new.setter
     def E_new(self, values):
-        self._E_new = Field(self.size_Ex, self.size_Ey
-                            ,self.size_Ez,self.disc,values)
-#        self._E_new.E = True
-        
-        if type(values) != np.ndarray or values.shape[0] != 3:
-            print('Something is wrong. Assigned incorrect array to E_new')
-            raise Exception
+        self._E_new = Field(self.outer_node_grid,self.disc,values)
    
     @property
     def H_new(self):
         return self._H_new
     @H_new.setter
     def H_new(self, values):
-        self._H_new = Field(self.size_Bx, self.size_By
-                            ,self.size_Bz,self.disc,values)
-        
-        if type(values) != np.ndarray or values.shape[0] != 3:
-            print('Something is wrong. Assigned incorrect array to H_new')
-            raise Exception        
+        self._H_new = Field(self.inner_node_grid,self.disc,values)       
         
     @property
     def M_new(self):
         return self._M_new
     @M_new.setter
     def M_new(self, values):
-        self._M_new = Field(self.size_Bx, self.size_By
-                            ,self.size_Bz,self.disc,values)
-        
-        if type(values) != np.ndarray or values.shape[0] != 3:
-            print('Something is wrong. Assigned incorrect array to M_new')
-            raise Exception        
+        self._M_new = Field(self.inner_node_grid,self.disc,values)      
          
     @property
     def B_new(self):
         return self._B_new
     @B_new.setter
     def B_new(self, values):
-        self._B_new = Field(self.size_Bx, self.size_By
-                            ,self.size_Bz,self.disc,values)
-        
-        if type(values) != np.ndarray or values.shape[0] != 3:
-            print('Something is wrong. Assigned incorrect array to B_new')
-            raise Exception 
-        else:
-            pass
+        self._B_new = Field(self.inner_node_grid,self.disc,values)
         
     @property
     def H_s(self):
@@ -320,16 +278,7 @@ class Ferro_sys(object):
     @H_s.setter
     def H_s(self, val):
 #        shape1 = np.int(np.round(np.prod(self.size_inner_x)))
-        values = val*np.ones(shape = self.B_old.values.shape)
-        self._H_s = Field(self.size_Bx, self.size_By
-                            ,self.size_Bz,self.disc,values)
-        
-        if type(values) != np.ndarray or values.shape[0] != 3:
-            print('Something is wrong. Assigned incorrect array to H_new')
-            raise Exception      
-            
-        else: 
-            pass
+        self._H_s = Field(self.inner_node_grid,self.disc,val)
         
     def sizing(self,nx,ny,nz):
         '''
@@ -1845,8 +1794,8 @@ class Ferro_sys(object):
         sigma = self.sigma 
         
         ### Applying boundary conditions
-        F_old2 = np.concatenate((self.Fx(t-dt), self.Fy(t-dt), self.Fz(t-dt)),axis=1)
-        E_old2.values += F_old2.T
+        F_old2 = np.array([self.Fx(t-dt), self.Fy(t-dt), self.Fz(t-dt)])
+        E_old2.values += F_old2
         
         ##### Solving for E_n+1/2
         s_a = 1/mu0*self.curl_L(B_old2.values,'Inner')
@@ -1886,7 +1835,6 @@ class Ferro_sys(object):
                 self.curl_L(E_old2.values, 'o'))
             
         B_old.values = B_old_values
-        
         ###### Solving for H_n+1/2
         H_old_values = 1/mu0*B_old_values - M_old.values
         H_old.values = H_old_values
@@ -2137,7 +2085,7 @@ class Ferro_sys(object):
             
         for k in np.arange(0,a.shape[0]):
             try:
-                val[k] = np.dot(a[k], b[k])
+                val[k] = np.dot(a[0][k], b[0][k])
             except:
                 print('Error at k = ',k,' assignment')
                 raise Exception

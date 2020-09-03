@@ -30,7 +30,7 @@ import pandas as pd
 from collections import OrderedDict
 
 from Research import field_class
-Field = field_class.Field_2
+Field = field_class.Field_v3
 Vector = field_class.Vector
 
 from Research import ferro_system1
@@ -55,7 +55,7 @@ name_dict = {name_data:50}
 # name_dict = {'Ricker_ADI_CFL10_LLG':25}
 
 l1 = np.zeros(shape = 10) ## How many nodes to check (better name?)
-ticker_start = 1 ## Where do you want to start your unpacking
+ticker_start = 0 ## Where do you want to start your unpacking
 
 # dt_name = 50 ## How often saved. Works with new saving style.  ### Now set above in names dictionary
 
@@ -128,6 +128,7 @@ for k in l1:
         # fig31, (ax131, ax132, ax133) = plt.subplots(3,1)
         for name_a in name_dict:
             name_ticker = 'ticker:'+str(name_dict[name_a]*ticker)
+            # print(name_ticker)
             R_sys = set_up_ferro_system(name_ticker, name_a)
             R_sys.T = ticker*name_dict[name_a]*R_sys.dt
             

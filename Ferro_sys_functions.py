@@ -96,7 +96,7 @@ def sizing(nx,ny,nz):
     
     if nx != ny:
         print('Error. Discretization not currently available. Break')
-        raise Exception
+        # raise Exception
     
     if nz != 1:
         size_outer_x = np.array([(nx-1)/2, (ny+1)/2, (nz+1)/2])

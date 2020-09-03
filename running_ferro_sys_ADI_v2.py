@@ -42,8 +42,8 @@ if not os.path.exists(m_path):
 else:
     sys.path.append(m_path)
 
-from Research import ferro_system1
-Ferro_sys = ferro_system1.Ferro_sys
+from Research import ferro_system2
+Ferro_sys = ferro_system2.Ferro_sys_v2
 
 from Research.Ferro_sys_functions import sizing, Ricker_pulse, Gaussian_source, cardanos_method
 
@@ -67,10 +67,10 @@ def disp_what():
     # fig_Ey = R_sys.plot_slice('E','y',0)
     
     # fig_Ey0 = R_sys.plot_line('E','y',0,0)
-    fig_Mz0 = R_sys.plot_line('M','z',3,0)
+    # fig_Mz0 = R_sys.plot_line('M','z')
     # fig_Ey1,ax_Ey1 = R_sys.plot_slice('E','y',0)
     # fig_Ey2 = R_sys.plot_line('E','y',100,0)
-    fig_Ey3,ax_Ey3 = R_sys.plot_line('E','y',3,0)
+    fig_Ey3,ax_Ey3 = R_sys.plot_line('E','y')
     # fig2 = R_sys2.plot_line()
     # ax_Ey1.view_init(elev = 90,azim = 90)
     
@@ -84,6 +84,7 @@ def disp_what():
     # ax.set_title(Title)
     
     # print(Ricker_pulse(t))
+    plt.show(block=False)
 
 hold_on = 0 ## Pause the run or not. BE SURE THIS IS OFF IF DOING REMOTE
 ho_hold = 1 ## How often to hold
@@ -93,9 +94,10 @@ save_final_time = False ## Turn on to save final time step
 ho_save = 25 #How often to save
 
 today1 = date.today()
-name_date = today1.strftime("%d_%m_%y")
-mkdir_p(name_date)
-name_data ='Ricker_ADI_CFL10_LLG'
+if save_time_steps == True:
+    name_date = today1.strftime("%d_%m_%y")
+    mkdir_p(name_date)
+    name_data ='Ricker_ADI_CFL10_LLG'
 
 ######################## Parameters (global) ########################
 mu0 = 1.25667e-6
@@ -113,7 +115,7 @@ dx = 0.2
 dy = dx
 dz = dx
 disc = np.array([dx, dy, dz]) ### (dx, dy, dz)
-max_x = 16
+max_x = 10.2
 
 CFL = 1/(2**(1/2))*3 ### Testing. Soon this will be increased                  
 dt = CFL*disc[0]/c
@@ -220,22 +222,25 @@ def set_up_system(gnx,gny,gnz,disc):
     E0_x = np.zeros(shape = (int(a[0]),1))
     E0_y = np.zeros(shape = (int(a[1]),1))
     E0_z = np.zeros(shape = (int(a[2]),1))
-    E0 = np.concatenate((E0_x, E0_y, E0_z),axis=1).T
+    # E0 = np.concatenate((E0_x, E0_y, E0_z),axis=1).T
+    E0 = np.array([E0_x, E0_y, E0_z])
     
     M0_x = np.zeros(shape = (int(a[3]),1))
     M0_y = np.zeros(shape = (int(a[4]),1))
     M0_z = init_mag*np.ones(shape = (int(a[5]),1))
-    M0 = np.concatenate((M0_x, M0_y, M0_z),axis=1).T
+    M0 = np.array([M0_x, M0_y, M0_z])
+    # M0 = np.concatenate((M0_x, M0_y, M0_z),axis=1).T
     
     H0_x = np.zeros(shape = (int(a[3]),1))
     H0_y = np.zeros(shape = (int(a[4]),1))
     H0_z = np.zeros(shape = (int(a[5]),1))
-    H0 = np.concatenate((H0_x, H0_y, H0_z),axis=1).T
+    # H0 = np.concatenate((H0_x, H0_y, H0_z),axis=1).T
+    H0 = np.array([H0_x, H0_y, H0_z])
     
     H_s_x = H_s_val*np.ones(shape = (int(a[3]),1))
     H_s_y = H_s_val*np.ones(shape = (int(a[4]),1))
     H_s_z = H_s_val*np.ones(shape = (int(a[5]),1))
-    H_s = np.concatenate((H_s_x, H_s_y, H_s_z),axis=1).T
+    H_s = np.array([H_s_x, H_s_y, H_s_z])
     
     R_sys = Ferro_sys(node_count,disc,E0,H0,M0,H_s)
     
@@ -264,7 +269,7 @@ R_sys.fx = f_x
 R_sys.fy = f_y
 R_sys.fz = f_z
 
-R_sys.tol = 1E-6
+# R_sys.tol = 1E-6
 
 # R_sys2.fx = f_x
 # R_sys2.fy = f_y
@@ -282,7 +287,7 @@ R_sys.initialize_set_up_ADI() ### Sets up matrices and operators for ADI method
 
 for t in np.arange(dt,T,dt):
     ### re-initializing the system
-    R_sys.set_up()
+    # R_sys.set_up() ## Outdated?
     ticker += 1
     if cont == True:
         pass
@@ -294,9 +299,6 @@ for t in np.arange(dt,T,dt):
     ### Running the system
     R_sys.T = t
     R_sys.single_run_ADI_v2(t)
-    
-    # R_sys2.T = t
-    # R_sys2.single_run_ADI_v2(t)
     
     ## Plotting stuff to demo
     if disp == True:
