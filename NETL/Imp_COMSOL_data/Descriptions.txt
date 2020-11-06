@@ -1,0 +1,13 @@
+evan_K_con_far_run13: Shows good convergence with Ideal power-out for ALL K values.
+
+evan_B_con_far_run2: B sweep with updated geometry
+evan_u_con_far_run2: u sweep with updated geometry
+evan_sig_con_far_run2: sig sweep with updated geometry
+ 
+evan_B_seg_far_run2: B sweep with updated geometry
+evan_u_seg_far_run2: u sweep with updated geometry
+evan_sig_seg_far_run2: sig sweep with updated geometry
+
+evan_K_seg_far_run8: Shows much better convergence than old geometry (run1), but still not amazing. Has updated geometry. 
+
+

@@ -194,391 +194,264 @@ def get_keys(file_name = ''):
 ### comparing to Rosa's equations. Otherwise, this would be done in a for loop
     
 ######## Hall Runs ##########
-# file_list_hall = ['evan_B_seg_hal_run1',
-#                   'evan_u_seg_hal_run1',
-#                   'evan_sig_seg_hal_run1',
-#                   'evan_res_seg_hal_run1']
-
-# file = file_list_hall[0] ## file currently being used
-
-# fig_hal,ax_hal = plt.subplots(2,3,sharex = True)
+file_list = [['evan_B_seg_hal_run3','B'],
+              ['evan_u_seg_hal_run3','u'],
+              ['evan_sig_seg_hal_run2',r'$\sigma$']]
+ticker = 0
+for fl in file_list:
+    print('\n','*'*40,'\n')
+    if ticker == 10:
+        pass
+    file=fl[0]
+    fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
+    df_hal = pd.read_csv(file+'.csv', skiprows=4)
+    key_hal = df_hal.keys().to_numpy()
+    if ticker == 0 or ticker == 2:        
+        x_plot = df_hal[key_hal[0]] ## x-value for plottings
+        comsol_power = df_hal[key_hal[8]]
+        print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
+        
+        
+        K = df_hal[key_hal[4]]
+        u = df_hal[key_hal[5]]
+        B = df_hal[key_hal[6]]
+        sig = df_hal[key_hal[7]]
+        beta = df_hal[key_hal[1]] 
+        
+        print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name+
+              '\n beta:'+beta.name)
+        
+    elif ticker == 1:         
+        x_plot = df_hal[key_hal[1]] ## x-value for plottings
+        comsol_power = df_hal[key_hal[8]]
+        print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
+        
+        
+        K = df_hal[key_hal[4]]
+        u = df_hal[key_hal[5]]
+        B = df_hal[key_hal[6]]
+        sig = df_hal[key_hal[7]]
+        beta = df_hal[key_hal[2]] 
+        
+        print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
+              '\n beta:'+beta.name)
+        
+    power_ideal_hal = K*(1-K)*sig*u**2*B**2*beta**2/(1+beta**2)
+    
+    ax_hal[0].plot(x_plot, comsol_power,label = 'COMSOL')
+    ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Ideal Power output')
+    
+    ax_hal[0].set_ylabel('Ideal Power Output [W]')
+    ax_hal[0].set_title(r'Seg. Hall, Comparing Power Ouput: '+fl[1])
+    ax_hal[0].legend()
+    
+    diff_hal = abs((np.array(comsol_power) - np.array(power_ideal_hal))/power_ideal_hal)
+    
+    ax_hal[1].plot(x_plot,diff_hal)
+    ax_hal[1].set_xlabel(fl[1])
+    ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
+    fig_hal.set_figheight(10)
+    
+    ticker += 1
+    
+# file='evan_K_seg_hal_run2'
+# fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
 # df_hal = pd.read_csv(file+'.csv', skiprows=4)
-# key_hal = df_hal.keys()
-# ## COMSOL power
-# ax_hal[0][0].plot(df_hal[key_hal[0]],-df_hal[key_hal[12]],label = 'COMSOL') ## Total
-# ax_hal[0][1].plot(df_hal[key_hal[0]],-df_hal[key_hal[10]],label = 'COMSOL') ## Faraday
-# ax_hal[0][2].plot(df_hal[key_hal[0]],-df_hal[key_hal[11]],label = 'COMSOL') ## Hall
-# ## Ideal power
-# K_hal = df_hal[key_hal[6]]
-# sig_hal = df_hal[key_hal[9]]
-# B_hal = df_hal[key_hal[8]]
-# u_hal = df_hal[key_hal[7]]
-# power_ideal = K_hal*(1-K_hal)*sig_hal*(u_hal**2)*(B_hal**2)*(.5*6)**2/((1+0)**2+(.5*6)**2) ## Needs to be corrected
-# power_ideal_hal = -np.array(power_ideal)
-# ax_hal[1][0].plot(df_hal[key_hal[0]],-power_ideal_hal,label = 'Ideal') ## Total
-# ax_hal[1][1].plot(df_hal[key_hal[0]],-power_ideal_hal,label = 'Ideal') ## Faraday
-# ax_hal[1][2].plot(df_hal[key_hal[0]],-power_ideal_hal,label = 'Ideal') ## Hall
-# ax_hal[0][0].legend()
-# ax_hal[0][1].legend()
-# ax_hal[0][2].legend()
-# ## Relative Difference
-# dif_hal_tot = abs(abs(df_hal[key_hal[12]]) - abs(power_ideal_hal))/abs(power_ideal_hal) ## Total diff
-# dif_hal_far = abs(abs(df_hal[key_hal[10]]) - abs(power_ideal_hal))/abs(power_ideal_hal) ## Fara diff
-# dif_hal_hal = abs(abs(df_hal[key_hal[11]]) - abs(power_ideal_hal))/abs(power_ideal_hal) ## Hal diff
-# ax_B[1].plot(df_B[key_B[0]],diff_B)
-# ax_B[1].set_xlabel(r'$B_z$ [T]')
-# ax_B[1].set_ylabel('Rel. difference (Measured-idea)/ideal')
-# fig_B.set_figheight(10)
-# ax_B[0].legend()
+# key_hal = df_hal.keys().to_numpy()
 
+# x_plot = df_hal[key_hal[8]] ## x-value for plottings
+# comsol_power = df_hal[key_hal[4]]
+# print('Plotting: '+key_hal[8]+' vs. '+key_hal[4])
 
+# K = df_hal[key_hal[8]]
+# u = df_hal[key_hal[9]]
+# B = df_hal[key_hal[10]]
+# sig = df_hal[key_hal[11]]
 
+# print('\n K: '+key_hal[8]+'\n u: '+key_hal[1]+'\n B: '+key_hal[2]+'\n sigma: '+key_hal[3])
 
+# power_ideal_hal = K*(1-K)*sig*u**2*B**2
 
+# ax_hal[0].plot(x_plot,-comsol_power,label = 'COMSOL')
+# ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Ideal Power output')
 
-
-
-
-
-
-
-######### Some Faraday runs: needs to be altered for con vs. seg ####
-
-
-# key_B = get_keys(file_list[0])
-# fig_B,ax_B = plt.subplots(2,1,sharex = True)
-# df_B = pd.read_csv(file_list[0]+'.csv', skiprows=4)
-# ax_B[0].plot(df_B[key_B[0]],-df_B[key_B[1]],label = 'COMSOL')
-# K_B = df_B[key_B[4]]
-# power_ideal_B = K_B*(1-K_B)*60*(1800**2)*(df_B[key_B[0]]**2)
-# power_ideal_B = -np.array(power_ideal_B)
-# ax_B[0].plot(df_B[key_B[0]],-power_ideal_B,'--',label='Ideal Power output')
-# ax_B[0].set_title(r'Con. Faraday; Comparing Power Ouput: $B_z$')
-# ax_B[0].set_ylabel('Ideal Power Output [W]')
-# diff_B = abs((np.array(df_B[key_B[1]]) - power_ideal_B)/power_ideal_B)
-# ax_B[1].plot(df_B[key_B[0]],diff_B)
-# ax_B[1].set_xlabel(r'$B_z$ [T]')
-# ax_B[1].set_ylabel('Rel. difference (Measured-idea)/ideal')
-# fig_B.set_figheight(10)
-# ax_B[0].legend()
-    
-# key_sig = get_keys(file_list[2])
-# fig_sig,ax_sig = plt.subplots(2,1,sharex = True)
-# df_sig = pd.read_csv(file_list[2]+'.csv', skiprows=4)
-# ax_sig[0].plot(df_sig[key_sig[0]],-df_sig[key_sig[1]],label = 'COMSOL')
-# K_sig = df_sig[key_sig[4]]
-# power_ideal_sig = K_sig*(1-K_sig)*(df_sig[key_sig[0]])*(1800**2)*6**2
-# power_ideal_sig = -np.array(power_ideal_sig)
-# ax_sig[0].set_ylabel('Ideal Power Output [W]')
-# ax_sig[0].plot(df_sig[key_sig[0]],-power_ideal_sig,'--',label='Ideal Power output')
-# ax_sig[0].set_title(r'Con. Faraday; Comparing Power Ouput: $\sigma$')
-# diff_sig = abs((np.array(df_sig[key_sig[1]]) - power_ideal_sig)/power_ideal_sig)
-# ax_sig[1].plot(df_sig[key_sig[0]],diff_sig)
-# ax_sig[1].set_xlabel(r'$\sigma$ [S/m]')
-# ax_sig[1].set_ylabel('Rel. difference (Measured-idea)/ideal')
-# fig_sig.set_figheight(10)
-# ax_sig[0].legend()
-
-# key_u = get_keys(file_list[1])
-# fig_u,ax_u = plt.subplots(2,1,sharex = True)
-# df_u = pd.read_csv(file_list[1]+'.csv', skiprows=4)
-# ax_u[0].plot(df_u[key_u[0]],-df_u[key_u[1]],label = 'COMSOL')
-# K_u = df_u[key_u[4]]
-# power_ideal_u = K_u*(1-K_u)*60*(df_u[key_u[0]])**2*6**2
-# power_ideal_u = -np.array(power_ideal_u)
-# ax_u[0].set_ylabel('Ideal Power Output [W]')
-# ax_u[0].plot(df_u[key_u[0]],-power_ideal_u,'--',label='Ideal Power output')
-# ax_u[0].set_title(r'Seg. Faraday; Comparing Power Ouput: $u_x$')
-# diff_u = abs((np.array(df_u[key_u[1]]) - power_ideal_u)/power_ideal_u)
-# ax_u[1].plot(df_u[key_u[0]],diff_u)
-# ax_u[1].set_xlabel(r'$u_x$ [m/s]')
-# ax_u[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
-# fig_u.set_figheight(10)
-# ax_u[0].legend()
-
-# key_hal = get_keys('evan_res_con_far_run1')
-# fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
-# df_hal = pd.read_csv('evan_res_con_far_run1.csv', skiprows=4)
-# ax_hal[0].plot(df_hal[key_hal[4]],-df_hal[key_hal[1]],label = 'COMSOL')
-# K_hal = df_hal[key_hal[4]]
-# power_ideal_hal = K_hal*(1-K_hal)*60*1800**2*6**2
-# power_ideal_hal = -np.array(power_ideal_hal)
 # ax_hal[0].set_ylabel('Ideal Power Output [W]')
-# ax_hal[0].plot(df_hal[key_hal[4]],-power_ideal_hal,'--',label='Ideal Power output')
-# ax_hal[0].set_title(r'Con. Faraday, Comparing Power Ouput: $K$')
-# diff_hal = abs((np.array(df_hal[key_hal[1]]) - power_ideal_hal)/power_ideal_hal)
-# ax_hal[1].plot(df_hal[key_hal[4]],diff_hal)
+# ax_hal[0].set_title(r'Con. Faraday, Comparing Power Ouput: '+'K')
+# ax_hal[0].legend()
+
+# diff_hal = abs((np.array(comsol_power) + np.array(power_ideal_hal))/power_ideal_hal)
+
+# ax_hal[1].plot(x_plot,diff_hal)
 # ax_hal[1].set_xlabel(r'$K$ []')
 # ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
 # fig_hal.set_figheight(10)
-# ax_hal[0].legend()    
     
-###### Segmented Runs #######
-# file_list = ['evan_B_seg_far_run1',
-#              'evan_u_seg_far_run1',
-#              'evan_sig_seg_far_run1'] 
-
-# ### As I forgot to add the probes for sigma, u, B, this is necessary for 
-# ### comparing to Rosa's equations. Otherwise, this would be done in a for loop
     
-# key_B = get_keys(file_list[0])
-# fig_B,ax_B = plt.subplots(2,1,sharex = True)
-# df_B = pd.read_csv(file_list[0]+'.csv', skiprows=4)
-# ax_B[0].plot(df_B[key_B[0]],-df_B[key_B[1]],label = 'COMSOL')
-# K_B = df_B[key_B[4]]
-# power_ideal_B = K_B*(1-K_B)*60*(1800**2)*(df_B[key_B[0]]**2)
-# power_ideal_B = -np.array(power_ideal_B)
-# ax_B[0].plot(df_B[key_B[0]],-power_ideal_B,'--',label='Ideal Power output')
-# ax_B[0].set_title(r'Seg. Faraday; Comparing Power Ouput: $B_z$')
-# ax_B[0].set_ylabel('Ideal Power Output [W]')
-# diff_B = abs((np.array(df_B[key_B[1]]) - power_ideal_B)/power_ideal_B)
-# ax_B[1].plot(df_B[key_B[0]],diff_B)
-# ax_B[1].set_xlabel(r'$B_z$ [T]')
-# ax_B[1].set_ylabel('Rel. difference (Measured-idea)/ideal')
-# fig_B.set_figheight(10)
+
+
+
+
+
+
+
+
+
+
+
+
+######### Continuous Faraday ####
+# file_list = [['evan_B_con_far_run2','B'],
+#               ['evan_sig_con_far_run2',r'$\sigma$'],
+#               ['evan_u_con_far_run3','u']]
+
+# ticker=0
+# for fl in file_list:
+#     file=fl[0]
+#     fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
+#     df_hal = pd.read_csv(file+'.csv', skiprows=4)
+#     key_hal = df_hal.keys().to_numpy()
     
-# key_sig = get_keys(file_list[2])
-# fig_sig,ax_sig = plt.subplots(2,1,sharex = True)
-# df_sig = pd.read_csv(file_list[2]+'.csv', skiprows=4)
-# ax_sig[0].plot(df_sig[key_sig[0]],-df_sig[key_sig[1]],label = 'COMSOL')
-# K_sig = df_sig[key_sig[4]]
-# power_ideal_sig = K_sig*(1-K_sig)*(df_sig[key_sig[0]])*(1800**2)*6**2
-# power_ideal_sig = -np.array(power_ideal_sig)
-# ax_sig[0].set_ylabel('Ideal Power Output [W]')
-# ax_sig[0].plot(df_sig[key_sig[0]],-power_ideal_sig,'--',label='Ideal Power output')
-# ax_sig[0].set_title(r'Seg. Faraday; Comparing Power Ouput: $\sigma$')
-# diff_sig = abs((np.array(df_sig[key_sig[1]]) - power_ideal_sig)/power_ideal_sig)
-# ax_sig[1].plot(df_sig[key_sig[0]],diff_sig)
-# ax_sig[1].set_xlabel(r'$\sigma$ [S/m]')
-# ax_sig[1].set_ylabel('Rel. difference (Measured-idea)/ideal')
-# fig_sig.set_figheight(10)
-
-# key_u = get_keys(file_list[1])
-# fig_u,ax_u = plt.subplots(2,1,sharex = True)
-# df_u = pd.read_csv(file_list[1]+'.csv', skiprows=4)
-# ax_u[0].plot(df_u[key_u[0]],-df_u[key_u[1]],label = 'COMSOL')
-# K_u = df_u[key_u[4]]
-# power_ideal_u = K_u*(1-K_u)*60*(df_u[key_u[0]])**2*6**2
-# power_ideal_u = -np.array(power_ideal_u)
-# ax_u[0].set_ylabel('Ideal Power Output [W]')
-# ax_u[0].plot(df_u[key_u[0]],-power_ideal_u,'--',label='Ideal Power output')
-# ax_u[0].set_title(r'Seg. Faraday; Comparing Power Ouput: $u_x$')
-# diff_u = abs((np.array(df_u[key_u[1]]) - power_ideal_u)/power_ideal_u)
-# ax_u[1].plot(df_u[key_u[0]],diff_u)
-# ax_u[1].set_xlabel(r'$u_x$ [m/s]')
-# ax_u[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
-# fig_u.set_figheight(10)
-
-# key_hal = get_keys('evan_res_seg_far_run1')
+#     if ticker != 2:
+#         x_plot = df_hal[key_hal[0]] ## x-value for plottings
+#     else:
+#         x_plot = df_hal[key_hal[1]] ## x-value for plottings
+#     comsol_power = df_hal[key_hal[3]]
+#     print('*'*40+'\n Plotting: '+x_plot.name+' vs. '+comsol_power.name)
+    
+    
+#     K = df_hal[key_hal[4]]
+#     u = df_hal[key_hal[8]]
+#     B = df_hal[key_hal[9]]
+#     sig = df_hal[key_hal[10]]
+    
+#     print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name)
+    
+#     power_ideal_hal = K*(1-K)*sig*u**2*B**2
+    
+#     ax_hal[0].plot(x_plot,-comsol_power,label = 'COMSOL')
+#     ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Ideal Power output')
+    
+#     ax_hal[0].set_ylabel('Ideal Power Output [W]')
+#     ax_hal[0].set_title(r'Con. Faraday, Comparing Power Ouput: '+fl[1])
+#     ax_hal[0].legend()
+    
+#     diff_hal = abs((np.array(comsol_power) + np.array(power_ideal_hal))/power_ideal_hal)
+    
+#     ax_hal[1].plot(x_plot,diff_hal)
+#     ax_hal[1].set_xlabel(fl[1])
+#     ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
+#     fig_hal.set_figheight(10)
+    
+#     ticker+=1
+    
+# file='evan_K_con_far_run13'
 # fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
-# df_hal = pd.read_csv('evan_res_seg_far_run1.csv', skiprows=4)
-# ax_hal[0].plot(df_hal[key_hal[4]],-df_hal[key_hal[1]],label = 'COMSOL')
-# K_hal = df_hal[key_hal[4]]
-# power_ideal_hal = K_hal*(1-K_hal)*60*1800**2*6**2
-# power_ideal_hal = -np.array(power_ideal_hal)
-# ax_hal[0].set_ylabel('Ideal Power Output [W]')
-# ax_hal[0].plot(df_hal[key_hal[4]],-power_ideal_hal,'--',label='Ideal Power output')
-# ax_hal[0].set_title(r'Seg. Faraday, Comparing Power Ouput: $K$')
-# diff_hal = abs((np.array(df_hal[key_hal[1]]) - power_ideal_hal)/power_ideal_hal)
-# ax_hal[1].plot(df_hal[key_hal[4]],diff_hal)
-# ax_hal[1].set_xlabel(r'$K$ []')
-# ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
-# fig_hal.set_figheight(10)    
-
-# df_mob = pd.read_csv(file_list[4]+'.csv', skiprows=4)
-# key_mob = df_mob.keys()
-
-# fig_mob = plt.figure()
-# ax_mob = fig_mob.add_subplot(111,projection='3d')
-
-# beta_i = np.array(df_mob[key_mob[1]])
-# power = np.array(df_mob[key_mob[2]])
-# K_mob = df_mob[key_mob[5]]
-# sigma_mob = df_mob[key_mob[15]]
-# vel_mob = df_mob[key_mob[13]]
-# B_mob = df_mob[key_mob[14]]
-# beta_e = np.array(df_mob[key_mob[0]])
-# power_ideal_mob = (K_mob*(1-K_mob)*60*(1-beta_i)*1800**2*6**2)/ \
-#     ((1-beta_i)**2 + beta_e**2)
-
-# surf = ax_mob.plot_trisurf(beta_e,beta_i,-power,label='COMSOL Power-out')
-# surf2 = ax_mob.plot_trisurf(beta_e,beta_i,power_ideal_mob,label='Ideal Power-out')
-# ax_mob.set_xlabel(r'$\beta_e$')
-# ax_mob.set_ylabel(r'$\beta_i$')
-# ax_mob.set_zlabel(r'Measured Power-out')
-
-# ## To account for a bug ##
-# surf._edgecolors2d=surf._edgecolors3d
-# surf._facecolors2d=surf._facecolors3d
-# surf2._edgecolors2d=surf2._edgecolors3d
-# surf2._facecolors2d=surf2._facecolors3d
-# ## To account for a bug ##
-
-# ax_mob.legend()
-
-# fig_mob2 = plt.figure()
-# ax_mob2 = fig_mob2.add_subplot(111,projection='3d')
-# diff = abs(power-power_ideal_mob)/abs(power_ideal_mob)
-# surf3 = ax_mob2.plot_trisurf(beta_e,beta_i,np.log((diff)))
-# ax_mob2.set_xlabel(r'$\beta_e$')
-# ax_mob2.set_ylabel(r'$\beta_i$')
-# ax_mob2.set_zlabel(r'Log(Rel. difference)')
-
-# key_u = get_keys(file_list[5])
-# fig_u,ax_u = plt.subplots(2,1,sharex = True)
-# df_u = pd.read_csv(file_list[5]+'.csv', skiprows=4)
-# ax_u[0].plot(6*df_u[key_u[0]],df_u[key_u[2]],label = 'COMSOL')
-# beta_e = np.array(df_u[key_u[0]])*6
-# beta_i = np.array(df_u[key_u[1]])
-# power = np.array(df_u[key_u[2]])
-# K_mob = df_u[key_u[5]]
-# sigma_mob = df_u[key_u[17]]
-# vel_mob = df_u[key_u[13]]
-# B_mob = df_u[key_u[14]]
-# power_ideal_mob = (K_mob*(1-K_mob)*sigma_mob*(1-beta_i)*vel_mob**2*B_mob**2)/ \
-#     ((1-beta_i)**2+beta_e**2)
-# ax_u[0].set_ylabel('Ideal Power Output [W]')
-# ax_u[0].plot(6*df_u[key_u[0]],power_ideal_mob,'--',label='Ideal Power output')
-# ax_u[0].set_title(r'Seg. Faraday; Comparing Power Ouput: $\beta_e$')
-# ax_u[0].legend()
-# diff_u = abs((np.array(df_u[key_u[1]]) - power_ideal_u)/power_ideal_u)
-# ax_u[1].plot(df_u[key_u[0]],diff_u)
-# ax_u[1].set_xlabel(r'$u_x$ [m/s]')
-# ax_u[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
-# fig_u.set_figheight(10)
-    
-    
-# df_mob = pd.read_csv('evan_mob_con_far_v3_run2.csv', skiprows=4)
-# key_mob = df_mob.keys()
-
-# fig_mob = plt.figure()
-# ax_mob = fig_mob.add_subplot(111,projection='3d')
-
-# beta_i = np.array(df_mob[key_mob[1]])
-# power = np.array(df_mob[key_mob[2]])
-# K_mob = df_mob[key_mob[5]]
-# sigma_mob = df_mob[key_mob[15]]
-# vel_mob = df_mob[key_mob[13]]
-# B_mob = df_mob[key_mob[14]]
-# beta_e = np.array(df_mob[key_mob[0]])
-# power_ideal_mob = (K_mob*(1-K_mob)*60*(1-beta_i)*1800**2*6**2)/ \
-#     ((1-beta_i)**2 + beta_e**2)
-
-# surf = ax_mob.plot(beta_e,beta_i,-power,label='COMSOL Power-out')
-# surf2 = ax_mob.plot(beta_e,beta_i,power_ideal_mob,label='Ideal Power-out')
-# ax_mob.set_xlabel(r'$\beta_e$')
-# ax_mob.set_ylabel(r'$\beta_i$')
-# ax_mob.set_zlabel(r'Measured Power-out')
-
-# ## To account for a bug ##
-# surf._edgecolors2d=surf._edgecolors3d
-# surf._facecolors2d=surf._facecolors3d
-# surf2._edgecolors2d=surf2._edgecolors3d
-# surf2._facecolors2d=surf2._facecolors3d
-# ## To account for a bug ##
-
-# ax_mob.legend()
-
-# fig_mob2 = plt.figure()
-# ax_mob2 = fig_mob2.add_subplot(111,projection='3d')
-# diff = abs(power-power_ideal_mob)/abs(power_ideal_mob)
-# surf3 = ax_mob2.plot_trisurf(beta_e,beta_i,np.log((diff)))
-# ax_mob2.set_xlabel(r'$\beta_e$')
-# ax_mob2.set_ylabel(r'$\beta_i$')
-# ax_mob2.set_zlabel(r'Log(Rel. difference)')
-
-    
-    
-# fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
-# df_hal = pd.read_csv('evan_K_con_far_run7.csv', skiprows=4)
+# df_hal = pd.read_csv(file+'.csv', skiprows=4)
 # key_hal = df_hal.keys().to_numpy()
-# ax_hal[0].plot(df_hal[key_hal[5]],-df_hal[key_hal[3]],label = 'COMSOL')
-# K_hal = df_hal[key_hal[5]]
-# power_ideal_hal = K_hal*(1-K_hal)*60*1800**2*6**2
-# power_ideal_hal = -np.array(power_ideal_hal)
-# ax_hal[0].set_ylabel('Ideal Power Output [W]')
-# ax_hal[0].plot(K_hal,-power_ideal_hal,'--',label='Ideal Power output')
-# ax_hal[0].set_title(r'Con. Faraday, Comparing Power Ouput: $K$')
-# ax_hal[0].legend()
-# diff_hal = abs((np.array(df_hal[key_hal[3]]) - power_ideal_hal)/power_ideal_hal)
-# ax_hal[1].plot(df_hal[key_hal[5]],diff_hal)
-# ax_hal[1].set_xlabel(r'$K$ []')
-# ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
-# fig_hal.set_figheight(10) 
-    
-# df_hal_2 = pd.read_csv('evan_K_con_far_run4.csv', skiprows=4)
-# df_hal_3 = pd.read_csv('evan_K_con_far_run3.csv', skiprows=4)
-    
-    
-# fig_2, ax_2 = plt.subplots(1,1)
-# # ax_2.plot(df_hal[key_hal[5]],-df_hal[key_hal[3]],label='Faraday Power')
-# # ax_2.plot(df_hal[key_hal[5]],-df_hal[key_hal[8]],label='Total Power')
-# ax_2.plot(df_hal[key_hal[5]],-df_hal[key_hal[7]],label='Hall Power')
-# ax_2.legend()
 
-# fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
-# df_hal = pd.read_csv('evan_K_con_far_run9.csv', skiprows=4)
-# key_hal = df_hal.keys().to_numpy()
-# ax_hal[0].plot(df_hal[key_hal[4]],-df_hal[key_hal[3]],label = 'COMSOL')
-# K_hal = df_hal[key_hal[4]]
-# power_ideal_hal = K_hal*(1-K_hal)*60*1800**2*6**2
-# power_ideal_hal = -np.array(power_ideal_hal)
+# x_plot = df_hal[key_hal[8]] ## x-value for plottings
+# comsol_power = df_hal[key_hal[4]]
+# print('Plotting: '+key_hal[8]+' vs. '+key_hal[4])
 
-# K_hal_new = df_hal[key_hal[12]]/(1800*6)
-# power_ideal_hal_new = K_hal_new*(1-K_hal_new)*60*1800**2*6**2
-# power_ideal_hal_new = -np.array(power_ideal_hal_new)
+# K = df_hal[key_hal[8]]
+# u = df_hal[key_hal[9]]
+# B = df_hal[key_hal[10]]
+# sig = df_hal[key_hal[11]]
+
+# print('\n K: '+key_hal[8]+'\n u: '+key_hal[1]+'\n B: '+key_hal[2]+'\n sigma: '+key_hal[3])
+
+# power_ideal_hal = K*(1-K)*sig*u**2*B**2
+
+# ax_hal[0].plot(x_plot,-comsol_power,label = 'COMSOL')
+# ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Ideal Power output')
 
 # ax_hal[0].set_ylabel('Ideal Power Output [W]')
-# ax_hal[0].plot(K_hal,-power_ideal_hal,'--',label='Ideal Power output')
-# ax_hal[0].plot(K_hal_new,-power_ideal_hal_new,'-+',label='COMSOL Power output v.2')
-# ax_hal[0].set_title(r'Con. Faraday, Comparing Power Ouput: $K$')
+# ax_hal[0].set_title(r'Con. Faraday, Comparing Power Ouput: '+'K')
 # ax_hal[0].legend()
 
-# diff_hal = abs((np.array(df_hal[key_hal[3]]) - power_ideal_hal)/power_ideal_hal)
-# diff_hal_new = abs((np.array(df_hal[key_hal[3]]) - power_ideal_hal_new)/power_ideal_hal)
+# diff_hal = abs((np.array(comsol_power) + np.array(power_ideal_hal))/power_ideal_hal)
 
-# ax_hal[1].plot(K_hal,diff_hal, label='K comp. COMSOL')
-# ax_hal[1].plot(K_hal_new,diff_hal_new,label='K comp. outside')
+# ax_hal[1].plot(x_plot,diff_hal)
 # ax_hal[1].set_xlabel(r'$K$ []')
 # ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
-# ax_hal[1].legend()
-# fig_hal.set_figheight(10) 
-
-fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
-df_hal = pd.read_csv('evan_K_seg_far_run6.csv', skiprows=4)
-key_hal = df_hal.keys().to_numpy()
-
-K_hal = df_hal[key_hal[8]]
-COMSOL_power = df_hal[key_hal[5]]
-
-power_ideal_hal = K_hal*(1-K_hal)*60*1800**2*6**2
-power_ideal_hal = -np.array(power_ideal_hal)
-
-K_hal_new = -df_hal[key_hal[10]]/(1800*6)
-power_ideal_hal_new = K_hal_new*(1-K_hal_new)*60*1800**2*6**2
-power_ideal_hal_new = -np.array(power_ideal_hal_new)
-
-ax_hal[0].set_ylabel('Ideal Power Output [W]')
-ax_hal[0].plot(K_hal,-COMSOL_power,label = 'COMSOL')
-ax_hal[0].plot(K_hal,-power_ideal_hal,'--',label='Ideal Power out')
-# ax_hal[0].plot(K_hal_new,-power_ideal_hal_new,'-+',label='Ideal Power out v.2')
-ax_hal[0].set_title(r'Seg. Faraday, Comparing Power Ouput: $K$')
-ax_hal[0].legend()
-
-# diff_hal = abs((np.array(df_hal[key_hal[3]]) - power_ideal_hal)/power_ideal_hal)
-# diff_hal_new = abs((np.array(df_hal[key_hal[3]]) - power_ideal_hal_new)/power_ideal_hal)
-
-# ax_hal[1].plot(K_hal,diff_hal, label='K comp. COMSOL')
-# ax_hal[1].plot(K_hal_new,diff_hal_new,label='K comp. outside')
-# ax_hal[1].set_xlabel(r'$K$ []')
-# ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
-# ax_hal[1].legend()
 # fig_hal.set_figheight(10)
     
     
+
+
+    
+###### Segmented Faraday Runs #######
+# file_list = [['evan_B_seg_far_run2','B'],
+#               ['evan_sig_seg_far_run2',r'$\sigma$'],
+#               ['evan_u_seg_far_run2','u']]
+
+# for fl in file_list:
+#     file=fl[0]
+#     fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
+#     df_hal = pd.read_csv(file+'.csv', skiprows=4)
+#     key_hal = df_hal.keys().to_numpy()
+    
+#     x_plot = df_hal[key_hal[0]] ## x-value for plottings
+#     comsol_power = df_hal[key_hal[4]]
+#     print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
+    
+#     K = df_hal[key_hal[8]]
+#     u = df_hal[key_hal[9]]
+#     B = df_hal[key_hal[10]]
+#     sig = df_hal[key_hal[11]]
+    
+#     print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name)
+    
+#     power_ideal_hal = K*(1-K)*sig*u**2*B**2
+    
+#     ax_hal[0].plot(x_plot,-comsol_power,label = 'COMSOL')
+#     ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Ideal Power output')
+    
+#     ax_hal[0].set_ylabel('Ideal Power Output [W]')
+#     ax_hal[0].set_title(r'Seg. Faraday, Comparing Power Ouput: '+fl[1])
+#     ax_hal[0].legend()
+    
+#     diff_hal = abs((np.array(comsol_power) + np.array(power_ideal_hal))/power_ideal_hal)
+    
+#     ax_hal[1].plot(x_plot,diff_hal)
+#     ax_hal[1].set_xlabel(fl[1])
+#     ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
+#     fig_hal.set_figheight(10)
+    
+# file='evan_K_seg_far_run8'
+# fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
+# df_hal = pd.read_csv(file+'.csv', skiprows=4)
+# key_hal = df_hal.keys().to_numpy()
+
+# x_plot = df_hal[key_hal[8]] ## x-value for plottings
+# comsol_power = df_hal[key_hal[4]]
+# print('Plotting: '+key_hal[8]+' vs. '+key_hal[4])
+
+# K = df_hal[key_hal[8]]
+# u = df_hal[key_hal[9]]
+# B = df_hal[key_hal[10]]
+# sig = df_hal[key_hal[11]]
+
+# print('\n K: '+key_hal[8]+'\n u: '+key_hal[1]+'\n B: '+key_hal[2]+'\n sigma: '+key_hal[3])
+
+# power_ideal_hal = K*(1-K)*sig*u**2*B**2
+
+# ax_hal[0].plot(x_plot,-comsol_power,label = 'COMSOL')
+# ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Ideal Power output')
+
+# ax_hal[0].set_ylabel('Ideal Power Output [W]')
+# ax_hal[0].set_title(r'Seg. Faraday, Comparing Power Ouput: '+'K')
+# ax_hal[0].legend()
+
+# diff_hal = abs((np.array(comsol_power) + np.array(power_ideal_hal))/power_ideal_hal)
+
+# ax_hal[1].plot(x_plot,diff_hal)
+# ax_hal[1].set_xlabel(r'$K$ []')
+# ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
+# fig_hal.set_figheight(10)
     
     
-    
+
     
     
     
