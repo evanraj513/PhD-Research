@@ -197,62 +197,65 @@ def get_keys(file_name = ''):
 # file_list = [['evan_B_seg_hal_run3','B'],
 #               ['evan_u_seg_hal_run3','u'],
 #               ['evan_sig_seg_hal_run2',r'$\sigma$']]
-# ticker = 0
-# for fl in file_list:
-#     print('\n','*'*40,'\n')
-#     if ticker == 10:
-#         pass
-#     file=fl[0]
-#     fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
-#     df_hal = pd.read_csv(file+'.csv', skiprows=4)
-#     key_hal = df_hal.keys().to_numpy()
-#     if ticker == 0 or ticker == 2:        
-#         x_plot = df_hal[key_hal[0]] ## x-value for plottings
-#         comsol_power = df_hal[key_hal[8]]
-#         print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
+
+file_list = [['evan_u_seg_hal_run5','u']]
+
+ticker = 1
+for fl in file_list:
+    print('\n','*'*40,'\n')
+    if ticker == 10:
+        pass
+    file=fl[0]
+    fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
+    df_hal = pd.read_csv(file+'.csv', skiprows=4)
+    key_hal = df_hal.keys().to_numpy()
+    if ticker == 0 or ticker == 2:        
+        x_plot = df_hal[key_hal[0]] ## x-value for plottings
+        comsol_power = df_hal[key_hal[9]]
+        print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
         
         
-#         K = df_hal[key_hal[4]]
-#         u = df_hal[key_hal[5]]
-#         B = df_hal[key_hal[6]]
-#         sig = df_hal[key_hal[7]]
-#         beta = df_hal[key_hal[1]] 
+        K = df_hal[key_hal[4]]
+        u = df_hal[key_hal[5]]
+        B = df_hal[key_hal[6]]
+        sig = df_hal[key_hal[7]]
+        beta = df_hal[key_hal[1]] 
         
-#         print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name+
-#               '\n beta:'+beta.name)
+        print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name+
+              '\n beta:'+beta.name)
         
-#     elif ticker == 1:         
-#         x_plot = df_hal[key_hal[1]] ## x-value for plottings
-#         comsol_power = df_hal[key_hal[8]]
-#         print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
+    elif ticker == 1:         
+        x_plot = df_hal[key_hal[1]] ## x-value for plottings
+        comsol_power = abs(df_hal[key_hal[9]])
+        print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
         
         
-#         K = df_hal[key_hal[4]]
-#         u = df_hal[key_hal[5]]
-#         B = df_hal[key_hal[6]]
-#         sig = df_hal[key_hal[7]]
-#         beta = df_hal[key_hal[2]] 
+        K = df_hal[key_hal[4]]
+        u = df_hal[key_hal[5]]
+        B = df_hal[key_hal[6]]
+        sig = df_hal[key_hal[7]]
+        beta = df_hal[key_hal[2]] 
         
-#         print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
-#               '\n beta:'+beta.name)
+        print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
+              '\n beta:'+beta.name)
         
-#     power_ideal_hal = K*(1-K)*sig*u**2*B**2*beta**2/(1+beta**2)
+    power_ideal_hal = K*(1-K)*sig*u**2*B**2*beta**2/(1+beta**2)
     
-#     ax_hal[0].plot(x_plot, comsol_power,label = 'COMSOL')
-#     ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Ideal Power output')
+    ax_hal[0].plot(x_plot, comsol_power,label = 'COMSOL')
+    ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Ideal Power output')
     
-#     ax_hal[0].set_ylabel('Ideal Power Output [W]')
-#     ax_hal[0].set_title(r'Seg. Hall, Comparing Power Ouput: '+fl[1])
-#     ax_hal[0].legend()
+    ax_hal[0].set_ylabel('Ideal Power Output [W]')
+    ax_hal[0].set_title(r'Seg. Hall, Comparing Power Ouput: '+fl[1])
+    ax_hal[0].legend()
     
-#     diff_hal = abs((np.array(comsol_power) - np.array(power_ideal_hal))/power_ideal_hal)
+    diff_hal = abs((np.array(comsol_power) - np.array(power_ideal_hal))/power_ideal_hal)
     
-#     ax_hal[1].plot(x_plot,diff_hal)
-#     ax_hal[1].set_xlabel(fl[1])
-#     ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
-#     fig_hal.set_figheight(10)
+    ax_hal[1].plot(x_plot,diff_hal)
+    ax_hal[1].set_xlabel(fl[1])
+    ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
+    fig_hal.set_figheight(10)
     
-#     ticker += 1
+    ticker += 1
     
 # file='evan_K_seg_hal_run2'
 # fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
@@ -499,38 +502,38 @@ def get_keys(file_name = ''):
 # fig_hal.set_figheight(10)
 
 #### beta_e run
-file='evan_beta_e_seg_far_run1'
-fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
-df_hal = pd.read_csv(file+'.csv', skiprows=4)
-key_hal = df_hal.keys().to_numpy()
+# file='evan_beta_e_seg_far_run1'
+# fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
+# df_hal = pd.read_csv(file+'.csv', skiprows=4)
+# key_hal = df_hal.keys().to_numpy()
 
-x_plot = df_hal[key_hal[0]] ## x-value for plottings
-comsol_power = df_hal[key_hal[3]]
-print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
-K = df_hal[key_hal[7]]
-m = 8 ## to make redefining u,B,sig easier. 
-u = df_hal[key_hal[m]]
-B = df_hal[key_hal[m+1]]
-sig = df_hal[key_hal[m+2]]
-beta= df_hal[key_hal[0]]
+# x_plot = df_hal[key_hal[0]] ## x-value for plottings
+# comsol_power = df_hal[key_hal[3]]
+# print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
+# K = df_hal[key_hal[7]]
+# m = 8 ## to make redefining u,B,sig easier. 
+# u = df_hal[key_hal[m]]
+# B = df_hal[key_hal[m+1]]
+# sig = df_hal[key_hal[m+2]]
+# beta= df_hal[key_hal[0]]
 
-print('\n K: '+key_hal[8]+'\n u: '+key_hal[1]+'\n B: '+key_hal[2]+'\n sigma: '+key_hal[3])
+# print('\n K: '+key_hal[8]+'\n u: '+key_hal[1]+'\n B: '+key_hal[2]+'\n sigma: '+key_hal[3])
 
-power_ideal_hal = K*(1-K)*sig*u**2*B**2/(1+beta**2)
+# power_ideal_hal = K*(1-K)*sig*u**2*B**2/(1+beta**2)
 
-ax_hal[0].plot(x_plot,-comsol_power,label = 'COMSOL')
-ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Ideal Power output')
+# ax_hal[0].plot(x_plot,-comsol_power,label = 'COMSOL')
+# ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Ideal Power output')
 
-ax_hal[0].set_ylabel('Ideal Power Output [W]')
-ax_hal[0].set_title(r'Seg. Faraday, Comparing Power Ouput: '+r'$\beta$')
-ax_hal[0].legend()
+# ax_hal[0].set_ylabel('Ideal Power Output [W]')
+# ax_hal[0].set_title(r'Seg. Faraday, Comparing Power Ouput: '+r'$\beta$')
+# ax_hal[0].legend()
 
-diff_hal = abs((np.array(comsol_power) + np.array(power_ideal_hal))/power_ideal_hal)
+# diff_hal = abs((np.array(comsol_power) + np.array(power_ideal_hal))/power_ideal_hal)
 
-ax_hal[1].plot(x_plot,diff_hal)
-ax_hal[1].set_xlabel(r'$\beta$ []')
-ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
-fig_hal.set_figheight(10)
+# ax_hal[1].plot(x_plot,diff_hal)
+# ax_hal[1].set_xlabel(r'$\beta$ []')
+# ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
+# fig_hal.set_figheight(10)
 
     
 #### Varying CW:EW and IW:EW
