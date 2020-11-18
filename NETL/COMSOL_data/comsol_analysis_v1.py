@@ -198,64 +198,64 @@ def get_keys(file_name = ''):
 #               ['evan_u_seg_hal_run3','u'],
 #               ['evan_sig_seg_hal_run2',r'$\sigma$']]
 
-file_list = [['evan_u_seg_hal_run5','u']]
+# file_list = [['evan_u_seg_hal_run5','u']]
 
-ticker = 1
-for fl in file_list:
-    print('\n','*'*40,'\n')
-    if ticker == 10:
-        pass
-    file=fl[0]
-    fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
-    df_hal = pd.read_csv(file+'.csv', skiprows=4)
-    key_hal = df_hal.keys().to_numpy()
-    if ticker == 0 or ticker == 2:        
-        x_plot = df_hal[key_hal[0]] ## x-value for plottings
-        comsol_power = df_hal[key_hal[9]]
-        print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
+# ticker = 1
+# for fl in file_list:
+#     print('\n','*'*40,'\n')
+#     if ticker == 10:
+#         pass
+#     file=fl[0]
+#     fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
+#     df_hal = pd.read_csv(file+'.csv', skiprows=4)
+#     key_hal = df_hal.keys().to_numpy()
+#     if ticker == 0 or ticker == 2:        
+#         x_plot = df_hal[key_hal[0]] ## x-value for plottings
+#         comsol_power = df_hal[key_hal[9]]
+#         print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
         
         
-        K = df_hal[key_hal[4]]
-        u = df_hal[key_hal[5]]
-        B = df_hal[key_hal[6]]
-        sig = df_hal[key_hal[7]]
-        beta = df_hal[key_hal[1]] 
+#         K = df_hal[key_hal[4]]
+#         u = df_hal[key_hal[5]]
+#         B = df_hal[key_hal[6]]
+#         sig = df_hal[key_hal[7]]
+#         beta = df_hal[key_hal[1]] 
         
-        print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name+
-              '\n beta:'+beta.name)
+#         print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name+
+#               '\n beta:'+beta.name)
         
-    elif ticker == 1:         
-        x_plot = df_hal[key_hal[1]] ## x-value for plottings
-        comsol_power = abs(df_hal[key_hal[9]])
-        print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
+#     elif ticker == 1:         
+#         x_plot = df_hal[key_hal[1]] ## x-value for plottings
+#         comsol_power = abs(df_hal[key_hal[9]])
+#         print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
         
         
-        K = df_hal[key_hal[4]]
-        u = df_hal[key_hal[5]]
-        B = df_hal[key_hal[6]]
-        sig = df_hal[key_hal[7]]
-        beta = df_hal[key_hal[2]] 
+#         K = df_hal[key_hal[4]]
+#         u = df_hal[key_hal[5]]
+#         B = df_hal[key_hal[6]]
+#         sig = df_hal[key_hal[7]]
+#         beta = df_hal[key_hal[2]] 
         
-        print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
-              '\n beta:'+beta.name)
+#         print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
+#               '\n beta:'+beta.name)
         
-    power_ideal_hal = K*(1-K)*sig*u**2*B**2*beta**2/(1+beta**2)
+#     power_ideal_hal = K*(1-K)*sig*u**2*B**2*beta**2/(1+beta**2)
     
-    ax_hal[0].plot(x_plot, comsol_power,label = 'COMSOL')
-    ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Ideal Power output')
+#     ax_hal[0].plot(x_plot, comsol_power,label = 'COMSOL')
+#     ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Ideal Power output')
     
-    ax_hal[0].set_ylabel('Ideal Power Output [W]')
-    ax_hal[0].set_title(r'Seg. Hall, Comparing Power Ouput: '+fl[1])
-    ax_hal[0].legend()
+#     ax_hal[0].set_ylabel('Ideal Power Output [W]')
+#     ax_hal[0].set_title(r'Seg. Hall, Comparing Power Ouput: '+fl[1])
+#     ax_hal[0].legend()
     
-    diff_hal = abs((np.array(comsol_power) - np.array(power_ideal_hal))/power_ideal_hal)
+#     diff_hal = abs((np.array(comsol_power) - np.array(power_ideal_hal))/power_ideal_hal)
     
-    ax_hal[1].plot(x_plot,diff_hal)
-    ax_hal[1].set_xlabel(fl[1])
-    ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
-    fig_hal.set_figheight(10)
+#     ax_hal[1].plot(x_plot,diff_hal)
+#     ax_hal[1].set_xlabel(fl[1])
+#     ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
+#     fig_hal.set_figheight(10)
     
-    ticker += 1
+#     ticker += 1
     
 # file='evan_K_seg_hal_run2'
 # fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
@@ -425,6 +425,102 @@ for fl in file_list:
 # ax_hal[2].set_xlabel(r'$\beta_e$ []')
 
 # fig_hal.set_figheight(10)
+
+### both beta_e and beta_i
+file='evan_both_beta_con_far_run3'
+# fig_hal,ax_hal = plt.subplots(3,1,sharex = True)
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+
+fig2 = plt.figure()
+ax2 = fig2.gca(projection='3d')
+
+df_hal = pd.read_csv(file+'.csv', skiprows=4)
+key_hal = df_hal.keys().to_numpy()
+
+x_plot = df_hal[key_hal[0]] ## x-value for plottings
+comsol_power = df_hal[key_hal[2]]
+print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
+comsol_power = abs(comsol_power.to_numpy())
+
+K = df_hal[key_hal[3]]
+m = 7 ## to make redefining u,B,sig easier. 
+u = df_hal[key_hal[m]]
+B = df_hal[key_hal[m+1]]
+sig = df_hal[key_hal[m+2]]
+mob_e = x_plot
+beta_e = mob_e*B
+mob_i = df_hal[key_hal[1]]
+beta_i = mob_i*mob_e*B*B
+# beta_i = df_hal[key_hal[1]]
+
+
+print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
+      '\n'+'mob_e : '+mob_e.name,'\n'+'mob_i: '+mob_i.name)
+
+power_ideal_hal = K*(1-K)*sig*u**2*B**2*((1-beta_i)/((1-beta_i)**2+beta_e**2))
+
+ax.plot_trisurf(beta_e,beta_i,comsol_power)
+ax.plot_trisurf(beta_e,beta_i,power_ideal_hal)
+
+# x_plot = x_plot.to_numpy().reshape(5,5).T
+comsol_power = comsol_power.reshape(5,5).T
+power_ideal_hal = power_ideal_hal.to_numpy().reshape(5,5).T
+
+# a = 4
+# ax_hal[0].plot(x_plot[a],comsol_power[a],'+',label = r'COMSOL: resistance $= 7E-4$')
+# ax_hal[0].plot(x_plot[a], power_ideal_hal[a],'x',label='Far. Power')
+
+# ax_hal[0].set_ylabel('Ideal Power Output [W]')
+# ax_hal[0].set_title(r'Con. Faraday, Comparing Power Ouput: '+r'$\beta_e$ and $\beta_i$')
+# ax_hal[0].legend()
+
+diff_hal = abs((comsol_power - power_ideal_hal)/power_ideal_hal)
+
+# ax2.plot_trisurf(beta_e,beta_i,diff_hal)
+ax2.set_xlabel(r'$\beta_e$')
+ax2.set_ylabel(r'$\beta_i$')
+
+ax2.plot_trisurf(beta_e,beta_i,K)
+
+K = K.to_numpy().reshape(5,5).T
+
+a = 1
+
+fig3,ax3 = plt.subplots(1,1)
+ax3.plot(K[a],power_ideal_hal[a],'+')
+ax3.plot(K[a],comsol_power[a],'x')
+
+
+# ax_hal[1].plot(x_plot, -df_hal[key_hal[5]],label='Hall power')
+# # ax_hal[1].set_ylabel('Hall Power [W]')
+
+# ax_hal[1].plot(x_plot, diff_hal)
+# ax_hal[1].set_ylabel('Relative Difference')
+ 
+# ax_hal[2].plot(x_plot,K) 
+# ax_hal[2].set_ylabel('K []')  
+# ax_hal[2].set_xlabel(r'$\beta_e$ []')
+
+# fig_hal.set_figheight(10)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     
