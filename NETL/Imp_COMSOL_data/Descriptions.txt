@@ -10,4 +10,13 @@ evan_sig_seg_far_run2: sig sweep with updated geometry
 
 evan_K_seg_far_run8: Shows much better convergence than old geometry (run1), but still not amazing. Has updated geometry. 
 
+evan_both_beta_con_far_run3: Sweep through both beta_e and beta_i, shows great convergence for beta_e in (0,1) and beta_i in (0,beta_e).
+
+evan_both_beta_seg_far_run1: Sweep through both beta_e and beta_i, shows good convegence, again for beta_e in (0,1), beta_i in (0,beta_e). 
+
+evan_both_beta_seg_far_run2: Sweep through both beta_e and beta_i, shows good convegence, again for beta_e in (1,2.7), beta_i in (0,beta_e). 
+
+
+ 
+
 
