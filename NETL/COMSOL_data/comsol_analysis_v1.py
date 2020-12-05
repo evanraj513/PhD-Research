@@ -449,113 +449,116 @@ def get_keys(file_name = ''):
 
 
 ## beta_e run ##
-# file='evan_beta_e_con_far_run4'
-# fig_hal,ax_hal = plt.subplots(3,1,sharex = True)
-# df_hal = pd.read_csv(file+'.csv', skiprows=4)
-# key_hal = df_hal.keys().to_numpy()
-
-# x_plot = df_hal[key_hal[0]] ## x-value for plottings
-# comsol_power = df_hal[key_hal[2]]
-# print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
-# comsol_power = abs(comsol_power.to_numpy())
-
-# K = df_hal[key_hal[3]]
-# m = 7 ## to make redefining u,B,sig easier. 
-# u = df_hal[key_hal[m]]
-# B = df_hal[key_hal[m+1]]
-# sig = df_hal[key_hal[m+2]]
-# beta_e = x_plot
-
-# print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
-#       '\n'+'beta_e : '+beta_e.name)
-
-# power_ideal_hal = K*(1-K)*sig*u**2*B**2/(1+beta_e**2)
-
-# ax_hal[0].plot(x_plot,comsol_power,label = r'COMSOL: resistance $= 7E-4$')
-# ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Far. Power')
-
-# ax_hal[0].set_ylabel('Ideal Power Output [W]')
-# ax_hal[0].set_title(r'Con. Faraday, Comparing Power Ouput: '+r'$\beta_e$')
-# ax_hal[0].legend()
-
-# diff_hal = abs((comsol_power - power_ideal_hal)/power_ideal_hal)
-
-
-# # ax_hal[1].plot(x_plot, -df_hal[key_hal[5]],label='Hall power')
-# # ax_hal[1].set_ylabel('Hall Power [W]')
-
-# ax_hal[1].plot(x_plot, diff_hal)
-# ax_hal[1].set_ylabel('Relative Difference')
- 
-# ax_hal[2].plot(x_plot,K) 
-# ax_hal[2].set_ylabel('K []')  
-# ax_hal[2].set_xlabel(r'$\beta_e$ []')
-
-# fig_hal.set_figheight(10)
-
-
-
-### both beta_e and beta_i
-file='evan_both_beta_con_far_run3'
-
-# fig = plt.figure()
-# ax = fig.gca(projection='3d')
-
-# fig2 = plt.figure()
-# ax2 = fig2.gca(projection='3d')
-
+file='evan_beta_e_con_far_run5'
+fig_hal,ax_hal = plt.subplots(3,1,sharex = True)
 df_hal = pd.read_csv(file+'.csv', skiprows=4)
 key_hal = df_hal.keys().to_numpy()
 
+x_plot = df_hal[key_hal[0]]*6 ## x-value for plottings
 comsol_power = abs(df_hal[key_hal[2]])
+print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
+comsol_power = abs(comsol_power.to_numpy())
 
-K = df_hal[key_hal[3]]
+K = df_hal[key_hal[6]]
 m = 7 ## to make redefining u,B,sig easier. 
 u = df_hal[key_hal[m]]
 B = df_hal[key_hal[m+1]]
 sig = df_hal[key_hal[m+2]]
-mob_e = df_hal[key_hal[0]]
-beta_e = mob_e*B
-mob_i = df_hal[key_hal[1]]
-beta_i = mob_i*mob_e*B*B
-
+beta_e = x_plot
 
 print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
-      '\n'+'mob_e : '+mob_e.name,'\n'+'mob_i: '+mob_i.name,
-      '\n'+'comsol_power: '+comsol_power.name)
+      '\n'+'beta_e : '+beta_e.name)
 
-power_ideal_hal = K*(1-K)*sig*u**2*B**2*((1-beta_i)/((1-beta_i)**2+beta_e**2))
+power_ideal_hal = K*(1-K)*sig*u**2*B**2/(1+beta_e**2)
 
-##############
-## 2D plots ##
-##############
-
-x_plot = beta_i
-fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
-
-rs1 = beta_e.unique().size ## Number of beta_e tested
-rs2 = beta_e.shape[0]/rs1 ## Number of beta_i for specific beta_e
-
-beta_e = beta_e.to_numpy().reshape(rs1,rs2).T
-x_plot = x_plot.to_numpy().reshape(rs1,rs2).T
-comsol_power = comsol_power.to_numpy().reshape(rs1,rs2).T
-power_ideal_hal = power_ideal_hal.to_numpy().reshape(rs1,rs2).T
-
-diff_hal = abs(comsol_power - power_ideal_hal)/power_ideal_hal
-diff_hal = diff_hal.reshape(rs1,rs2).T
-
-for a in np.arange(1,5):
-    ax_hal[0].plot(x_plot[a],comsol_power[a],'-',label = r'COMSOL: $\beta_e = $'+str(beta_e[0][a]))
-    ax_hal[0].plot(x_plot[a], power_ideal_hal[a],'--',label=r'Ideal Far. Power, $\beta_e = $'+str(beta_e[0][a]))
-    
-    ax_hal[1].plot(x_plot[a], diff_hal[a], label=r'Diff. for $\beta_e = $'+str(beta_e[0][a]))
-    
+ax_hal[0].plot(x_plot, comsol_power,label = r'COMSOL: resistance $= 7E-4$')
+ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Far. Power')
 
 ax_hal[0].set_ylabel('Ideal Power Output [W]')
-ax_hal[0].set_title(r'Con. Faraday, Comparing Power Ouput: '+r'$\beta_e$ and $\beta_i$')
-ax_hal[0].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
-ax_hal[1].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
-fig_hal.set_size_inches(10,10)
+ax_hal[0].set_title(r'Con. Faraday, Comparing Power Ouput: '+r'$\beta_e$')
+ax_hal[0].legend()
+
+diff_hal = abs((comsol_power - power_ideal_hal)/power_ideal_hal)
+
+
+# ax_hal[1].plot(x_plot, -df_hal[key_hal[5]],label='Hall power')
+# ax_hal[1].set_ylabel('Hall Power [W]')
+
+ax_hal[1].plot(x_plot, diff_hal)
+ax_hal[1].set_ylabel('Relative Difference')
+ 
+ax_hal[2].plot(x_plot,K) 
+ax_hal[2].set_ylabel('K []')  
+ax_hal[2].set_xlabel(r'$\beta_e$ []')
+
+fig_hal.set_figheight(10)
+
+
+
+### both beta_e and beta_i
+# file='evan_both_beta_con_far_run5'
+
+# # fig = plt.figure()
+# # ax = fig.gca(projection='3d')
+
+# # fig2 = plt.figure()
+# # ax2 = fig2.gca(projection='3d')
+
+# df_hal = pd.read_csv(file+'.csv', skiprows=4)
+# key_hal = df_hal.keys().to_numpy()
+
+# comsol_power = abs(df_hal[key_hal[3]])
+
+# K = df_hal[key_hal[6]]
+# m = 7 ## to make redefining u,B,sig easier. 
+# u = df_hal[key_hal[m]]
+# B = df_hal[key_hal[m+1]]
+# sig = df_hal[key_hal[m+2]]
+# mob_e = df_hal[key_hal[0]]
+# beta_e = mob_e*B
+# mob_i = df_hal[key_hal[1]]
+# beta_i = mob_i*mob_e*B*B
+
+
+# print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
+#       '\n'+'mob_e : '+mob_e.name,'\n'+'mob_i: '+mob_i.name,
+#       '\n'+'comsol_power: '+comsol_power.name)
+
+# power_ideal_hal = K*(1-K)*sig*u**2*B**2*((1-beta_i)/((1-beta_i)**2+beta_e**2))
+
+# ##############
+# ## 2D plots ##
+# ##############
+
+# x_plot = beta_i
+
+# rs1 = int(beta_e.unique().size) ## Number of beta_e tested
+# rs2 = int(beta_e.shape[0]/rs1) ## Number of beta_i for specific beta_e
+
+# beta_e = beta_e.to_numpy().reshape(rs1,rs2)
+# x_plot = x_plot.to_numpy().reshape(rs1,rs2)
+# comsol_power = comsol_power.to_numpy().reshape(rs1,rs2)
+# power_ideal_hal = power_ideal_hal.to_numpy().reshape(rs1,rs2)
+
+# diff_hal = abs(comsol_power - power_ideal_hal)/power_ideal_hal
+# diff_hal = diff_hal.reshape(rs1,rs2)
+
+# fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
+
+# for a in np.arange(0,rs1):
+#     ax_hal[0].plot(x_plot[a], comsol_power[a],'-o',label = r'COMSOL: $\beta_e = $'+str(beta_e[0][a]))
+#     ax_hal[0].plot(x_plot[a], power_ideal_hal[a],'-x',label=r'Ideal Far. Power, $\beta_e = $'+str(beta_e[0][a]))
+    
+#     ax_hal[1].plot(x_plot[a], diff_hal[a], label=r'Diff. for $\beta_e = $'+str(beta_e[0][a]))
+    
+
+# ax_hal[0].set_ylabel('Ideal Power Output [W]')
+# ax_hal[0].set_title(r'Con. Faraday, Comparing Power Ouput: '+r'$\beta_e$ and $\beta_i$')
+# ax_hal[0].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+# ax_hal[1].set_ylabel('Rel. Diff')
+# ax_hal[1].set_xlabel(r'$\beta_i$')
+# ax_hal[1].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+# fig_hal.set_size_inches(10,10)
 
 ##############
 ## 3D plots ##
@@ -817,16 +820,208 @@ fig_hal.set_size_inches(10,10)
 # ax3.plot(K[a],comsol_power[a],'x')
 
 
+###############################################################################################
+########################### Sensitivity Analyses ##############################################
+###############################################################################################
+
+######### Continuous Faraday ############
+
+#########
+### u ###
+#########
+
+# file='sens_con_far_u_run2'
+
+# df_hal = pd.read_csv(file+'.csv', skiprows=4)
+# key_hal = df_hal.keys().to_numpy()
+
+# comsol_power = abs(df_hal[key_hal[4]])
+
+# K = df_hal[key_hal[7]]
+# m = 8 ## to make redefining u,B,sig easier. 
+# u = df_hal[key_hal[0]]
+# B = df_hal[key_hal[m+1]]
+# sig = df_hal[key_hal[m+2]]
+# mob_e = df_hal[key_hal[1]]
+# beta_e = mob_e*B
+# mob_i = df_hal[key_hal[2]]
+# beta_i = mob_i*mob_e*B*B
+
+
+# print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
+#       '\n'+'mob_e : '+mob_e.name,'\n'+'mob_i: '+mob_i.name,
+#       '\n'+'comsol_power: '+comsol_power.name)
+
+# power_ideal_hal = K*(1-K)*sig*u**2*B**2*((1-beta_i)/((1-beta_i)**2+beta_e**2))
+
+# x_plot = beta_i
+
+# rs1 = int(beta_e.unique().size) ## Number of beta_e tested
+# rs2 = int(u.unique().size) ## Number of u's tested
+# rs3 = int(beta_e.shape[0]/rs1/rs2) ## Number of beta_i for each unique pair (beta_e, u)
+
+# beta_e = beta_e.to_numpy().reshape(rs1,rs3,rs2).transpose(0,2,1)
+# x_plot = x_plot.to_numpy().reshape(rs1,rs3,rs2).transpose(0,2,1)
+# comsol_power = comsol_power.to_numpy().reshape(rs1,rs3,rs2).transpose(0,2,1)
+# power_ideal_hal = power_ideal_hal.to_numpy().reshape(rs1,rs3,rs2).transpose(0,2,1)
+# u = u.to_numpy().reshape(rs1,rs3,rs2).transpose(0,2,1)
+
+# diff_hal = abs(comsol_power - power_ideal_hal)/power_ideal_hal
+# diff_hal = diff_hal.reshape(rs1,rs3,rs2).transpose(0,2,1)
+
+# for a in np.arange(0,rs1):
+#     fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
+#     for b in np.arange(0,rs2):
+#         ax_hal[0].plot(x_plot[a][b], comsol_power[a][b],'-o',
+#                         label = r'COMSOL: $\beta_e = $'+str(beta_e[0][b][a])+
+#                         r'\n $u = $'+str(u[0][b][a]))
+#         ax_hal[0].plot(x_plot[a][b], power_ideal_hal[a][b],'--x',
+#                         label=r'Ideal Far. Power, $\beta_e = $'+str(beta_e[0][b][a])+
+#                         r'\n $u = $'+str(u[0][b][a]))
     
+#         ax_hal[1].plot(x_plot[a][b], diff_hal[a][b], 
+#                         label=r'Diff. for $\beta_e = $'+str(beta_e[0][b][a])+
+#                         r'\n $u = $'+str(u[0][b][a]))
     
+
+#     ax_hal[0].set_ylabel('Ideal Power Output [W]')
+#     ax_hal[0].set_title(r'Con. Faraday, Sensitivity Analysis, u, $\beta_E = $'+str(beta_e[a][0][0]))
+#     ax_hal[0].legend(fontsize = 'x-small', loc = 'upper left', bbox_to_anchor=(1.05, 1))
+#     ax_hal[1].set_ylabel('Rel. Diff')
+#     ax_hal[1].set_xlabel(r'$\beta_i$')
+#     ax_hal[1].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+#     fig_hal.set_size_inches(10,10)
+
+#########
+### B ###
+#########
+
+# file='sens_con_far_B_run1'
+
+# df_hal = pd.read_csv(file+'.csv', skiprows=4)
+# key_hal = df_hal.keys().to_numpy()
+
+# comsol_power = abs(df_hal[key_hal[4]])
+
+# K = df_hal[key_hal[7]]
+# m = 8 ## to make redefining u,B,sig easier. 
+# u = df_hal[key_hal[m]]
+# B = df_hal[key_hal[m+1]]
+# sig = df_hal[key_hal[m+2]]
+# mob_e = df_hal[key_hal[1]]
+# beta_e = mob_e*B
+# mob_i = df_hal[key_hal[2]]
+# beta_i = mob_i*mob_e*B*B
+
+
+# print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
+#       '\n'+'mob_e : '+mob_e.name,'\n'+'mob_i: '+mob_i.name,
+#       '\n'+'comsol_power: '+comsol_power.name)
+
+# power_ideal_hal = K*(1-K)*sig*u**2*B**2*((1-beta_i)/((1-beta_i)**2+beta_e**2))
+
+# x_plot = beta_i
+
+# rs1 = int(mob_e.unique().size) ## Number of beta_e tested
+# rs2 = int(B.unique().size) ## Number of u's tested
+# rs3 = int(beta_e.shape[0]/rs1/rs2) ## Number of beta_i for each unique pair (beta_e, u)
+
+# mob_e = mob_e.to_numpy().reshape(rs1,rs3,rs2).transpose(0,2,1)
+# beta_e = beta_e.to_numpy().reshape(rs1,rs3,rs2).transpose(0,2,1)
+# x_plot = x_plot.to_numpy().reshape(rs1,rs3,rs2).transpose(0,2,1)
+# comsol_power = comsol_power.to_numpy().reshape(rs1,rs3,rs2).transpose(0,2,1)
+# power_ideal_hal = power_ideal_hal.to_numpy().reshape(rs1,rs3,rs2).transpose(0,2,1)
+# u = u.to_numpy().reshape(rs1,rs3,rs2).transpose(0,2,1)
+
+# diff_hal = abs(comsol_power - power_ideal_hal)/power_ideal_hal
+# diff_hal = diff_hal.reshape(rs1,rs3,rs2).transpose(0,2,1)
+
+# for a in np.arange(0,rs1):
+#     fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
+#     for b in np.arange(0,rs2):
+#         ax_hal[0].plot(x_plot[a][b], comsol_power[a][b],'-o',
+#                         label = r'COMSOL: $\beta_e = $'+str(beta_e[0][b][a])+
+#                         r'\n $u = $'+str(u[0][b][a]))
+#         ax_hal[0].plot(x_plot[a][b], power_ideal_hal[a][b],'--x',
+#                         label=r'Ideal Far. Power, $\beta_e = $'+str(beta_e[0][b][a])+
+#                         r'\n $u = $'+str(u[0][b][a]))
     
+#         ax_hal[1].plot(x_plot[a][b], diff_hal[a][b], 
+#                         label=r'Diff. for $\beta_e = $'+str(beta_e[0][b][a])+
+#                         r'\n $u = $'+str(u[0][b][a]))
     
+
+#     ax_hal[0].set_ylabel('Ideal Power Output [W]')
+#     ax_hal[0].set_title(r'Con. Faraday, Sensitivity Analysis, u, $\mu_E = $'+str(mob_e[a][0][0]))
+#     ax_hal[0].legend(fontsize = 'x-small', loc = 'upper left', bbox_to_anchor=(1.05, 1))
+#     ax_hal[1].set_ylabel('Rel. Diff')
+#     ax_hal[1].set_xlabel(r'$\beta_i$')
+#     ax_hal[1].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+#     fig_hal.set_size_inches(10,10)
+
+#########
+## sig ##
+#########
+
+# file='sens_con_far_sig_run1'
+
+# df_hal = pd.read_csv(file+'.csv')
+# key_hal = df_hal.keys().to_numpy()
+
+# comsol_power = abs(df_hal[key_hal[4]])
+
+# K = df_hal[key_hal[7]]
+# m = 8 ## to make redefining u,B,sig easier. 
+# u = df_hal[key_hal[m]]
+# B = df_hal[key_hal[m+1]]
+# sig = df_hal[key_hal[m+2]]
+# mob_e = df_hal[key_hal[1]]
+# beta_e = mob_e*B
+# mob_i = df_hal[key_hal[2]]
+# beta_i = mob_i*mob_e*B*B
+
+
+# print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
+#       '\n'+'mob_e : '+mob_e.name,'\n'+'mob_i: '+mob_i.name,
+#       '\n'+'comsol_power: '+comsol_power.name)
+
+# power_ideal_hal = K*(1-K)*sig*u**2*B**2*((1-beta_i)/((1-beta_i)**2+beta_e**2))
+
+# x_plot = beta_i
+
+# rs1 = int(mob_e.unique().size) ## Number of beta_e tested
+# rs2 = int(sig.unique().size) ## Number of u's tested
+# rs3 = int(beta_e.shape[0]/rs1/rs2) ## Number of beta_i for each unique pair (beta_e, u)
+
+# mob_e = mob_e.to_numpy().reshape(rs1,rs2,rs3)
+# beta_e = beta_e.to_numpy().reshape(rs1,rs2,rs3)
+# x_plot = x_plot.to_numpy().reshape(rs1,rs2,rs3)
+# comsol_power = comsol_power.to_numpy().reshape(rs1,rs2,rs3)
+# power_ideal_hal = power_ideal_hal.to_numpy().reshape(rs1,rs2,rs3)
+# u = u.to_numpy().reshape(rs1,rs2,rs3)
+
+# diff_hal = abs(comsol_power - power_ideal_hal)/power_ideal_hal
+# diff_hal = diff_hal.reshape(rs1,rs2,rs3)
+
+# for a in np.arange(0,rs1):
+#     fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
+#     for b in np.arange(0,rs2):
+#         ax_hal[0].plot(x_plot[a][b], comsol_power[a][b],'-o',
+#                         label = r'COMSOL: $\beta_e = $'+str(beta_e[0][b][a])+
+#                         r'\n $u = $'+str(u[0][b][a]))
+#         ax_hal[0].plot(x_plot[a][b], power_ideal_hal[a][b],'--x',
+#                         label=r'Ideal Far. Power, $\beta_e = $'+str(beta_e[0][b][a])+
+#                         r'\n $u = $'+str(u[0][b][a]))
     
+#         ax_hal[1].plot(x_plot[a][b], diff_hal[a][b], 
+#                         label=r'Diff. for $\beta_e = $'+str(beta_e[0][b][a])+
+#                         r'\n $u = $'+str(u[0][b][a]))
     
-    
-    
-    
-    
-    
-    
-    
+
+#     ax_hal[0].set_ylabel('Ideal Power Output [W]')
+#     ax_hal[0].set_title(r'Con. Faraday, Sensitivity Analysis, u, $\mu_E = $'+str(mob_e[a][0][0]))
+#     ax_hal[0].legend(fontsize = 'x-small', loc = 'upper left', bbox_to_anchor=(1.05, 1))
+#     ax_hal[1].set_ylabel('Rel. Diff')
+#     ax_hal[1].set_xlabel(r'$\beta_i$')
+#     ax_hal[1].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+#     fig_hal.set_size_inches(10,10)
