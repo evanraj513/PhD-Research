@@ -496,7 +496,7 @@ def get_keys(file_name = ''):
 
 
 ### both beta_e and beta_i
-file='evan_both_beta_con_far_run3'
+file='evan_both_beta_con_far_run10'
 
 df_hal = pd.read_csv(file+'.csv', skiprows=4)
 key_hal = df_hal.keys().to_numpy()
@@ -525,58 +525,58 @@ diff_hal = abs(comsol_power - power_ideal_hal)/power_ideal_hal
 # ## 2D plots ##
 # ##############
 
-x_plot = beta_i
+# x_plot = beta_i
 
-rs1 = int(beta_e.unique().size) ## Number of beta_e tested
-rs2 = int(beta_e.shape[0]/rs1) ## Number of beta_i for specific beta_e
+# rs1 = int(beta_e.unique().size) ## Number of beta_e tested
+# rs2 = int(beta_e.shape[0]/rs1) ## Number of beta_i for specific beta_e
 
-beta_e = beta_e.to_numpy().reshape(rs1,rs2)
-x_plot = x_plot.to_numpy().reshape(rs1,rs2)
-comsol_power = comsol_power.to_numpy().reshape(rs1,rs2)
-power_ideal_hal = power_ideal_hal.to_numpy().reshape(rs1,rs2)
+# beta_e = beta_e.to_numpy().reshape(rs1,rs2)
+# x_plot = x_plot.to_numpy().reshape(rs1,rs2)
+# comsol_power = comsol_power.to_numpy().reshape(rs1,rs2)
+# power_ideal_hal = power_ideal_hal.to_numpy().reshape(rs1,rs2)
 
-diff_hal = diff_hal.to_numpy().reshape(rs1,rs2)
+# diff_hal = diff_hal.to_numpy().reshape(rs1,rs2)
 
-fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
+# fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
 
-for a in np.arange(0,rs1):
-    ax_hal[0].plot(x_plot[a], comsol_power[a],'-o',label = r'COMSOL: $\beta_e = $'+str(beta_e[a][0]))
-    ax_hal[0].plot(x_plot[a], power_ideal_hal[a],'-x',label=r'Ideal Far. Power, $\beta_e = $'+str(beta_e[a][0]))
+# for a in np.arange(0,rs1):
+#     ax_hal[0].plot(x_plot[a], comsol_power[a],'-o',label = r'COMSOL: $\beta_e = $'+str(beta_e[a][0]))
+#     ax_hal[0].plot(x_plot[a], power_ideal_hal[a],'-x',label=r'Ideal Far. Power, $\beta_e = $'+str(beta_e[a][0]))
     
-    ax_hal[1].plot(x_plot[a], diff_hal[a], label=r'Diff. for $\beta_e = $'+str(beta_e[a][0]))
+#     ax_hal[1].plot(x_plot[a], diff_hal[a], label=r'Diff. for $\beta_e = $'+str(beta_e[a][0]))
     
 
-ax_hal[0].set_ylabel('Ideal Power Output [W]')
-ax_hal[0].set_title(r'Con. Faraday, Comparing Power Ouput: '+r'$\beta_e$ and $\beta_i$')
-ax_hal[0].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
-ax_hal[1].set_ylabel('Rel. Diff')
-ax_hal[1].set_xlabel(r'$\beta_i$')
-ax_hal[1].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
-fig_hal.set_size_inches(10,10)
+# ax_hal[0].set_ylabel('Ideal Power Output [W]')
+# ax_hal[0].set_title(r'Con. Faraday, Comparing Power Ouput: '+r'$\beta_e$ and $\beta_i$')
+# ax_hal[0].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+# ax_hal[1].set_ylabel('Rel. Diff')
+# ax_hal[1].set_xlabel(r'$\beta_i$')
+# ax_hal[1].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+# fig_hal.set_size_inches(10,10)
 
 ##############
 ## 3D plots ##
 ##############
 
-# fig = plt.figure()
-# ax = fig.gca(projection='3d')
+fig = plt.figure()
+ax = fig.gca(projection='3d')
 
-# fig2 = plt.figure()
-# ax2 = fig2.gca(projection='3d')
+fig2 = plt.figure()
+ax2 = fig2.gca(projection='3d')
 
-# ax.plot_trisurf(beta_e,beta_i,comsol_power)
-# ax.plot_trisurf(beta_e,beta_i,power_ideal_hal)
-# ax.set_xlabel(r'$\beta_e$ []')
-# ax.set_ylabel(r'$\beta_i$ []')
-# ax.set_zlabel(r'Power [MW]')
-
-# # ax2.plot_trisurf(beta_e,beta_i,diff_hal)
-# ax2.set_xlabel(r'$\beta_e$')
-# ax2.set_ylabel(r'$\beta_i$')
-# ax2.set_zlabel(r'Rel. Difference')
-# ax2.set_title('Relative Difference between measured and ideal Power out')
+ax.plot_trisurf(beta_e,beta_i,comsol_power)
+ax.plot_trisurf(beta_e,beta_i,power_ideal_hal)
+ax.set_xlabel(r'$\beta_e$ []')
+ax.set_ylabel(r'$\beta_i$ []')
+ax.set_zlabel(r'Power [MW]')
 
 # ax2.plot_trisurf(beta_e,beta_i,diff_hal)
+ax2.set_xlabel(r'$\beta_e$')
+ax2.set_ylabel(r'$\beta_i$')
+ax2.set_zlabel(r'Rel. Difference')
+ax2.set_title('Relative Difference between measured and ideal Power out')
+
+ax2.plot_trisurf(beta_e,beta_i,diff_hal)
 
 
 
