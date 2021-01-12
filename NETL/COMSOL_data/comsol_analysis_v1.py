@@ -1117,7 +1117,7 @@ df_hal = pd.read_csv(file+'.csv',skiprows=4)
 key_hal = df_hal.keys().to_numpy()
 df_hal = df_hal.sort_values(by=[key_hal[1],key_hal[2]])
 
-comsol_power = abs(df_hal[key_hal[4]])
+comsol_power = abs(df_hal[key_hal[17]])
 
 K = df_hal[key_hal[8]]
 m = 9 ## to make redefining u,B,sig easier. 
@@ -1153,11 +1153,11 @@ sig = sig.to_numpy().reshape(rs1,rs2,rs3)
 diff_hal = abs(comsol_power - power_ideal_hal)/power_ideal_hal
 diff_hal = diff_hal.reshape(rs1,rs2,rs3)
 
-# fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
+fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
 
 for a in np.arange(0,rs1):
     # fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
-    fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
+    # fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
     for b in np.arange(0,rs2):
         # ax_hal[0].plot(x_plot[a][b], comsol_power[a][b],'-o',
         #                 label = r'COMSOL: '+
@@ -1172,7 +1172,8 @@ for a in np.arange(0,rs1):
         
         ax_hal.plot(x_plot[a][b], comsol_power[a][b],'-o',
                         label = r'COMSOL: '+
-                        r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
+                        r'$\beta_i = $'+str(round(beta_i[a][b][0],2))+
+                        r', $\beta_e = $'+str(round(beta_e[a][0][0],3)))
     
 
     # ax_hal[0].set_ylabel('Power Output [W]')
@@ -1182,8 +1183,9 @@ for a in np.arange(0,rs1):
     # ax_hal[1].set_xlabel(r'L [m]')
     # ax_hal[1].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
     
-    ax_hal.set_ylabel('Power Output [W]')
-    ax_hal.set_title(r'Con. Faraday, Sensitivity Analysis, L, $\beta_e = $'+str(round(beta_e[a][0][0],3)))
+    ax_hal.set_ylabel(r'Joule Heating [W/m$^3$]')
+    ax_hal.set_xlabel('L [m]')
+    ax_hal.set_title(r'Seg. Faraday, Sensitivity Analysis, L')#', $\beta_e = $'+str(round(beta_e[a][0][0],3)))
     ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
     
     fig_hal.set_size_inches(10,10)
