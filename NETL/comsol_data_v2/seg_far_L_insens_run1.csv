@@ -1,0 +1,9 @@
+% Model,Evan_segmented_faraday_v5.mph
+% Version,COMSOL 5.5.0.359
+% Date,"Jan 22 2021, 15:27"
+% Table,Probe Table 1 - 
+% mob_e (m^2/(V*s)),mob_i (m^2/(V*s)),"abs(ec.Ey/(u_x*B_app)) (1), K hall","plasma velocity (m/s), Point: (0, 0, 0)","Applied Magnetic Field (T), Point: (0, 0, 0)","plasma conductivity (S/m), Point: (0, 0, 0)","ec.Ex*ec.Jx+ec.Ey*ec.Jy+ec.Ez*ec.Jz (W), Resistor Power","ec.Ey*ec.Jy (W), Faraday Power","ec.Ex*ec.Jx (W), Hall Power","ec.Jz*ec.Ez (W), Off Power","ec.Ex*ec.Jx+ec.Ey*ec.Jy+ec.Ez*ec.Jz (W), Total Channel Power","ec.Jx*ec.Ex + ec.Jy*ec.Ey + ec.Jz*ec.Ez (W), Joule Heating","Insulating boundary added to ends of channel (outdated, use L now) (mm)",Support of B_z function away from channel (mm)
+0,0,0.5224543904458429,1800,6,60,7.277170326036023E7,-2.6592463901412018E7,14713.905388556657,175.2403065467981,-2.65775747557159E7,-4.618855356016964E7,50,500
+0.3,0,0.5217966649791961,1800,6,60,7.25443353392836E7,-2.6491478711750306E7,29646.16860180584,5826.579604210123,-2.645600596354521E7,-4.608500478727074E7,50,500
+1,0,0.5194308917474029,1800,6,60,7.147178655317293E7,-2.6091020336070396E7,129520.46573236244,120835.52856258994,-2.5840664341775864E7,-4.5625661340415016E7,50,500
+1.6666666666666667,0,0.518292102093909,1800,6,60,7.035681078188252E7,-2.5796375357181307E7,175901.7418510547,373362.38925025146,-2.524711122607966E7,-4.510427688844568E7,50,500
