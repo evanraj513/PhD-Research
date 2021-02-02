@@ -187,10 +187,10 @@ def plot_data(plot_y, file, save_question = 1, plot_x = 0, file_name = 'Unnamed'
         pdf.close()
         
         
-file_name='con_far_L_sens_run1'
+file_name='con_far_L_sens_run1_4'
 
 file='../comsol_data_v2/'+file_name
 
 plot_all = ['Joule Heating','Resistor','Resistor_Joule Heating']
 for x in plot_all:
-    plot_data(x, file, save_question = 0, plot_x = 0, file_name = 'Con. Faraday Sens. Analysis: '+x, plot_type=2)
+    plot_data(x, file, save_question = 0, plot_x = 0, file_name = file_name+': '+x, plot_type=0)
