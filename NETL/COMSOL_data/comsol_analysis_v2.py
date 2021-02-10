@@ -8,9 +8,12 @@ Created on Mon Feb  1 16:32:08 2021
 
 import numpy as np
 import pandas as pd
+import difflib
 import os
 import sys
 import time
+
+find_key = difflib.get_close_matches
 
 from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
@@ -31,13 +34,16 @@ if not os.path.exists(m_path):
 else:
     sys.path.append(m_path)
     
-def plot_data(plot_y, file, save_question = 1, plot_x = 0, file_name = 'Unnamed', plot_type=0):
+def plot_data(plot_y, file, save_question = 1, plot_x = 0, file_name = 'Unnamed', plot_type=0, plot_ideal=False, title_name = ''):
     '''
     Plots the data contained in the file provided. 
     '''
     
     if file_name == 'Unnamed':
         file_name = file
+        
+    if title_name == '':
+        title_name = file_name
     
     # plot_type = 0
     '''
@@ -56,23 +62,36 @@ def plot_data(plot_y, file, save_question = 1, plot_x = 0, file_name = 'Unnamed'
     df_hal = df_hal.sort_values(by=[key_hal[1],key_hal[2]])
     
     if plot_y == 'Resistor':
-        comsol_power = abs(df_hal[key_hal[7]])
+        key = find_key('ec.Ex*ec.Jx+ec.Ey*ec.Jy+ec.Ez*ec.Jz (W), Resistor Power',key_hal)
+        comsol_power = abs(df_hal[key[0]])
         y_plot_name = comsol_power.name
     elif plot_y == 'Joule Heating':
-        comsol_power = abs(df_hal[key_hal[12]])
+        key = find_key('ec.Jx*ec.Ex + ec.Jy*ec.Ey + ec.Jz*ec.Ez (W), Joule Heating',key_hal)
+        comsol_power = abs(df_hal[key[0]])
         y_plot_name = comsol_power.name
     elif plot_y == 'Resistor_Joule Heating':
-        comsol_power = abs(df_hal[key_hal[7]]) - abs(df_hal[key_hal[12]])
+        key_R = find_key('ec.Ex*ec.Jx+ec.Ey*ec.Jy+ec.Ez*ec.Jz (W), Resistor Power',key_hal)
+        key_J = find_key('ec.Jx*ec.Ex + ec.Jy*ec.Ey + ec.Jz*ec.Ez (W), Joule Heating',key_hal)
+        comsol_power = abs(df_hal[key_R[0]]) - abs(df_hal[key_J[0]])
         y_plot_name = 'Resistor Power - Joule Heating [W]'
+    else:
+        try:
+            key = find_key(plot_y, key_hal)
+            comsol_power = abs(df_hal[key[0]])
+            y_plot_name = plot_y
+        except:
+            print('Error. Did not find key given in y_plot')
+            raise Exception
+                
     
-    K = df_hal[key_hal[3]]
-    m = 4 ## to make redefining u,B,sig easier. 
-    u = df_hal[key_hal[m]]
-    B = df_hal[key_hal[m+1]]
-    sig = df_hal[key_hal[m+2]]
-    mob_e = df_hal[key_hal[1]]
+    K = df_hal[find_key('abs(ec.Ey/(u_x*B_app)) (1), K hall', key_hal)[0]]
+    # m = 4 ## to make redefining u,B,sig easier. 
+    u = df_hal[find_key('plasma velocity (m/s), Point: (0, 0, 0)', key_hal)[0]]
+    B = df_hal[find_key('Applied Magnetic Field (T), Point: (0, 0, 0)', key_hal)[0]]
+    sig = df_hal[find_key('plasma conductivity (S/m), Point: (0, 0, 0)', key_hal)[0]]
+    mob_e = df_hal[find_key('% mob_e (m^2/(V*s))', key_hal)[0]]
     beta_e = mob_e*B
-    mob_i = df_hal[key_hal[2]]
+    mob_i = df_hal[find_key('mob_i (m^2/(V*s))', key_hal)[0]]
     beta_i = mob_e*mob_i*B**2
     
     
@@ -108,23 +127,44 @@ def plot_data(plot_y, file, save_question = 1, plot_x = 0, file_name = 'Unnamed'
     
     if plot_type == 2:
         print('Plotting all plots inlaid')
-        fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
+        if plot_ideal == False:
+            fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
+        else:
+            fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
     
     for a in np.arange(0,rs1):
         # fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
         if plot_type == 1:
-            fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
+            if plot_ideal == False:
+                fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
+            else:
+                fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
         for b in np.arange(0,rs2):
             
             if plot_type == 0:
-                fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
-                ax_hal.plot(x_plot[a][b],comsol_power[a][b])
-                ax_hal.set_ylabel(y_plot_name)
-                ax_hal.set_xlabel(x_plot_name)
-                ax_hal.set_title(file_name + r' $\beta_e = $'+str(round(beta_e[a][0][0],3))
-                                 +r' $\beta_i = $'+str(round(beta_i[a][b][0],3)))
-                # ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
-                fig_hal.set_size_inches(10,10)
+                if plot_ideal == False:
+                    fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
+                    ax_hal.plot(x_plot[a][b],comsol_power[a][b])
+                    ax_hal.set_ylabel(y_plot_name)
+                    ax_hal.set_xlabel(x_plot_name)
+                    ax_hal.set_title(title_name + r' $\beta_e = $'+str(round(beta_e[a][0][0],3))
+                                     +r' $\beta_i = $'+str(round(beta_i[a][b][0],3)))
+                    # ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+                    fig_hal.set_size_inches(10,10)
+                else:
+                    fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
+                    ax_hal[0].plot(x_plot[a][b],comsol_power[a][b])
+                    ax_hal[0].set_ylabel(y_plot_name)
+                    ax_hal[0].set_title(title_name + r' $\beta_e = $'+str(round(beta_e[a][0][0],3))
+                                     +r' $\beta_i = $'+str(round(beta_i[a][b][0],3)))
+                    
+                    ax_hal[1].set_xlabel(x_plot_name)
+                    ax_hal[1].set_ylabel('Rel. Difference')
+                    ax_hal[0].plot(x_plot[a][b], power_ideal_hal[a][b], '-x')
+                    
+                    ax_hal[1].plot(x_plot[a][b], diff_hal[a][b])
+                    # ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+                    fig_hal.set_size_inches(10,10)
                 
                 if saving == 1:
                     pdf.savefig(fig_hal)
@@ -143,15 +183,37 @@ def plot_data(plot_y, file, save_question = 1, plot_x = 0, file_name = 'Unnamed'
             #                 r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
             
             elif plot_type == 1:
-                ax_hal.plot(x_plot[a][b], comsol_power[a][b],'-o',
-                                label = r'COMSOL: '+
-                                r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
-                                # r', $\beta_e = $'+str(round(beta_e[a][0][0],3)))
+                if plot_ideal == False:
+                    ax_hal.plot(x_plot[a][b],comsol_power[a][b], label = r'COMSOL: '+
+                            r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
+                else:
+                    ax_hal[0].plot(x_plot[a][b],comsol_power[a][b], label = r'COMSOL: '+
+                            r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
+
+                    ax_hal[0].plot(x_plot[a][b], power_ideal_hal[a][b], '-x', label = r'Ideal Power: '+
+                            r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
+                    
+                    ax_hal[1].plot(x_plot[a][b], diff_hal[a][b])
+
             elif plot_type == 2:
-                ax_hal.plot(x_plot[a][b], comsol_power[a][b],'-o',
+                
+                if plot_ideal == False:
+                    ax_hal.plot(x_plot[a][b], comsol_power[a][b],'-',
                             label = r'COMSOL: '+
                             r'$\beta_i = $'+str(round(beta_i[a][b][0],2))+
                             r', $\beta_e = $'+str(round(beta_e[a][0][0],3)))
+                else:
+                    ax_hal[0].plot(x_plot[a][b], comsol_power[a][b],'-',
+                                   label = r'COMSOL: '+
+                                   r'$\beta_i = $'+str(round(beta_i[a][b][0],2))+
+                                   r', $\beta_e = $'+str(round(beta_e[a][0][0],3)))
+
+                    ax_hal[0].plot(x_plot[a][b], power_ideal_hal[a][b], '-x',
+                                    label = r'COMSOL: '+
+                                    r'$\beta_i = $'+str(round(beta_i[a][b][0],2))+
+                                    r', $\beta_e = $'+str(round(beta_e[a][0][0],3)))
+                    
+                    ax_hal[1].plot(x_plot[a][b], diff_hal[a][b])
         
     
         # ax_hal[0].set_ylabel('Power Output [W]')
@@ -162,23 +224,42 @@ def plot_data(plot_y, file, save_question = 1, plot_x = 0, file_name = 'Unnamed'
         # ax_hal[1].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
         
         if plot_type == 1:
-            ax_hal.set_ylabel(y_plot_name)
-            ax_hal.set_xlabel(x_plot_name)
-            ax_hal.set_title(file_name + r' $\beta_e = $'+str(round(beta_e[a][0][0],3)))
-            ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
-            
-            fig_hal.set_size_inches(10,10)
+            if plot_ideal == False:
+                ax_hal.set_ylabel(y_plot_name)
+                ax_hal.set_xlabel(x_plot_name)
+                ax_hal.set_title(file_name + r' $\beta_e = $'+str(round(beta_e[a][0][0],3)))
+                ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+                
+                fig_hal.set_size_inches(10,10)
+            else:
+                ax_hal[0].set_ylabel(y_plot_name)
+                ax_hal[1].set_xlabel(x_plot_name)
+                ax_hal[0].set_title(file_name + r' $\beta_e = $'+str(round(beta_e[a][0][0],3)))
+                ax_hal[0].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+                ax_hal[1].set_ylabel('Rel. Difference')
+                
+                fig_hal.set_size_inches(10,10)
             
             if saving == 1:
                     pdf.savefig(fig_hal) 
                     
                     
     if plot_type == 2:
-        ax_hal.set_ylabel(y_plot_name)
-        ax_hal.set_xlabel(x_plot_name)
-        ax_hal.set_title(file_name)
-        ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
-        fig_hal.set_size_inches(10,10)
+        if plot_ideal == False:
+            ax_hal.set_ylabel(y_plot_name)
+            ax_hal.set_xlabel(x_plot_name)
+            ax_hal.set_title(file_name + r' $\beta_e = $'+str(round(beta_e[a][0][0],3)))
+            ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+            
+            fig_hal.set_size_inches(10,10)
+        else:
+            ax_hal[0].set_ylabel(y_plot_name)
+            ax_hal[1].set_xlabel(x_plot_name)
+            ax_hal[0].set_title(file_name + r' $\beta_e = $'+str(round(beta_e[a][0][0],3)))
+            ax_hal[0].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+            ax_hal[1].set_ylabel('Rel. Difference')
+            
+            fig_hal.set_size_inches(10,10)
         
         if saving == 1:
             pdf.savefig(fig_hal)
@@ -187,10 +268,27 @@ def plot_data(plot_y, file, save_question = 1, plot_x = 0, file_name = 'Unnamed'
         pdf.close()
         
         
-file_name='seg_far_L_sens_run1_5'
+# file_name='seg_far_L_sens_run1_5'
+file_name = 'seg_far_both_beta_sens_run1'
 
 file='../comsol_data_v2/'+file_name
 
-plot_all = ['Joule Heating','Resistor_Joule Heating']
-for x in plot_all:
-    plot_data(x, file, save_question = 0, plot_x = 0, file_name = file_name+': '+x, plot_type=0)
+# plot_all = ['Joule Heating','Resistor_Joule Heating']
+# for x in plot_all:
+#     plot_data(x, file, save_question = 0, plot_x = 0, file_name = file_name+': '+x, plot_type=2,plot_ideal=True)
+
+plot_data('Faraday Power', file, save_question=0, plot_x=0, title_name='Segmented Faraday: Faraday Power',
+          plot_type=2, plot_ideal=False)
+
+
+
+
+
+
+
+
+
+
+
+
+
