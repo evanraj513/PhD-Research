@@ -351,11 +351,11 @@ def comb_plots(file_list, plot_y_str,
         ax.plot(xmax,ymax,'x')
         
         if count == 0:
-            ax.plot(x_plot,np.ones(12)*1.622E6,'--',label='Bz constant, 4 electrodes')
+            ax.plot(x_plot,np.ones(x_plot.shape)*1.622E6,'--',label='Bz constant, 4 electrodes')
         if count == 1:
-            ax.plot(x_plot,np.ones(12)*3.003E6,'--', label='Bz constant, 8 electrodes')
+            ax.plot(x_plot,np.ones(x_plot.shape)*3.003E6,'--', label='Bz constant, 8 electrodes')
         if count == 2:
-            ax.plot(x_plot,np.ones(12)*5.705E6,'--', label='Bz constant, 16 electrodes')
+            ax.plot(x_plot,np.ones(x_plot.shape)*5.705E6,'--', label='Bz constant, 16 electrodes')
         count += 1
         
         
