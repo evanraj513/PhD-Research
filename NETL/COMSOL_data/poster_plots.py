@@ -152,7 +152,7 @@ def plot_data(plot_y, file, save_question = 0, plot_x = 0, file_name = 'Unnamed'
     if saving == 1:
         pdf.close()
         
-file_name = 'seg_far_v7_both_beta_run1_3'
+file_name = 'seg_far_both_beta_sweep_1'
 file='../comsol_data_v2/'+file_name
 
 # file_name = 'evan_both_beta_seg_far_run2'

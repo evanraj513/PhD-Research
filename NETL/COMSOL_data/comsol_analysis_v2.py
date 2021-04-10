@@ -291,12 +291,13 @@ def plot_data(plot_y, file, save_question = 1, plot_x = 0, file_name = 'Unnamed'
         
 # file_name='seg_far_L_sens_run1_5'
 # file_name = 'seg_far_v7_linear_B_run1'
-file_name = 'seg_far_v6_2_hall_10_L_sweep'
+# file_name = 'seg_far_v6_2_hall_10_L_sweep'
 # file_name = 'seg_far_v6_2_L_020_100_run1'
+file_name = 'seg_far_v6_2_mob_e_sweep_2'
 
 file='../comsol_data_v2/'+file_name
 
-plot_y_str = 'Resistor-Joule Heating'
+plot_y_str = 'ec.Ey*ec.Jy (W/m^3), Faraday Power'
 # plot_y_str = file_name
 # plot_y_str = 'ec.Ey*ec.Jy (W/m^3), Faraday Power'
 
@@ -304,85 +305,7 @@ plot_y_str = 'Resistor-Joule Heating'
 # for x in plot_all:
 #     plot_data(x, file, save_question = 0, plot_x = 0, file_name = file_name+': '+x, plot_type=2,plot_ideal=True)
 
-# fig_hal, ax_hal = plot_data(plot_y_str, 
-#           file, save_question=0, plot_x=0, title_name='Segmented Faraday:'+file_name,
-#           plot_type=2, plot_ideal=False)
-
-def comb_plots(file_list, plot_y_str, 
-          save_question=0, plot_x=0, title_name='',
-          plot_type=2, plot_ideal=False):
-    '''
-    Parameters
-    ----------
-    file_list : list of strings
-        names of files to go through and plot, and then combine lines
-    
-    The other parameters are described in the plot_data function
-
-    Returns
-    -------
-    fig: plt.figure
-        combined figure
-    ax: plt.axes
-        axes of combined figure
-    '''
-    
-    fig,ax = plt.subplots(1,1,figsize=(10,10))
-    
-    count = 0
-    
-    for k in file_list:
-        fig1,ax1 = plot_data(plot_y_str, 
-          k, save_question=0, plot_x=0, title_name='Segmented Faraday:'+file_name,
+fig_hal, ax_hal = plot_data(plot_y_str, 
+          file, save_question=0, plot_x=2, title_name='Segmented Faraday:'+file_name,
           plot_type=2, plot_ideal=False)
-        close(fig1)
-        line1 = ax1.get_lines()
-        handles,labels = ax1.get_legend_handles_labels()
-        # for j in np.count_nonzero(line1):
-        elec_num = 2**(count+2)
-        x_plot = line1[0].get_data()[0]
-        y_plot = line1[0].get_data()[1]
-        ax.plot(x_plot,y_plot,
-                label = labels[0]+': '+str(elec_num)+' Electrodes')
-        ymax = max(line1[0].get_data()[1])
-        xpos = np.where(line1[0].get_data()[1] == (ymax))[0][0]
-        xmax = line1[0].get_data()[0][xpos]
-        
-        ax.plot(xmax,ymax,'x')
-        
-        if count == 0:
-            ax.plot(x_plot,np.ones(x_plot.shape)*1.622E6,'--',label='Bz constant, 4 electrodes')
-        if count == 1:
-            ax.plot(x_plot,np.ones(x_plot.shape)*3.003E6,'--', label='Bz constant, 8 electrodes')
-        if count == 2:
-            ax.plot(x_plot,np.ones(x_plot.shape)*5.705E6,'--', label='Bz constant, 16 electrodes')
-        count += 1
-        
-        
-    ax.set_ylabel(plot_y_str)
-    ax.set_xlabel('L [m]')
-    ax.set_title(title_name)# + r' $\beta_e = $'+str(round(beta_e[a][0][0],3)))
-    ax.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
-    ax.set_ylabel('Rel. Difference')
-    
-    return fig,ax
-
-file_list = ['../comsol_data_v2/'+'seg_far_v6_2_hall_10_L_fine_sweep',
-             '../comsol_data_v2/'+'seg_far_v6_3_hall_10_L_fine_sweep',
-             '../comsol_data_v2/'+'seg_far_v6_4_hall_10_L_fine_sweep']
-
-fig,ax = comb_plots(file_list,plot_y_str, 
-           save_question=0, plot_x=0, title_name='Segmented Faraday:'+file_name,
-           plot_type=2, plot_ideal=False)
-
-
-
-
-
-
-
-
-
-
-
 

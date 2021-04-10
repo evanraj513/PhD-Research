@@ -673,38 +673,38 @@ def get_keys(file_name = ''):
 # fig_hal.set_figheight(10)
 
 #### beta_e run
-# file='evan_beta_e_seg_far_run1'
-# fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
-# df_hal = pd.read_csv(file+'.csv', skiprows=4)
-# key_hal = df_hal.keys().to_numpy()
+file='evan_beta_e_seg_far_run1'
+fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
+df_hal = pd.read_csv(file+'.csv', skiprows=4)
+key_hal = df_hal.keys().to_numpy()
 
-# x_plot = df_hal[key_hal[0]] ## x-value for plottings
-# comsol_power = df_hal[key_hal[3]]
-# print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
-# K = df_hal[key_hal[7]]
-# m = 8 ## to make redefining u,B,sig easier. 
-# u = df_hal[key_hal[m]]
-# B = df_hal[key_hal[m+1]]
-# sig = df_hal[key_hal[m+2]]
-# beta= df_hal[key_hal[0]]
+x_plot = df_hal[key_hal[0]] ## x-value for plottings
+comsol_power = df_hal[key_hal[3]]
+print('Plotting: '+x_plot.name+' vs. '+comsol_power.name)
+K = df_hal[key_hal[7]]
+m = 8 ## to make redefining u,B,sig easier. 
+u = df_hal[key_hal[m]]
+B = df_hal[key_hal[m+1]]
+sig = df_hal[key_hal[m+2]]
+beta= df_hal[key_hal[0]]
 
-# print('\n K: '+key_hal[8]+'\n u: '+key_hal[1]+'\n B: '+key_hal[2]+'\n sigma: '+key_hal[3])
+print('\n K: '+key_hal[8]+'\n u: '+key_hal[1]+'\n B: '+key_hal[2]+'\n sigma: '+key_hal[3])
 
-# power_ideal_hal = K*(1-K)*sig*u**2*B**2/(1+beta**2)
+power_ideal_hal = K*(1-K)*sig*u**2*B**2/(1+beta**2)
 
-# ax_hal[0].plot(x_plot,-comsol_power,label = 'COMSOL')
-# ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Ideal Power output')
+ax_hal[0].plot(x_plot,-comsol_power,label = 'COMSOL')
+ax_hal[0].plot(x_plot, power_ideal_hal,'--',label='Ideal Power output')
 
-# ax_hal[0].set_ylabel('Ideal Power Output [W]')
-# ax_hal[0].set_title(r'Seg. Faraday, Comparing Power Ouput: '+r'$\beta$')
-# ax_hal[0].legend()
+ax_hal[0].set_ylabel('Ideal Power Output [W]')
+ax_hal[0].set_title(r'Seg. Faraday, Comparing Power Ouput: '+r'$\beta$')
+ax_hal[0].legend()
 
-# diff_hal = abs((np.array(comsol_power) + np.array(power_ideal_hal))/power_ideal_hal)
+diff_hal = abs((np.array(comsol_power) + np.array(power_ideal_hal))/power_ideal_hal)
 
-# ax_hal[1].plot(x_plot,diff_hal)
-# ax_hal[1].set_xlabel(r'$\beta$ []')
-# ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
-# fig_hal.set_figheight(10)
+ax_hal[1].plot(x_plot,diff_hal)
+ax_hal[1].set_xlabel(r'$\beta$ []')
+ax_hal[1].set_ylabel('Rel. difference (Measured-ideal)/ideal')
+fig_hal.set_figheight(10)
 
     
 #### Varying CW:EW and IW:EW
@@ -1033,9 +1033,9 @@ def get_keys(file_name = ''):
 
 ##### Cont. Faraday #####
 
-file_name='con_far_L_sens_run1_2'
+# file_name='con_far_L_sens_run1_2'
 
-file='../comsol_data_v2/'+file_name
+# file='../comsol_data_v2/'+file_name
 # file='sens_seg_far_L_run2'
 
 # plot = 'Joule Heating'
@@ -1050,152 +1050,152 @@ file='../comsol_data_v2/'+file_name
     # pdf = matplotlib.backends.backend_pdf.PdfPages('../saved_plots_2/'+file_name+'_'+ plot+'plot.pdf')
     # pdf = matplotlib.backends.backend_pdf.PdfPages(file_name+'_'+ plot+'plot.pdf')
 
-def plot_data(plot):
+# def plot_data(plot):
     
-    plot_type = 0
-    '''
-    Sets the way plots are viewed: 0 = all separate, 1 = separated by diff. beta_e, 2 = all together
-    '''
+#     plot_type = 0
+#     '''
+#     Sets the way plots are viewed: 0 = all separate, 1 = separated by diff. beta_e, 2 = all together
+#     '''
     
-    saving = 1 ## saves pdf in output file, named by file_name. 0 = off, 1 = on. 
+#     saving = 1 ## saves pdf in output file, named by file_name. 0 = off, 1 = on. 
     
-    if saving == 1:
-        pdf = matplotlib.backends.backend_pdf.PdfPages('../saved_plots_2/'+file_name+'_'+ plot+'_plot.pdf')
-        # pdf = matplotlib.backends.backend_pdf.PdfPages(file_name+'_'+ plot+'plot.pdf')
+#     if saving == 1:
+#         pdf = matplotlib.backends.backend_pdf.PdfPages('../saved_plots_2/'+file_name+'_'+ plot+'_plot.pdf')
+#         # pdf = matplotlib.backends.backend_pdf.PdfPages(file_name+'_'+ plot+'plot.pdf')
     
-    df_hal = pd.read_csv(file+'.csv',skiprows=4)
-    key_hal = df_hal.keys().to_numpy()
-    df_hal = df_hal.sort_values(by=[key_hal[1],key_hal[2]])
+#     df_hal = pd.read_csv(file+'.csv',skiprows=4)
+#     key_hal = df_hal.keys().to_numpy()
+#     df_hal = df_hal.sort_values(by=[key_hal[1],key_hal[2]])
     
-    if plot == 'Resistor':
-        comsol_power = abs(df_hal[key_hal[7]])
-        y_plot_name = comsol_power.name
-    elif plot == 'Joule Heating':
-        comsol_power = abs(df_hal[key_hal[12]])
-        y_plot_name = comsol_power.name
-    elif plot == 'Resistor_Joule Heating':
-        comsol_power = abs(df_hal[key_hal[7]]) - abs(df_hal[key_hal[12]])
-        y_plot_name = 'Resistor Power - Joule Heating [W]'
+#     if plot == 'Resistor':
+#         comsol_power = abs(df_hal[key_hal[7]])
+#         y_plot_name = comsol_power.name
+#     elif plot == 'Joule Heating':
+#         comsol_power = abs(df_hal[key_hal[12]])
+#         y_plot_name = comsol_power.name
+#     elif plot == 'Resistor_Joule Heating':
+#         comsol_power = abs(df_hal[key_hal[7]]) - abs(df_hal[key_hal[12]])
+#         y_plot_name = 'Resistor Power - Joule Heating [W]'
     
-    K = df_hal[key_hal[3]]
-    m = 4 ## to make redefining u,B,sig easier. 
-    u = df_hal[key_hal[m]]
-    B = df_hal[key_hal[m+1]]
-    sig = df_hal[key_hal[m+2]]
-    mob_e = df_hal[key_hal[1]]
-    beta_e = mob_e*B
-    mob_i = df_hal[key_hal[2]]
-    beta_i = mob_e*mob_i*B**2
+#     K = df_hal[key_hal[3]]
+#     m = 4 ## to make redefining u,B,sig easier. 
+#     u = df_hal[key_hal[m]]
+#     B = df_hal[key_hal[m+1]]
+#     sig = df_hal[key_hal[m+2]]
+#     mob_e = df_hal[key_hal[1]]
+#     beta_e = mob_e*B
+#     mob_i = df_hal[key_hal[2]]
+#     beta_i = mob_e*mob_i*B**2
     
     
-    print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
-          '\n'+'mob_e : '+mob_e.name,'\n'+'mob_i: '+mob_i.name,
-          '\n'+'Plotting: '+y_plot_name)
+#     print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
+#           '\n'+'mob_e : '+mob_e.name,'\n'+'mob_i: '+mob_i.name,
+#           '\n'+'Plotting: '+y_plot_name)
     
-    power_ideal_hal = K*(1-K)*sig*u**2*B**2*((1-beta_i)/((1-beta_i)**2+beta_e**2))
+#     power_ideal_hal = K*(1-K)*sig*u**2*B**2*((1-beta_i)/((1-beta_i)**2+beta_e**2))
     
-    x_plot = df_hal[key_hal[0]] ## L_input
-    x_plot_name = x_plot.name
+#     x_plot = df_hal[key_hal[0]] ## L_input
+#     x_plot_name = x_plot.name
     
-    rs1 = int(beta_e.unique().size) ## Number of beta_e tested
-    rs3 = int(x_plot.unique().size) ## Number of L's tested
-    rs2 = int(beta_e.shape[0]/rs1/rs3) ## Number of beta_i for each unique pair (beta_e, u)
+#     rs1 = int(beta_e.unique().size) ## Number of beta_e tested
+#     rs3 = int(x_plot.unique().size) ## Number of L's tested
+#     rs2 = int(beta_e.shape[0]/rs1/rs3) ## Number of beta_i for each unique pair (beta_e, u)
     
-    mob_e = mob_e.to_numpy().reshape(rs1,rs2,rs3)
-    beta_e = beta_e.to_numpy().reshape(rs1,rs2,rs3)
-    beta_i = beta_i.to_numpy().reshape(rs1,rs2,rs3)
-    x_plot = x_plot.to_numpy().reshape(rs1,rs2,rs3)
-    comsol_power = comsol_power.to_numpy().reshape(rs1,rs2,rs3)
-    power_ideal_hal = power_ideal_hal.to_numpy().reshape(rs1,rs2,rs3)
-    sig = sig.to_numpy().reshape(rs1,rs2,rs3)
+#     mob_e = mob_e.to_numpy().reshape(rs1,rs2,rs3)
+#     beta_e = beta_e.to_numpy().reshape(rs1,rs2,rs3)
+#     beta_i = beta_i.to_numpy().reshape(rs1,rs2,rs3)
+#     x_plot = x_plot.to_numpy().reshape(rs1,rs2,rs3)
+#     comsol_power = comsol_power.to_numpy().reshape(rs1,rs2,rs3)
+#     power_ideal_hal = power_ideal_hal.to_numpy().reshape(rs1,rs2,rs3)
+#     sig = sig.to_numpy().reshape(rs1,rs2,rs3)
     
-    diff_hal = abs(comsol_power - power_ideal_hal)/power_ideal_hal
-    diff_hal = diff_hal.reshape(rs1,rs2,rs3)
+#     diff_hal = abs(comsol_power - power_ideal_hal)/power_ideal_hal
+#     diff_hal = diff_hal.reshape(rs1,rs2,rs3)
     
-    if plot_type == 2:
-        print('Plotting all plots inlaid')
-        fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
+#     if plot_type == 2:
+#         print('Plotting all plots inlaid')
+#         fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
     
-    for a in np.arange(0,rs1):
-        # fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
-        if plot_type == 1:
-            fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
-        for b in np.arange(0,rs2):
+#     for a in np.arange(0,rs1):
+#         # fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
+#         if plot_type == 1:
+#             fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
+#         for b in np.arange(0,rs2):
             
-            if plot_type == 0:
-                fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
-                ax_hal.plot(x_plot[a][b],comsol_power[a][b])
-                ax_hal.set_ylabel(y_plot_name)
-                ax_hal.set_xlabel(x_plot_name)
-                ax_hal.set_title(r'Con. Faraday, Sensitivity Analysis, L, $\beta_e = $'+str(round(beta_e[a][0][0],3))
-                                 +r' $\beta_i = $'+str(round(beta_i[a][b][0],3)))
-                # ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
-                fig_hal.set_size_inches(10,10)
+#             if plot_type == 0:
+#                 fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
+#                 ax_hal.plot(x_plot[a][b],comsol_power[a][b])
+#                 ax_hal.set_ylabel(y_plot_name)
+#                 ax_hal.set_xlabel(x_plot_name)
+#                 ax_hal.set_title(r'Con. Faraday, Sensitivity Analysis, L, $\beta_e = $'+str(round(beta_e[a][0][0],3))
+#                                  +r' $\beta_i = $'+str(round(beta_i[a][b][0],3)))
+#                 # ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+#                 fig_hal.set_size_inches(10,10)
                 
-                if saving == 1:
-                    pdf.savefig(fig_hal)
+#                 if saving == 1:
+#                     pdf.savefig(fig_hal)
                     
         
-            # fig_hal.set_size_inches(10,10)
-            # ax_hal[0].plot(x_plot[a][b], comsol_power[a][b],'-o',
-            #                 label = r'COMSOL: '+
-            #                 r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
-            # ax_hal[0].plot(x_plot[a][b], power_ideal_hal[a][b],'--x'),
-            #                 # label=r'Ideal Far. Power, '+
-            #                 # r'$\beta_i = $'+str(beta_i[0][b][a]))
+#             # fig_hal.set_size_inches(10,10)
+#             # ax_hal[0].plot(x_plot[a][b], comsol_power[a][b],'-o',
+#             #                 label = r'COMSOL: '+
+#             #                 r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
+#             # ax_hal[0].plot(x_plot[a][b], power_ideal_hal[a][b],'--x'),
+#             #                 # label=r'Ideal Far. Power, '+
+#             #                 # r'$\beta_i = $'+str(beta_i[0][b][a]))
         
-            # ax_hal[1].plot(x_plot[a][b], diff_hal[a][b], 
-            #                 label=r'Diff. for '+
-            #                 r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
+#             # ax_hal[1].plot(x_plot[a][b], diff_hal[a][b], 
+#             #                 label=r'Diff. for '+
+#             #                 r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
             
-            elif plot_type == 1:
-                ax_hal.plot(x_plot[a][b], comsol_power[a][b],'-o',
-                                label = r'COMSOL: '+
-                                r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
-                                # r', $\beta_e = $'+str(round(beta_e[a][0][0],3)))
-            elif plot_type == 2:
-                ax_hal.plot(x_plot[a][b], comsol_power[a][b],'-o',
-                            label = r'COMSOL: '+
-                            r'$\beta_i = $'+str(round(beta_i[a][b][0],2))+
-                            r', $\beta_e = $'+str(round(beta_e[a][0][0],3)))
+#             elif plot_type == 1:
+#                 ax_hal.plot(x_plot[a][b], comsol_power[a][b],'-o',
+#                                 label = r'COMSOL: '+
+#                                 r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
+#                                 # r', $\beta_e = $'+str(round(beta_e[a][0][0],3)))
+#             elif plot_type == 2:
+#                 ax_hal.plot(x_plot[a][b], comsol_power[a][b],'-o',
+#                             label = r'COMSOL: '+
+#                             r'$\beta_i = $'+str(round(beta_i[a][b][0],2))+
+#                             r', $\beta_e = $'+str(round(beta_e[a][0][0],3)))
         
     
-        # ax_hal[0].set_ylabel('Power Output [W]')
-        # ax_hal[0].set_title(r'Con. Faraday, Sensitivity Analysis, L, $\beta_e = $'+str(round(beta_e[a][0][0],3)))
-        # ax_hal[0].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
-        # ax_hal[1].set_ylabel('Rel. Diff')
-        # ax_hal[1].set_xlabel(r'L [m]')
-        # ax_hal[1].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+#         # ax_hal[0].set_ylabel('Power Output [W]')
+#         # ax_hal[0].set_title(r'Con. Faraday, Sensitivity Analysis, L, $\beta_e = $'+str(round(beta_e[a][0][0],3)))
+#         # ax_hal[0].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+#         # ax_hal[1].set_ylabel('Rel. Diff')
+#         # ax_hal[1].set_xlabel(r'L [m]')
+#         # ax_hal[1].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
         
-        if plot_type == 1:
-            ax_hal.set_ylabel(y_plot_name)
-            ax_hal.set_xlabel(x_plot_name)
-            ax_hal.set_title(r'Con. Faraday, Sensitivity Analysis, L, $\beta_e = $'+str(round(beta_e[a][0][0],3)))
-            ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+#         if plot_type == 1:
+#             ax_hal.set_ylabel(y_plot_name)
+#             ax_hal.set_xlabel(x_plot_name)
+#             ax_hal.set_title(r'Con. Faraday, Sensitivity Analysis, L, $\beta_e = $'+str(round(beta_e[a][0][0],3)))
+#             ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
             
-            fig_hal.set_size_inches(10,10)
+#             fig_hal.set_size_inches(10,10)
             
-            if saving == 1:
-                    pdf.savefig(fig_hal) 
+#             if saving == 1:
+#                     pdf.savefig(fig_hal) 
                     
                     
-    if plot_type == 2:
-        ax_hal.set_ylabel(y_plot_name)
-        ax_hal.set_xlabel(x_plot_name)
-        ax_hal.set_title(r'Con. Faraday, Sensitivity Analysis, L, all plotted')
-        ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
-        fig_hal.set_size_inches(10,10)
+#     if plot_type == 2:
+#         ax_hal.set_ylabel(y_plot_name)
+#         ax_hal.set_xlabel(x_plot_name)
+#         ax_hal.set_title(r'Con. Faraday, Sensitivity Analysis, L, all plotted')
+#         ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+#         fig_hal.set_size_inches(10,10)
         
-        if saving == 1:
-            pdf.savefig(fig_hal)
+#         if saving == 1:
+#             pdf.savefig(fig_hal)
             
-    if saving == 1:
-        pdf.close()
+#     if saving == 1:
+#         pdf.close()
             
             
-plot_all = ['Joule Heating','Resistor','Resistor_Joule Heating']
-for x in plot_all:
-    plot_data(x)
+# plot_all = ['Joule Heating','Resistor','Resistor_Joule Heating']
+# for x in plot_all:
+#     plot_data(x)
 
 ##### Con. Far. beta_e insensitivity ####
 # file='sens_con_far_beta_e_insensitivity_run1'
@@ -1393,82 +1393,82 @@ for x in plot_all:
 #         fig_hal.set_size_inches(10,10)
 
 #### Seg. Far. Insensitivty #####
-# file='sens_seg_far_beta_e_insensitivity_run2'
+file='sens_seg_far_beta_e_insensitivity_run2'
 
-# df_hal = pd.read_csv(file+'.csv',skiprows=4)
-# key_hal = df_hal.keys().to_numpy()
-# df_hal = df_hal.sort_values(by=[key_hal[0],key_hal[1]])
+df_hal = pd.read_csv(file+'.csv',skiprows=4)
+key_hal = df_hal.keys().to_numpy()
+df_hal = df_hal.sort_values(by=[key_hal[0],key_hal[1]])
 
-# comsol_power = abs(df_hal[key_hal[6]])
+comsol_power = abs(df_hal[key_hal[6]])
 
-# K = df_hal[key_hal[2]]
-# m = 3 ## to make redefining u,B,sig easier. 
-# u = df_hal[key_hal[m]]
-# B = df_hal[key_hal[m+1]]
-# sig = df_hal[key_hal[m+2]]
-# mob_e = df_hal[key_hal[0]]
-# beta_e = mob_e*B
-# mob_i = df_hal[key_hal[1]]
-# beta_i = mob_e*mob_i*B**2
+K = df_hal[key_hal[2]]
+m = 3 ## to make redefining u,B,sig easier. 
+u = df_hal[key_hal[m]]
+B = df_hal[key_hal[m+1]]
+sig = df_hal[key_hal[m+2]]
+mob_e = df_hal[key_hal[0]]
+beta_e = mob_e*B
+mob_i = df_hal[key_hal[1]]
+beta_i = mob_e*mob_i*B**2
 
 
-# print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
-#       '\n'+'mob_e : '+mob_e.name,'\n'+'mob_i: '+mob_i.name,
-#       '\n'+'comsol_power: '+comsol_power.name)
+print('\n K: '+K.name+'\n u: '+u.name+'\n B: '+B.name+'\n sigma: '+sig.name,
+      '\n'+'mob_e : '+mob_e.name,'\n'+'mob_i: '+mob_i.name,
+      '\n'+'comsol_power: '+comsol_power.name)
 
-# power_ideal_hal = K*(1-K)*sig*u**2*B**2*((1-beta_i)/((1-beta_i)**2+beta_e**2))
+power_ideal_hal = K*(1-K)*sig*u**2*B**2*((1-beta_i)/((1-beta_i)**2+beta_e**2))
 
-# x_plot = beta_e ## beta_e
+x_plot = beta_e ## beta_e
 
-# rs1 = int(beta_e.unique().size) ## Number of beta_e tested
-# rs3 = int(x_plot.unique().size) ## Number of L's tested
-# rs2 = int(beta_e.shape[0]/rs1/rs3) ## Number of beta_i for each unique pair (beta_e, u)
+rs1 = int(beta_e.unique().size) ## Number of beta_e tested
+rs3 = int(x_plot.unique().size) ## Number of L's tested
+rs2 = int(beta_e.shape[0]/rs1/rs3) ## Number of beta_i for each unique pair (beta_e, u)
 
-# # mob_e = mob_e.to_numpy().reshape(rs1,rs2,rs3)
-# # beta_e = beta_e.to_numpy().reshape(rs1,rs2,rs3)
-# # beta_i = beta_i.to_numpy().reshape(rs1,rs2,rs3)
-# # x_plot = x_plot.to_numpy().reshape(rs1,rs2,rs3)
-# # comsol_power = comsol_power.to_numpy().reshape(rs1,rs2,rs3)
-# # power_ideal_hal = power_ideal_hal.to_numpy().reshape(rs1,rs2,rs3)
-# # sig = sig.to_numpy().reshape(rs1,rs2,rs3)
+# mob_e = mob_e.to_numpy().reshape(rs1,rs2,rs3)
+# beta_e = beta_e.to_numpy().reshape(rs1,rs2,rs3)
+# beta_i = beta_i.to_numpy().reshape(rs1,rs2,rs3)
+# x_plot = x_plot.to_numpy().reshape(rs1,rs2,rs3)
+# comsol_power = comsol_power.to_numpy().reshape(rs1,rs2,rs3)
+# power_ideal_hal = power_ideal_hal.to_numpy().reshape(rs1,rs2,rs3)
+# sig = sig.to_numpy().reshape(rs1,rs2,rs3)
 
-# diff_hal = abs(comsol_power - power_ideal_hal)/power_ideal_hal
-# # diff_hal = diff_hal.reshape(rs1,rs2,rs3)
-
-# # fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
+diff_hal = abs(comsol_power - power_ideal_hal)/power_ideal_hal
+# diff_hal = diff_hal.reshape(rs1,rs2,rs3)
 
 # fig_hal,ax_hal = plt.subplots(1,1,sharex = True)
 
-# # ax_hal[0].plot(x_plot[a][b], comsol_power[a][b],'-o',
-# #                 label = r'COMSOL: '+
-# #                 r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
-# # ax_hal[0].plot(x_plot[a][b], power_ideal_hal[a][b],'--x'),
-# #                 # label=r'Ideal Far. Power, '+
-# #                 # r'$\beta_i = $'+str(beta_i[0][b][a]))
+fig_hal,ax_hal = plt.subplots(2,1,sharex = True)
 
-# # ax_hal[1].plot(x_plot[a][b], diff_hal[a][b], 
-# #                 label=r'Diff. for '+
-# #                 r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
-
-# ax_hal.plot(x_plot, comsol_power,'-o',
+# ax_hal[0].plot(x_plot[a][b], comsol_power[a][b],'-o',
 #                 label = r'COMSOL: '+
-#                 r'$\beta_i = $'+str(round(beta_i[0],2)))
-#                 # r', $\beta_e = $'+str(round(beta_e[a][0][0],3)))
+#                 r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
+# ax_hal[0].plot(x_plot[a][b], power_ideal_hal[a][b],'--x'),
+#                 # label=r'Ideal Far. Power, '+
+#                 # r'$\beta_i = $'+str(beta_i[0][b][a]))
+
+# ax_hal[1].plot(x_plot[a][b], diff_hal[a][b], 
+#                 label=r'Diff. for '+
+#                 r'$\beta_i = $'+str(round(beta_i[a][b][0],2)))
+
+ax_hal.plot(x_plot, comsol_power,'-o',
+            label = r'COMSOL: '+
+            r'$\beta_i = $'+str(round(beta_i[0],2)))
+            # r', $\beta_e = $'+str(round(beta_e[a][0][0],3)))
 
 
-# # ax_hal[0].set_ylabel('Power Output [W]')
-# # ax_hal[0].set_title(r'Con. Faraday, Sensitivity Analysis, L, $\beta_e = $'+str(round(beta_e[a][0][0],3)))
-# # ax_hal[0].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
-# # ax_hal[1].set_ylabel('Rel. Diff')
-# # ax_hal[1].set_xlabel(r'L [m]')
-# # ax_hal[1].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+# ax_hal[0].set_ylabel('Power Output [W]')
+# ax_hal[0].set_title(r'Con. Faraday, Sensitivity Analysis, L, $\beta_e = $'+str(round(beta_e[a][0][0],3)))
+# ax_hal[0].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+# ax_hal[1].set_ylabel('Rel. Diff')
+# ax_hal[1].set_xlabel(r'L [m]')
+# ax_hal[1].legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
 
-# ax_hal.set_ylabel(r'Joule Heating [W]')
-# ax_hal.set_xlabel(r'$\beta_e$ []')
-# ax_hal.set_title(r'Seg. Faraday, Sensitivity Analysis, L,')
-# ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
+ax_hal.set_ylabel(r'Joule Heating [W]')
+ax_hal.set_xlabel(r'$\beta_e$ []')
+ax_hal.set_title(r'Seg. Faraday, Sensitivity Analysis, L,')
+ax_hal.legend(fontsize = 'x-small')#, loc = 'upper left', bbox_to_anchor=(1.05, 1))
 
-# fig_hal.set_size_inches(10,10)
+fig_hal.set_size_inches(10,10)
 
 
 
