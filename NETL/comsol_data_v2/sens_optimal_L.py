@@ -189,22 +189,34 @@ Notes:
 
 
 
-### Basic sensitivity analysis. 
+### Basic sensitivity analyses
 # sens_comb_plots('./Tapered_sensitivity_analyses_v2/seg_far_ocl_sweep'
 #                 ,'outer_chan_len (m)',
 #                 title_name = r'Sens. Of Opt. L to ocl',flip = 1)
 
 # sens_comb_plots('./Tapered_sensitivity_analyses_v2/seg_far_u_sweep_ocl_050'
-#                 ,'u_x (m/s)',
-#                 title_name = r'Sens. Of Opt. L to $u_x$')
+#                 ,'u_x (m/s)', title_name = r'Sens. Of Opt. L to $u_x$')
 
-sens_comb_plots('./Tapered_sensitivity_analyses_v2/seg_far_sig_sweep_ocl_050'
-                ,'sig_b (S/m)', title_name = r'Sens. Of Opt. L to $\sigma$',
-                plot_type = 'all in one')
+# sens_comb_plots('./Tapered_sensitivity_analyses_v2/seg_far_sig_sweep_ocl_050'
+#                 ,'sig_b (S/m)', title_name = r'Sens. Of Opt. L to $\sigma$')
 
-# sens_comb_plots('./Tapered_sensitivity_analyses_v2/seg_far_test_sweep'
-#                 ,'sig_b (S/m)', title_name = r'Sens. Of Opt. L to $\sigma$',
-#                 plot_type = 'all on own')
+# sens_comb_plots('./Tapered_sensitivity_analyses_v2/seg_far_B_sweep_ocl_050'
+#                 ,'B_app (T)', title_name = r'Sens. Of Opt. L to $B_z$')
+
+# sens_comb_plots('./Tapered_sensitivity_analyses_v2/seg_far_cweh_sweep_ocl_050'
+#                 ,'cw_eh_ratio', title_name = r'Sens. Of Opt. L to CW:EH')
+
+sens_comb_plots('./Tapered_sensitivity_analyses_v2/seg_far_u_sweep_ocl_025_coarse'
+                ,'u_x (m/s)', title_name = r'Sens. Of Opt. L to $u_x$')
+
+# sens_comb_plots('./Tapered_sensitivity_analyses_v2/seg_far_sig_sweep_ocl_025'
+#                 ,'sig_b (S/m)', title_name = r'Sens. Of Opt. L to $\sigma$')
+
+# sens_comb_plots('./Tapered_sensitivity_analyses_v2/seg_far_B_sweep_ocl_025'
+#                 ,'B_app (T)', title_name = r'Sens. Of Opt. L to $B_z$')
+
+# sens_comb_plots('./Tapered_sensitivity_analyses_v2/seg_far_cweh_sweep_ocl_025'
+#                 ,'cw_eh_ratio', title_name = r'Sens. Of Opt. L to CW:EH')
 
 
 
