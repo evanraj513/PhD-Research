@@ -206,8 +206,8 @@ Notes:
 # sens_comb_plots('./Tapered_sensitivity_analyses_v2/seg_far_cweh_sweep_ocl_050'
 #                 ,'cw_eh_ratio', title_name = r'Sens. Of Opt. L to CW:EH')
 
-sens_comb_plots('./Tapered_sensitivity_analyses_v2/seg_far_u_sweep_ocl_025_coarse'
-                ,'u_x (m/s)', title_name = r'Sens. Of Opt. L to $u_x$')
+# sens_comb_plots('./Tapered_sensitivity_analyses_v2/seg_far_u_sweep_ocl_025_coarse'
+#                 ,'u_x (m/s)', title_name = r'Sens. Of Opt. L to $u_x$')
 
 # sens_comb_plots('./Tapered_sensitivity_analyses_v2/seg_far_sig_sweep_ocl_025'
 #                 ,'sig_b (S/m)', title_name = r'Sens. Of Opt. L to $\sigma$')
@@ -266,42 +266,42 @@ Some notes:
         any additional _k are just additional runs. Notable for R
 '''
 
-### outer_chan_len = 100
-# sens_comb_plots('seg_far_v6_2_hall_10_L_and_u_sweep','u_x (m/s)',
-#                 title_name = r'Sens. Of Opt. L to $u_x$')
-# sens_comb_plots('seg_far_v6_2_hall_10_L_and_sig_sweep', 'sig_b (S/m)',
-#                 title_name=r'Sens. Of Opt. L to $\sigma$')
-# sens_comb_plots('seg_far_v6_2_hall_10_L_and_outer_chan_len_sweep_fine','outer_chan_len (m)',
-#                 title_name = r'Sens. Of Opt. L to outer_chan_len')
+## outer_chan_len = 100
+sens_comb_plots('seg_far_v6_2_hall_10_L_and_u_sweep','u_x (m/s)',
+                title_name = r'Sens. Of Opt. L to $u_x$')
+sens_comb_plots('seg_far_v6_2_hall_10_L_and_sig_sweep', 'sig_b (S/m)',
+                title_name=r'Sens. Of Opt. L to $\sigma$')
+sens_comb_plots('seg_far_v6_2_hall_10_L_and_outer_chan_len_sweep_fine','outer_chan_len (m)',
+                title_name = r'Sens. Of Opt. L to outer_chan_len')
 
-# sens_comb_plots('seg_far_v6_2_hall_10_L_and_beta_e_sweep','mob_e (m^2/V*s))',
-#                 title_name = r'Sens. Of Opt. L to $\mu_e$')
+sens_comb_plots('seg_far_v6_2_hall_10_L_and_beta_e_sweep','mob_e (m^2/V*s))',
+                title_name = r'Sens. Of Opt. L to $\mu_e$')
 
-# sens_comb_plots('seg_far_v6_2_hall_10_L_and_B_sweep','B_app (T)',
-#                 title_name = r'Sens. Of Opt. L to $B_z$')
+sens_comb_plots('seg_far_v6_2_hall_10_L_and_B_sweep','B_app (T)',
+                title_name = r'Sens. Of Opt. L to $B_z$')
 
-# sens_comb_plots('seg_far_v6_2_hall_10_L_and_cw_eh_sweep','cw_eh_ratio',
-#                 title_name = r'Sens. Of Opt. L to cw_eh_ratio')
+sens_comb_plots('seg_far_v6_2_hall_10_L_and_cw_eh_sweep','cw_eh_ratio',
+                title_name = r'Sens. Of Opt. L to cw_eh_ratio')
 
-# ### outer_chan_len = 500
-# sens_comb_plots('seg_far_v6_2_hall_10_L_and_sig_sweep_2', 'sig_b (S/m)',
-#                 title_name=r'Sens. Of Opt. L to $\sigma$')
-# sens_comb_plots('seg_far_v6_2_hall_10_L_and_outer_chan_len_sweep_2','outer_chan_len (m)',
-#                 title_name = r'Sens. Of Opt. L to outer_chan_len')
+### outer_chan_len = 500
+sens_comb_plots('seg_far_v6_2_hall_10_L_and_sig_sweep_2', 'sig_b (S/m)',
+                title_name=r'Sens. Of Opt. L to $\sigma$')
+sens_comb_plots('seg_far_v6_2_hall_10_L_and_outer_chan_len_sweep_2','outer_chan_len (m)',
+                title_name = r'Sens. Of Opt. L to outer_chan_len')
 
-# sens_comb_plots('seg_far_v6_2_hall_10_L_and_beta_e_sweep_2','mob_e (m^2/V*s))',
-#                 title_name = r'Sens. Of Opt. L to $\mu_e$')
+sens_comb_plots('seg_far_v6_2_hall_10_L_and_beta_e_sweep_2','mob_e (m^2/V*s))',
+                title_name = r'Sens. Of Opt. L to $\mu_e$')
 
-# sens_comb_plots('seg_far_v6_2_hall_10_L_and_B_sweep_2','B_app (T)',
-#                 title_name = r'Sens. Of Opt. L to $B_z$')
+sens_comb_plots('seg_far_v6_2_hall_10_L_and_B_sweep_2','B_app (T)',
+                title_name = r'Sens. Of Opt. L to $B_z$')
 
-# sens_comb_plots('seg_far_v6_2_hall_10_L_and_R_sweep_2_2','resistance',
-#                 title_name = r'Sens. Of Opt. L to Resistivity')
-# sens_comb_plots('seg_far_v6_2_hall_10_L_and_R_sweep_2_3','resistance',
-#                 title_name = r'Sens. Of Opt. L to Resistivity')
+sens_comb_plots('seg_far_v6_2_hall_10_L_and_R_sweep_2_2','resistance',
+                title_name = r'Sens. Of Opt. L to Resistivity')
+sens_comb_plots('seg_far_v6_2_hall_10_L_and_R_sweep_2_3','resistance',
+                title_name = r'Sens. Of Opt. L to Resistivity')
 
-# sens_comb_plots('seg_far_v6_2_hall_10_L_and_cw_eh_sweep_2','cw_eh_ratio_2',
-#                 title_name = r'Sens. Of Opt. L to cw_eh_ratio')
+sens_comb_plots('seg_far_v6_2_hall_10_L_and_cw_eh_sweep_2','cw_eh_ratio_2',
+                title_name = r'Sens. Of Opt. L to cw_eh_ratio')
 
 
 
